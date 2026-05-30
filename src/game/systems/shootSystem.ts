@@ -14,6 +14,11 @@ export function createShootState(): ShootState {
   return { bullets: [], kills: 0, combo: 0, comboTimer: 0, shotCooldown: 0 }
 }
 
+export interface ShootResult {
+  scoreGain: number
+  destroyedHazards: Hazard[]
+}
+
 /**
  * @param playerX  横スクロール時はワールドX、縦スクロール時はスクリーンX
  * @param playerY  スクリーンY（両モード共通）
@@ -34,7 +39,7 @@ export function updateShoot(
   viewportLeft = -200,
   viewportRight = 9999,
   viewportTop = -200,
-): number /* スコア加算 */ {
+): ShootResult {
   state.shotCooldown -= dt
   state.comboTimer -= dt
   if (state.comboTimer <= 0) state.combo = 0
@@ -115,9 +120,13 @@ export function updateShoot(
     }
   }
 
-  // 死亡 hazard 除去
+  // 死亡 hazard 除去（除去前に記録）
+  const destroyedHazards: Hazard[] = []
   for (let i = hazards.length - 1; i >= 0; i--) {
-    if (hazards[i].hp <= 0) hazards.splice(i, 1)
+    if (hazards[i].hp <= 0) {
+      destroyedHazards.push(hazards[i])
+      hazards.splice(i, 1)
+    }
   }
 
   // 死弾除去
@@ -125,5 +134,5 @@ export function updateShoot(
     if (!state.bullets[i].alive) state.bullets.splice(i, 1)
   }
 
-  return scoreGain
+  return { scoreGain, destroyedHazards }
 }

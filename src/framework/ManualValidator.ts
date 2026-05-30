@@ -5,11 +5,86 @@
  * - すべての choices[].next が実在するキーを指しているか
  * - 循環参照がないか
  * - ルートキー '1.0' が存在するか
+ * - 各エントリーの必須フィールドが存在し正しい型を持つか（実行時型ガード）
  *
  * 開発時に呼ぶことでデータ破損を早期検知できる。
  */
 
 import type { ManualVersion } from '../domain/types'
+
+// ──────────────────────────────────────────────────────────────────────
+// 実行時型ガード — JSON ロード時に ManualVersion の構造を検証
+// ──────────────────────────────────────────────────────────────────────
+
+/**
+ * 単一の ManualVersion エントリーが必須フィールドを持つか検証する。
+ * エラーメッセージの配列を返す（空なら問題なし）。
+ */
+export function validateManualVersionStructure(key: string, v: unknown): string[] {
+  const errs: string[] = []
+  if (typeof v !== 'object' || v === null) {
+    return [`"${key}": ManualVersion はオブジェクトである必要があります（${typeof v} が渡されました）`]
+  }
+  const obj = v as Record<string, unknown>
+
+  // version
+  if (typeof obj.version !== 'string' || obj.version === '') {
+    errs.push(`"${key}".version: string が必要です`)
+  }
+  // manualText
+  if (!Array.isArray(obj.manualText) || obj.manualText.some(t => typeof t !== 'string')) {
+    errs.push(`"${key}".manualText: string[] が必要です`)
+  }
+  // choices
+  if (!Array.isArray(obj.choices)) {
+    errs.push(`"${key}".choices: 配列が必要です`)
+  } else {
+    obj.choices.forEach((c: unknown, i: number) => {
+      if (typeof c !== 'object' || c === null) {
+        errs.push(`"${key}".choices[${i}]: オブジェクトが必要です`)
+        return
+      }
+      const ch = c as Record<string, unknown>
+      if (typeof ch.id !== 'string')    errs.push(`"${key}".choices[${i}].id: string が必要です`)
+      if (typeof ch.label !== 'string') errs.push(`"${key}".choices[${i}].label: string が必要です`)
+      if (typeof ch.next !== 'string')  errs.push(`"${key}".choices[${i}].next: string が必要です`)
+      if (typeof ch.genreParams !== 'object' || ch.genreParams === null || Array.isArray(ch.genreParams)) {
+        errs.push(`"${key}".choices[${i}].genreParams: object が必要です`)
+      }
+    })
+  }
+  // controls
+  if (typeof obj.controls !== 'object' || obj.controls === null) {
+    errs.push(`"${key}".controls: object が必要です`)
+  } else {
+    const ctrl = obj.controls as Record<string, unknown>
+    for (const field of ['jump', 'moveLeft', 'moveRight'] as const) {
+      if (typeof ctrl[field] !== 'string') errs.push(`"${key}".controls.${field}: string が必要です`)
+    }
+  }
+  // hazards
+  if (typeof obj.hazards !== 'object' || obj.hazards === null) {
+    errs.push(`"${key}".hazards: object が必要です`)
+  } else {
+    const hz = obj.hazards as Record<string, unknown>
+    if (!Array.isArray(hz.colors))     errs.push(`"${key}".hazards.colors: string[] が必要です`)
+    if (!Array.isArray(hz.safeColors)) errs.push(`"${key}".hazards.safeColors: string[] が必要です`)
+  }
+
+  return errs
+}
+
+/**
+ * デッキ全体のエントリー構造を検証し、エラー一覧を ValidationResult に追記する。
+ * validateDeck() の前処理として使う。
+ */
+export function validateDeckStructure(deck: Record<string, unknown>): string[] {
+  const errs: string[] = []
+  for (const [key, value] of Object.entries(deck)) {
+    errs.push(...validateManualVersionStructure(key, value))
+  }
+  return errs
+}
 
 export interface ValidationResult {
   ok: boolean
@@ -95,10 +170,22 @@ export function validateDeck(deck: Record<string, ManualVersion>): ValidationRes
 
 /**
  * 開発環境でのみ検証を実行し、問題があればコンソールに出力する。
+ * 型構造チェック → 参照整合性チェックの順で実施。
  */
 export function devValidate(deck: Record<string, ManualVersion>): void {
   if (import.meta.env?.PROD) return   // 本番では実行しない
 
+  // 1. JSON 構造型チェック（フィールド存在・型の確認）
+  const structErrors = validateDeckStructure(deck as Record<string, unknown>)
+  for (const e of structErrors) {
+    console.error('[ManualValidator] ❌ 型エラー:', e)
+  }
+  if (structErrors.length > 0) {
+    console.error('[ManualValidator] 型エラーがあるため、整合性チェックをスキップします。')
+    return
+  }
+
+  // 2. 参照整合性チェック（next が存在するか・到達可能か・循環なしか）
   const result = validateDeck(deck)
 
   for (const w of result.warnings) {

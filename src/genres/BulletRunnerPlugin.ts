@@ -6,11 +6,11 @@
  * 高速感・スタイリッシュ・カラフルなビジュアル。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 import type { GenreId } from '../domain/types'
 
-export class BulletRunnerPlugin implements GenrePlugin {
+export class BulletRunnerPlugin extends GenrePluginBase {
   readonly id: GenreId = 'bullet_runner'
 
   readonly skyColors    = ['#060010', '#100025'] as const

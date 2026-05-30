@@ -3,10 +3,10 @@
  * 'rpg' ジャンル（森/中世ファンタジー）のプラグイン。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 
-export class RpgPlugin implements GenrePlugin {
+export class RpgPlugin extends GenrePluginBase {
   readonly id = 'rpg' as const
   readonly skyColors    = ['#0a1a05', '#12280a'] as const
   readonly groundColors = ['#0f2008', '#071005'] as const
