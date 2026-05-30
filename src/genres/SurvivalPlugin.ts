@@ -6,11 +6,11 @@
  * HPアイテムが多め、危険なハザードが多めの構成。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 import type { GenreId } from '../domain/types'
 
-export class SurvivalPlugin implements GenrePlugin {
+export class SurvivalPlugin extends GenrePluginBase {
   readonly id: GenreId = 'survival'
 
   readonly skyColors    = ['#050e05', '#0a1a08'] as const

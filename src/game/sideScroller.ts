@@ -82,6 +82,13 @@ export class SideScroller {
   // プレイヤー演出
   private runCycle = 0           // 走りアニメ位相（0〜1）
 
+  // タイムスケール（setTimescale 用）
+  private _timescaleScale = 1.0
+  private _timescaleRemaining = -1
+
+  // フレーム内で一度だけ _buildWorld() するためのキャッシュ
+  private _frameWorld: MutableWorld | null = null
+
   // ─── 統計 ────────────────────────────────────────────────────────
   private stats: ActionStats = { jumps: 0, moveRight: 0, moveLeft: 0, shots: 0, ticks: 0 }
   private rafId = 0
@@ -129,10 +136,17 @@ export class SideScroller {
     if (rules.features.has('double_jump')) {
       this.player.jumpsLeft = Math.max(this.player.jumpsLeft, 2)
     }
+    // updateRules はループ外から呼ばれるため _frameWorld を使わず直接構築
     const world = this._buildWorld()
     for (const sys of getActiveSystems(rules.features)) {
       sys.onManualUpdated?.(world, '')
     }
+  }
+
+  /** フレーム内で _buildWorld() を1回だけ呼ぶためのキャッシュアクセサ */
+  private _getWorld(): MutableWorld {
+    if (!this._frameWorld) this._frameWorld = this._buildWorld()
+    return this._frameWorld
   }
 
   start(): void {
@@ -179,8 +193,16 @@ export class SideScroller {
 
   // ─── メインループ ────────────────────────────────────────────────
   private _loop = (ts: number) => {
-    let dt = Math.min((ts - this.lastTime) / 1000, 0.05)
+    const rawDt = Math.min((ts - this.lastTime) / 1000, 0.05)
     this.lastTime = ts
+    this._frameWorld = null  // フレームキャッシュを毎フレーム破棄
+
+    // タイムスケール経過カウントダウン（実時間ベース）
+    if (this._timescaleRemaining > 0) {
+      this._timescaleRemaining -= rawDt
+      if (this._timescaleRemaining <= 0) this._timescaleScale = 1.0
+    }
+    const dt = rawDt * this._timescaleScale
 
     this._computeInputEdges()
 
@@ -226,22 +248,28 @@ export class SideScroller {
     const shootKey = r.controls.shoot ?? 'z'
 
     const isVertical = r.scrollAxis === 'y'
-    const isAutoRun  = r.features.has('auto_run')
-    const isSlowPrec = r.features.has('slow_precise')
-    const isDouble   = r.features.has('double_jump')
 
-    const runSpeed = isSlowPrec ? PLAYER_PHYSICS.runSpeed * PHYSICS.slowPreciseRatio : PLAYER_PHYSICS.runSpeed
+    // ─── Pre-physics: 移動 Feature が vx をセット ────────────────────
+    {
+      const preWorld = this._getWorld()
+      const preInput: InputSnapshot = {
+        keys: this.keys,
+        justPressed: this.justPressed,
+        justReleased: this.justReleased,
+      }
+      for (const sys of getActiveSystems(r.features)) {
+        sys.preUpdate?.(preWorld, preInput, dt)
+      }
+    }
 
     if (isVertical) {
       // ════════════════════════════════════════════════════════
       // 縦スクロールモード
       // 障害物が上から降ってくる。プレイヤーは画面下部を左右に移動。
       // ════════════════════════════════════════════════════════
-      const movingLeft  = this.keys.has(leftKey)
-      const movingRight = this.keys.has(rightKey)
-      p.vx = movingRight ? runSpeed : movingLeft ? -runSpeed : 0
-      if (movingLeft)  this.stats.moveLeft++
-      if (movingRight) this.stats.moveRight++
+      // vx は MovementFeature.preUpdate() がセット済み
+      if (this.keys.has(leftKey))  this.stats.moveLeft++
+      if (this.keys.has(rightKey)) this.stats.moveRight++
       p.x += p.vx * dt
       p.x = Math.max(0, Math.min(W - p.w, p.x))
 
@@ -278,17 +306,13 @@ export class SideScroller {
           const h = this.hazards[i]
           if (!rectsOverlap(p.rect, h.rect)) continue
 
-          const isHazardous = !h.isSafe
-          if (isHazardous) {
-            this._onPlayerHit(p, r)
+          if (!h.isSafe) {
+            this._onPlayerHit(p)
             if (this.dead) return
-          } else if (r.features.has('color_touch')) {
-            // 安全色を踏む → 得点 + 消滅
-            const gain = r.colorTouchScore
-            this.playScore += gain
-            this.hazards.splice(i, 1)
-            this._addScorePopup(h.x + h.w / 2, h.y, `TOUCH! +${gain}`, '#00ffcc')
-            this._spawnHitParticles(h.x + h.w / 2, h.y + h.h / 2, '#00ffcc', 6)
+          } else {
+            for (const sys of getActiveSystems(r.features)) {
+              sys.onSafeHazardTouch?.(this._getWorld(), h, h.x)
+            }
           }
         }
       }
@@ -300,17 +324,15 @@ export class SideScroller {
       // ════════════════════════════════════════════════════════
       // 横スクロールモード（従来）
       // ════════════════════════════════════════════════════════
-      const movingLeft  = !isAutoRun && this.keys.has(leftKey)
-      const movingRight = isAutoRun || this.keys.has(rightKey)
-
-      p.vx = movingRight ? runSpeed : movingLeft ? -runSpeed : 0
-      if (movingLeft)  this.stats.moveLeft++
-      if (movingRight) this.stats.moveRight++
+      // vx は MovementFeature.preUpdate() がセット済み
+      if (!r.features.has('auto_run') && this.keys.has(leftKey))  this.stats.moveLeft++
+      if ( r.features.has('auto_run') || this.keys.has(rightKey)) this.stats.moveRight++
       if (p.onGround) {
         this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
       }
 
       // ─── ジャンプ ─────────────────────────────────────────
+      const isDouble         = r.features.has('double_jump')
       const jumpJustPressed  = this.justPressed.has(jumpKey)
       const jumpJustReleased = this.justReleased.has(jumpKey)
 
@@ -337,6 +359,12 @@ export class SideScroller {
           this.coyoteTimer = 0
           this.stats.jumps++
           this._spawnJumpParticles(p.x + p.w / 2, p.y + p.h)
+          // Hook: onPlayerJump
+          {
+            const jw = this._getWorld()
+            getGenre(r.genre).onPlayerJump?.(jw)
+            for (const sys of getActiveSystems(r.features)) sys.onPlayerJump?.(jw)
+          }
         }
       }
       if (jumpJustReleased && p.vy < 0 && this.jumpHeld) {
@@ -359,6 +387,8 @@ export class SideScroller {
         if (wasInAir) {
           p.landSquash = 1.0
           this._spawnLandParticles(p.x + p.w / 2, gY)
+          // Hook: onPlayerLand
+          getGenre(r.genre).onPlayerLand?.(this._getWorld())
           if (this.jumpBufferTimer > 0) {
             p.vy = PLAYER_PHYSICS.jumpVelocity
             p.onGround = false
@@ -366,6 +396,12 @@ export class SideScroller {
             this.jumpBufferTimer = 0
             this.jumpHeld = true
             this.stats.jumps++
+            // Hook: onPlayerJump (バッファジャンプ)
+            {
+              const jw = this._getWorld()
+              getGenre(r.genre).onPlayerJump?.(jw)
+              for (const sys of getActiveSystems(r.features)) sys.onPlayerJump?.(jw)
+            }
           }
         }
       } else {
@@ -374,7 +410,8 @@ export class SideScroller {
       }
       if (p.landSquash > 0) p.landSquash *= PHYSICS.landSquashDecay
 
-      if (!isAutoRun) p.x += p.vx * dt
+      // auto_run はスクロールで進む。画面上のX座標は変えない
+      if (!r.features.has('auto_run')) p.x += p.vx * dt
       p.x = Math.max(PHYSICS.playerMinX, Math.min(W * PHYSICS.playerMaxXRatio, p.x))
 
       // ─── スクロール ───────────────────────────────────────
@@ -399,7 +436,8 @@ export class SideScroller {
       if (p.invincible <= 0) {
         for (let i = this.hazards.length - 1; i >= 0; i--) {
           const h = this.hazards[i]
-          const hRect = { ...h.rect, x: h.rect.x - this.cameraX }
+          const sx = h.x - this.cameraX
+          const hRect = { ...h.rect, x: sx }
           if (!rectsOverlap(p.rect, hRect)) continue
 
           const isHazardous = this._gameStats.beatHazardInverted && r.features.has('beat_hazard')
@@ -407,16 +445,12 @@ export class SideScroller {
             : !h.isSafe
 
           if (isHazardous) {
-            this._onPlayerHit(p, r)
+            this._onPlayerHit(p)
             if (this.dead) return
-          } else if (r.features.has('color_touch')) {
-            // 安全色を踏む → 得点 + 消滅
-            const gain = r.colorTouchScore
-            this.playScore += gain
-            this.hazards.splice(i, 1)
-            const sx = h.x - this.cameraX
-            this._addScorePopup(sx + h.w / 2, h.y, `TOUCH! +${gain}`, '#00ffcc')
-            this._spawnHitParticles(sx + h.w / 2, h.y + h.h / 2, '#00ffcc', 6)
+          } else {
+            for (const sys of getActiveSystems(r.features)) {
+              sys.onSafeHazardTouch?.(this._getWorld(), h, sx)
+            }
           }
         }
       }
@@ -433,7 +467,7 @@ export class SideScroller {
     // ════════════════════════════════════════════════════════
 
     // ─── Feature システム（GameRegistry 経由で全システムをディスパッチ） ──
-    const world = this._buildWorld()
+    const world = this._getWorld()
     const inputSnapshot: InputSnapshot = {
       keys: this.keys,
       justPressed: this.justPressed,
@@ -443,27 +477,9 @@ export class SideScroller {
       sys.update(world, inputSnapshot, dt)
     }
 
-    // ─── アイテム (RPG) ───────────────────────────────────────────
-    if (r.features.has('item_pickup')) {
-      for (const item of this.items) {
-        if (!item.alive) continue
-        item.pulse += dt * 3
-        const iRect = { ...item.rect, x: item.rect.x - this.cameraX }
-        if (rectsOverlap(p.rect, iRect, 0)) {
-          item.alive = false
-          if (item.type === 'exp') {
-            p.exp += SPAWN.expItemExpGain
-            this.playScore += SPAWN.expItemScore
-            this._addScorePopup(item.x - this.cameraX, item.y, '+EXP', '#ffcc00')
-          }
-          if (item.type === 'hp' && p.hp < p.maxHp) {
-            p.hp++
-            this._addScorePopup(item.x - this.cameraX, item.y, '+HP', '#ff8888')
-          }
-        }
-      }
-      this.items = this.items.filter(i => i.alive && i.x - this.cameraX > SPAWN.itemCullLeft)
-    }
+    // ─── アイテムクリーンアップ ───────────────────────────────────
+    // 収集・パルスアニメは RpgFeature.update() が担当。ここは dead / 画面外除去のみ。
+    this.items = this.items.filter(i => i.alive && i.x - this.cameraX > SPAWN.itemCullLeft)
 
     // ─── パーティクル更新 ─────────────────────────────────────────
     for (const pt of this.particles) {
@@ -507,22 +523,25 @@ export class SideScroller {
   }
 
   // ─── 被弾処理 ────────────────────────────────────────────────────
-  private _onPlayerHit(p: Player, r: RuntimeRules): void {
-    if (r.features.has('hp')) {
-      p.hp--
-      p.invincible = VFX.invincibleDuration
-      this.shakeIntensity = VFX.hitShakeIntensity
-      this._spawnHitParticles(p.x + p.w / 2, p.y + p.h / 2, '#ff4444', VFX.hitParticleCount)
-      if (p.hp <= 0) this._die(p)
-    } else {
+  private _onPlayerHit(p: Player): void {
+    const world = this._getWorld()
+    for (const sys of getActiveSystems(this.rules.features)) {
+      sys.onPlayerHit?.(world)
+    }
+    // どのシステムも死亡を処理しなかった場合（hp feature なし）は即死
+    if (!this.dead) {
       this._die(p)
     }
   }
 
   private _die(p: Player): void {
+    if (this.dead) return  // 二重死亡防止
     this.dead = true
     this.shakeIntensity = VFX.deathShakeIntensity
     this._spawnDeathExplosion(p.x + p.w / 2, p.y + p.h / 2)
+    // Hook: onPlayerDeath
+    const dw = this._getWorld()
+    for (const sys of getActiveSystems(this.rules.features)) sys.onPlayerDeath?.(dw)
   }
 
   // ─── 描画 ────────────────────────────────────────────────────────
@@ -561,7 +580,7 @@ export class SideScroller {
 
     // ─── Feature システム描画（弾・ビートマーカー等） ─────────────
     {
-      const fWorld = this._buildWorld()
+      const fWorld = this._getWorld()
       for (const sys of getActiveSystems(r.features)) {
         sys.render?.(ctx, fWorld)
       }
@@ -857,35 +876,6 @@ export class SideScroller {
     return `rgb(${rr},${gg},${bb})`
   }
 
-  // ─── 弾描画 ───────────────────────────────────────────────────────
-  private _drawBullet(sx: number, sy: number): void {
-    const ctx = this.ctx
-    const isVertical = this.rules.scrollAxis === 'y'
-    ctx.save()
-    ctx.shadowColor = '#ffff88'
-    ctx.shadowBlur = 10
-    if (isVertical) {
-      // 縦モード: 上向き弾（縦長楕円）
-      const grad = ctx.createLinearGradient(sx, sy, sx, sy - 14)
-      grad.addColorStop(0, '#ffff44')
-      grad.addColorStop(1, '#ff8844')
-      ctx.fillStyle = grad
-      ctx.beginPath()
-      ctx.ellipse(sx + 2, sy - 7, 2.5, 7, 0, 0, Math.PI * 2)
-      ctx.fill()
-    } else {
-      // 横モード: 右向き弾（横長楕円）
-      const grad = ctx.createLinearGradient(sx, sy, sx + 14, sy)
-      grad.addColorStop(0, '#ffff44')
-      grad.addColorStop(1, '#ff8844')
-      ctx.fillStyle = grad
-      ctx.beginPath()
-      ctx.ellipse(sx + 7, sy + 2, 7, 2.5, 0, 0, Math.PI * 2)
-      ctx.fill()
-    }
-    ctx.restore()
-  }
-
   // ─── アイテム描画 ─────────────────────────────────────────────────
   private _drawItem(item: Item, sx: number): void {
     const ctx = this.ctx
@@ -956,6 +946,10 @@ export class SideScroller {
       const spawnX = Math.random() * (W - w - 20) + 10
       const spawnY = -h - 20  // 画面外上部
       this.hazards.push(new Hazard(spawnX, spawnY, w, h, color, glowColor, entry.shape, hp, isSafe, 0))
+      if (entry.isBoss) {
+        const bw = this._getWorld()
+        for (const sys of getActiveSystems(r.features)) sys.onBossSpawn?.(bw)
+      }
     } else {
       // ─── 横スクロール: 画面右端からワールド座標で出現 ────────────
       const worldX = this.cameraX + W + SPAWN.hazardSpawnOffsetX
@@ -977,6 +971,10 @@ export class SideScroller {
           y = gY - h
       }
       this.hazards.push(new Hazard(worldX, y, w, h, color, glowColor, entry.shape, hp, isSafe, floatAmp))
+      if (entry.isBoss) {
+        const bw = this._getWorld()
+        for (const sys of getActiveSystems(r.features)) sys.onBossSpawn?.(bw)
+      }
 
       if (r.features.has('item_pickup') && Math.random() < SPAWN.itemDropChance) {
         const type = Math.random() < SPAWN.itemExpChance ? 'exp' : 'hp'
@@ -999,18 +997,6 @@ export class SideScroller {
   // ─── パーティクル生成 ─────────────────────────────────────────────
   private _addParticle(x: number, y: number, vx: number, vy: number, life: number, color: string, size = 4): void {
     this.particles.push({ x, y, vx, vy, life, maxLife: life, color, size })
-  }
-
-  private _spawnHitParticles(x: number, y: number, color: string, count: number = VFX.hitParticleCount): void {
-    const plugin = getGenre(this.rules.genre)
-    const pColor = plugin.particleColors?.hit ?? color
-    for (let i = 0; i < count; i++) {
-      const angle = Math.random() * Math.PI * 2
-      const speed = VFX.hitParticleSpeedMin + Math.random() * (VFX.hitParticleSpeedMax - VFX.hitParticleSpeedMin)
-      const life  = VFX.hitParticleLifeMin + Math.random() * VFX.hitParticleLifeRange
-      const size  = VFX.hitParticleSizeBase + Math.random() * VFX.hitParticleSizeRange
-      this._addParticle(x, y, Math.cos(angle) * speed, Math.sin(angle) * speed + VFX.hitParticleYBoost, life, pColor, size)
-    }
   }
 
   private _spawnJumpParticles(x: number, y: number): void {
@@ -1059,20 +1045,21 @@ export class SideScroller {
   }
 
   // ─── MutableWorld 実装 ───────────────────────────────────────────
+  // getter を使うことで配列が filter で置き換わっても参照が失効しない
   private _buildWorld(): MutableWorld {
     const self = this
     return {
-      player:      this.player,
-      hazards:     this.hazards,
-      items:       this.items,
-      bullets:     this._bullets,
-      rules:       this.rules,
-      distance:    this.distance,
-      survivedSec: this.survivedSec,
-      canvas:      this.canvas,
-      ctx:         this.ctx,
-      cameraX:     this.cameraX,
-      gameStats:   this._gameStats,
+      get player()      { return self.player },
+      get hazards()     { return self.hazards },
+      get items()       { return self.items },
+      get bullets()     { return self._bullets },
+      get rules()       { return self.rules },
+      get distance()    { return self.distance },
+      get survivedSec() { return self.survivedSec },
+      canvas:           this.canvas,
+      ctx:              this.ctx,
+      get cameraX()     { return self.cameraX },
+      get gameStats()   { return self._gameStats },
 
       addScore(amount)              { self.playScore += amount },
       addScorePopup(x, y, text, c) { self._addScorePopup(x, y, text, c) },
@@ -1093,16 +1080,19 @@ export class SideScroller {
         p.hp = Math.max(0, Math.min(p.maxHp, p.hp + delta))
         if (p.hp <= 0) self._die(p)
       },
-      resetCombo()                   { self._gameStats.combo = 0 },
-      setTimescale(_s, _d)           { /* TODO: timescale implementation */ },
+      resetCombo() { self._gameStats.combo = 0 },
+      setTimescale(scale, durationSec) {
+        self._timescaleScale = scale
+        self._timescaleRemaining = durationSec ?? -1
+      },
 
-      setKills(n)                    { self._gameStats.kills = n },
-      setCombo(n)                    {
+      setKills(n)  { self._gameStats.kills = n },
+      setCombo(n)  {
         self._gameStats.combo = n
         if (n > self._gameStats.maxCombo) self._gameStats.maxCombo = n
       },
-      addBeatHit()                   { self._gameStats.beatHits++ },
-      setBeatHazardInverted(v)       { self._gameStats.beatHazardInverted = v },
+      addBeatHit()             { self._gameStats.beatHits++ },
+      setBeatHazardInverted(v) { self._gameStats.beatHazardInverted = v },
     }
   }
 }

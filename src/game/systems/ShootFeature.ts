@@ -13,6 +13,7 @@ import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { createShootState, updateShoot } from './shootSystem'
 import type { ShootState } from './shootSystem'
 import { HAZARD_VFX } from '../../data/tunables'
+import { getGenre } from '../../engine/GameRegistry'
 
 export class ShootFeature implements FeatureSystem {
   readonly handles = ['shoot', 'three_way', 'charge_shot', 'spread_shot', 'enemy_hp', 'bomb'] as const
@@ -35,7 +36,7 @@ export class ShootFeature implements FeatureSystem {
     const viewportLeft  = isVertical ? -100 : world.cameraX - 100
     const viewportRight = isVertical ? W + 100 : world.cameraX + W + 100
 
-    const scoreGain = updateShoot(
+    const { scoreGain, destroyedHazards } = updateShoot(
       this.state,
       world.hazards,
       shootJust,
@@ -49,6 +50,13 @@ export class ShootFeature implements FeatureSystem {
       world.addScore(scoreGain)
       const popupX = isVertical ? p.x + p.w / 2 : p.x + p.w + 4
       world.addScorePopup(popupX, p.y - 20, `+${scoreGain}`, '#ffdd00')
+    }
+
+    if (destroyedHazards.length > 0) {
+      const plugin = getGenre(world.rules.genre)
+      for (const h of destroyedHazards) {
+        plugin.onHazardDestroyed?.(world, h)
+      }
     }
 
     // GameStats に統計を同期

@@ -3,10 +3,10 @@
  * 'stg' ジャンル（宇宙シューティング）のプラグイン。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 
-export class StgPlugin implements GenrePlugin {
+export class StgPlugin extends GenrePluginBase {
   readonly id = 'stg' as const
   readonly skyColors    = ['#000005', '#05050f'] as const
   readonly groundColors = ['#05050a', '#020205'] as const

@@ -6,11 +6,11 @@
  * プレイヤーは小型戦闘機。星雲と星フィールドが流れる。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 import type { GenreId } from '../domain/types'
 
-export class AerialStgPlugin implements GenrePlugin {
+export class AerialStgPlugin extends GenrePluginBase {
   readonly id: GenreId = 'aerial_stg'
 
   readonly skyColors    = ['#000008', '#000418'] as const

@@ -91,7 +91,7 @@ src/
 │   ├── types.ts          全型定義（GenreId, FeatureId, RuntimeRules, GameStats…）
 │   ├── ruleEngine.ts     buildRuntimeRules() — 純粋関数
 │   ├── genreResolver.ts  resolveGenre() — 収束アルゴリズム
-│   └── scoreCalc.ts      最終スコア計算
+│   └── scoreCalc.ts      最終スコア計算(投擲込み)
 │
 ├── engine/
 │   ├── types.ts          MutableWorld / InputSnapshot / SpawnEntry / GameStats

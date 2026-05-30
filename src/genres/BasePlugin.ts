@@ -7,18 +7,18 @@
  * これにより TypeScript のリテラル型の継承問題を回避する。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 import type { GenreId } from '../domain/types'
 
-export abstract class DarkThemePlugin implements GenrePlugin {
+export abstract class DarkThemePlugin extends GenrePluginBase {
   abstract readonly id: GenreId
   abstract readonly skyColors: readonly [string, string]
   abstract readonly groundColors: readonly [string, string]
   abstract readonly farLayerColor: string
   abstract readonly midLayerColor: string
   abstract readonly starColor: string | undefined
-  abstract readonly palette: GenrePlugin['palette']
+  abstract readonly palette: import('../engine/GenrePlugin').GenrePlugin['palette']
   abstract readonly spawnTable: readonly SpawnEntry[]
 
   drawFarLayer(ctx: CanvasRenderingContext2D, offsetX: number, W: number, gY: number): void {
