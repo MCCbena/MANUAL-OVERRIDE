@@ -12,6 +12,7 @@ import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { rectsOverlap } from '../entities'
 import { VFX, SPAWN } from '../../data/tunables'
+import { getActiveSystems } from '../../engine/GameRegistry'
 
 export class RpgFeature implements FeatureSystem {
   readonly handles = ['hp', 'exp', 'item_pickup', 'shield'] as const
@@ -55,6 +56,10 @@ export class RpgFeature implements FeatureSystem {
       } else if (item.type === 'hp' && p.hp < p.maxHp) {
         p.hp++
         world.addScorePopup(item.x - world.cameraX, item.y, '+HP', '#ff8888')
+      }
+      // onItemPickup フック発火
+      for (const sys of getActiveSystems(world.rules.features)) {
+        sys.onItemPickup?.(world, item.type)
       }
     }
     // 死亡/画面外の除去は sideScroller の filter で行う
