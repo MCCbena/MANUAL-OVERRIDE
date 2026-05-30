@@ -8,6 +8,17 @@ import type { Player, Hazard, Item, Bullet } from '../game/entities'
 import type { RuntimeRules } from '../domain/types'
 
 // ──────────────────────────────────────────────────────────────────────
+// GameStats — FeatureSystem が読み書きするゲーム統計
+// ──────────────────────────────────────────────────────────────────────
+export interface GameStats {
+  kills: number
+  combo: number
+  maxCombo: number
+  beatHits: number
+  beatHazardInverted: boolean
+}
+
+// ──────────────────────────────────────────────────────────────────────
 // MutableWorld — システム・プラグインがフレームごとに受け取るコンテキスト
 // ──────────────────────────────────────────────────────────────────────
 export interface MutableWorld {
@@ -21,6 +32,10 @@ export interface MutableWorld {
   readonly survivedSec: number
   readonly canvas: HTMLCanvasElement
   readonly ctx: CanvasRenderingContext2D
+  /** 横スクロール時のカメラX位置（ワールド→スクリーン変換に使用） */
+  readonly cameraX: number
+  /** ゲーム統計（kills/combo/beatHits 等）の現在値 */
+  readonly gameStats: Readonly<GameStats>
 
   // ─ スコア / UI ───────────────────────────────────────────────
   addScore(amount: number): void
@@ -56,6 +71,16 @@ export interface MutableWorld {
    * @param durationSec この秒数後に 1.0 に戻る（省略=永続）
    */
   setTimescale(scale: number, durationSec?: number): void
+
+  // ─ 統計書き込み（FeatureSystem 専用） ──────────────────────
+  /** kills 数を直接セット（ShootFeature が使用） */
+  setKills(n: number): void
+  /** combo 数をセット。maxCombo も自動更新（ShootFeature が使用） */
+  setCombo(n: number): void
+  /** beatHits をインクリメント（RhythmFeature が使用） */
+  addBeatHit(): void
+  /** beat_hazard の色反転フラグを更新（RhythmFeature が使用） */
+  setBeatHazardInverted(v: boolean): void
 }
 
 // ──────────────────────────────────────────────────────────────────────

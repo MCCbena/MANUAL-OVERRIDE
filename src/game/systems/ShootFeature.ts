@@ -1,16 +1,21 @@
 /**
  * game/systems/ShootFeature.ts
- * 'shoot', 'three_way', 'enemy_hp' Feature を担当するシステム。
- * 既存の shootSystem.ts のロジックを FeatureSystem インターフェースで包む。
+ * 'shoot', 'three_way', 'charge_shot', 'spread_shot', 'enemy_hp', 'bomb' Feature を担当。
+ *
+ * 変更点（framework強化）:
+ * - world.cameraX を使い横モードのワールドX座標を正しく計算（旧実装の座標バグ修正）
+ * - kills/combo を world.setKills()/setCombo() 経由で GameStats に書き込む
+ * - 弾の描画を render() に移し sideScroller から分離
  */
 
 import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { createShootState, updateShoot } from './shootSystem'
 import type { ShootState } from './shootSystem'
+import { HAZARD_VFX } from '../../data/tunables'
 
 export class ShootFeature implements FeatureSystem {
-  readonly handles = ['shoot', 'three_way', 'enemy_hp'] as const
+  readonly handles = ['shoot', 'three_way', 'charge_shot', 'spread_shot', 'enemy_hp', 'bomb'] as const
 
   private state: ShootState = createShootState()
 
@@ -20,28 +25,60 @@ export class ShootFeature implements FeatureSystem {
 
   update(world: MutableWorld, input: InputSnapshot, dt: number): void {
     const p = world.player
+    const isVertical = world.rules.scrollAxis === 'y'
     const shootKey = world.rules.controls.shoot ?? 'z'
     const shootJust = input.justPressed.has(shootKey)
+
+    // 横モード: プレイヤーはスクリーン座標 → ワールドXへ変換
+    const playerX = isVertical ? p.x : p.x + world.cameraX
+    const W = world.canvas.width
+    const viewportLeft  = isVertical ? -100 : world.cameraX - 100
+    const viewportRight = isVertical ? W + 100 : world.cameraX + W + 100
 
     const scoreGain = updateShoot(
       this.state,
       world.hazards,
       shootJust,
-      p.x, p.y, p.h,
+      playerX, p.y, p.h,
       world.rules,
       dt,
+      viewportLeft, viewportRight, -100,
     )
 
     if (scoreGain > 0) {
       world.addScore(scoreGain)
-      world.addScorePopup(p.x + p.w + 4, p.y - 18, `+${scoreGain}`, '#ffdd00')
+      const popupX = isVertical ? p.x + p.w / 2 : p.x + p.w + 4
+      world.addScorePopup(popupX, p.y - 20, `+${scoreGain}`, '#ffdd00')
     }
 
-    // bullets を world.bullets に同期（読み取り専用なので cast）
+    // GameStats に統計を同期
+    world.setKills(this.state.kills)
+    world.setCombo(this.state.combo)
+
+    // world.bullets に同期（sideScroller や他システムが参照できる）
     ;(world.bullets as typeof this.state.bullets).length = 0
     ;(world.bullets as typeof this.state.bullets).push(...this.state.bullets)
   }
 
-  getKills(): number { return this.state.kills }
-  getCombo(): number { return this.state.combo }
+  render(ctx: CanvasRenderingContext2D, world: MutableWorld): void {
+    if (world.bullets.length === 0) return
+    const isVertical = world.rules.scrollAxis === 'y'
+
+    ctx.save()
+    ctx.shadowColor = '#ffff88'
+    ctx.shadowBlur = HAZARD_VFX.glowBlur * 0.6
+
+    for (const b of world.bullets) {
+      // 横モード: ワールドX → スクリーンX変換
+      const sx = isVertical ? b.x : b.x - world.cameraX
+      ctx.fillStyle = '#ffff00'
+      ctx.fillRect(sx - 4, b.y - 2, 8, 4)
+    }
+
+    ctx.restore()
+  }
+
+  onManualUpdated(): void {
+    this.state = createShootState()
+  }
 }

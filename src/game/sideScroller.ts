@@ -1,10 +1,9 @@
 import type { RuntimeRules, ActionStats } from '../domain/types'
-import { Player, Hazard, Item, rectsOverlap, type ScorePopup } from './entities'
-import { createShootState, updateShoot, type ShootState } from './systems/shootSystem'
-import { createRhythmState, updateRhythm, evaluateTiming, type RhythmState } from './systems/rhythmSystem'
+import type { MutableWorld, InputSnapshot, GameStats } from '../engine/types'
+import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBalance'
 import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '../data/tunables'
-import { getGenre } from '../engine/GameRegistry'
+import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
 // ジャンルプラグインとフィーチャーシステムを一括登録
 import '../genres/index'
@@ -40,8 +39,8 @@ export class SideScroller {
   private player: Player
   private hazards: Hazard[] = []
   private items: Item[] = []
-  private shoot: ShootState
-  private rhythm: RhythmState
+  private _bullets: Bullet[] = []
+  private _gameStats: GameStats = { kills: 0, combo: 0, maxCombo: 0, beatHits: 0, beatHazardInverted: false }
 
   // ゲーム状態
   private distance = 0
@@ -101,9 +100,6 @@ export class SideScroller {
     this.player = new Player(140, gY)
     this.player.jumpsLeft = rules.features.has('double_jump') ? 2 : 1
 
-    this.shoot = createShootState()
-    this.rhythm = createRhythmState(rules.bpm)
-
     // イベントハンドラ登録（解除できるよう名前付き関数で保持）
     this._onKeyDown = (e: KeyboardEvent) => {
       const key = this._normalizeKey(e)
@@ -133,7 +129,10 @@ export class SideScroller {
     if (rules.features.has('double_jump')) {
       this.player.jumpsLeft = Math.max(this.player.jumpsLeft, 2)
     }
-    this.rhythm = createRhythmState(rules.bpm)
+    const world = this._buildWorld()
+    for (const sys of getActiveSystems(rules.features)) {
+      sys.onManualUpdated?.(world, '')
+    }
   }
 
   start(): void {
@@ -156,10 +155,10 @@ export class SideScroller {
     return {
       distance: this.distance,
       playScore: this.playScore,
-      combo: this.shoot.combo,
-      kills: this.shoot.kills,
+      combo: this._gameStats.combo,
+      kills: this._gameStats.kills,
       exp: this.player.exp,
-      beatHits: this.rhythm.beatHits,
+      beatHits: this._gameStats.beatHits,
       survivedSec: this.survivedSec,
       hp: this.player.hp,
       maxHp: this.player.maxHp,
@@ -294,18 +293,8 @@ export class SideScroller {
         }
       }
 
-      // ─── シュート（縦モード: 弾がスクリーン座標） ────────────
-      const shootJust = this.justPressed.has(shootKey)
-      if (shootJust) this.stats.shots++
-      const scoreGain = updateShoot(
-        this.shoot, this.hazards,
-        shootJust, p.x, p.y, p.h, r, dt,
-        -100, W + 100, -100,
-      )
-      if (scoreGain > 0) {
-        this.playScore += scoreGain
-        this._addScorePopup(p.x + p.w / 2, p.y - 20, `+${scoreGain}`, '#ffdd00')
-      }
+      // シュート入力統計のみここで取得（shoot 処理は feature system に委譲）
+      if (this.justPressed.has(shootKey)) this.stats.shots++
 
     } else {
       // ════════════════════════════════════════════════════════
@@ -413,7 +402,7 @@ export class SideScroller {
           const hRect = { ...h.rect, x: h.rect.x - this.cameraX }
           if (!rectsOverlap(p.rect, hRect)) continue
 
-          const isHazardous = this.rhythm.beatHazardInverted && r.features.has('beat_hazard')
+          const isHazardous = this._gameStats.beatHazardInverted && r.features.has('beat_hazard')
             ? h.isSafe
             : !h.isSafe
 
@@ -435,39 +424,23 @@ export class SideScroller {
       // 画面外ハザード除去
       this.hazards = this.hazards.filter(h => h.x - this.cameraX > SPAWN.hazardCullLeft)
 
-      // ─── シュートシステム（横モード: playerX をワールド座標で渡す） ──
-      const shootJust = this.justPressed.has(shootKey)
-      if (shootJust) this.stats.shots++
-      const playerWorldX = p.x + this.cameraX
-      const scoreGain = updateShoot(
-        this.shoot, this.hazards,
-        shootJust, playerWorldX, p.y, p.h, r, dt,
-        this.cameraX - 100,
-        this.cameraX + W + 100,
-        -100,
-      )
-      if (scoreGain > 0) {
-        this.playScore += scoreGain
-        this._addScorePopup(p.x + p.w, p.y - 20, `+${scoreGain}`, '#ffdd00')
-      }
+      // シュート入力統計のみここで取得（shoot 処理は feature system に委譲）
+      if (this.justPressed.has(shootKey)) this.stats.shots++
     }
 
     // ════════════════════════════════════════════════════════
     // 以降は横・縦モード共通
     // ════════════════════════════════════════════════════════
 
-    // ─── リズムシステム ───────────────────────────────────────────
-    updateRhythm(this.rhythm, dt, r, r.hazardColors, r.safeColors)
-
-    if (r.features.has('just_input') && (this.justPressed.has(r.controls.jump) || this.justPressed.has(r.controls.shoot ?? 'z'))) {
-      const quality = evaluateTiming(this.rhythm, performance.now())
-      if (quality > 0.5) {
-        this.rhythm.beatHits++
-        const bonus = Math.round(150 * quality)
-        this.playScore += bonus
-        this._addScorePopup(p.x + p.w, p.y - 30, `JUST! +${bonus}`, '#ff00ff')
-        this._spawnHitParticles(p.x + p.w / 2, p.y, '#ff00ff', 10)
-      }
+    // ─── Feature システム（GameRegistry 経由で全システムをディスパッチ） ──
+    const world = this._buildWorld()
+    const inputSnapshot: InputSnapshot = {
+      keys: this.keys,
+      justPressed: this.justPressed,
+      justReleased: this.justReleased,
+    }
+    for (const sys of getActiveSystems(r.features)) {
+      sys.update(world, inputSnapshot, dt)
     }
 
     // ─── アイテム (RPG) ───────────────────────────────────────────
@@ -586,10 +559,12 @@ export class SideScroller {
       }
     }
 
-    // ─── 弾 ───────────────────────────────────────────────────────
-    for (const b of this.shoot.bullets) {
-      // 横モード: ワールドX→スクリーンX変換。縦モード: そのまま（スクリーン座標）
-      this._drawBullet(b.x - this.cameraX, b.y)
+    // ─── Feature システム描画（弾・ビートマーカー等） ─────────────
+    {
+      const fWorld = this._buildWorld()
+      for (const sys of getActiveSystems(r.features)) {
+        sys.render?.(ctx, fWorld)
+      }
     }
 
     // ─── パーティクル ─────────────────────────────────────────────
@@ -615,23 +590,6 @@ export class SideScroller {
 
     // ─── プレイヤー ───────────────────────────────────────────────
     if (!this.dead) this._drawPlayer()
-
-    // ─── ビートマーカー ───────────────────────────────────────────
-    if (r.features.has('beat_hazard')) {
-      for (const m of this.rhythm.beatMarkers) {
-        const alpha = (m.t / 400) * 0.3
-        ctx.globalAlpha = alpha
-        ctx.strokeStyle = '#ff00ff'
-        ctx.lineWidth = 2
-        ctx.setLineDash([6, 4])
-        ctx.beginPath()
-        ctx.moveTo(m.x, 0)
-        ctx.lineTo(m.x, gY)
-        ctx.stroke()
-        ctx.setLineDash([])
-      }
-      ctx.globalAlpha = 1
-    }
 
     ctx.restore()  // shake の restore
 
@@ -786,7 +744,7 @@ export class SideScroller {
     // ビートリズム反転色
     let color = h.color
     let glow = h.glowColor
-    if (this.rhythm.beatHazardInverted && r.features.has('beat_hazard')) {
+    if (this._gameStats.beatHazardInverted && r.features.has('beat_hazard')) {
       color = r.safeColors.has(h.color) ? '#e74c3c' : '#3498db'
       glow = r.safeColors.has(h.color) ? '#ff6b6b' : '#74b9ff'
     }
@@ -1098,5 +1056,53 @@ export class SideScroller {
 
   private _addScorePopup(x: number, y: number, text: string, color: string): void {
     this.scorePopups.push({ x, y, text, color, life: UI.popupLifeSec, vy: UI.popupRiseVy })
+  }
+
+  // ─── MutableWorld 実装 ───────────────────────────────────────────
+  private _buildWorld(): MutableWorld {
+    const self = this
+    return {
+      player:      this.player,
+      hazards:     this.hazards,
+      items:       this.items,
+      bullets:     this._bullets,
+      rules:       this.rules,
+      distance:    this.distance,
+      survivedSec: this.survivedSec,
+      canvas:      this.canvas,
+      ctx:         this.ctx,
+      cameraX:     this.cameraX,
+      gameStats:   this._gameStats,
+
+      addScore(amount)              { self.playScore += amount },
+      addScorePopup(x, y, text, c) { self._addScorePopup(x, y, text, c) },
+      triggerShake(intensity)       { self.shakeIntensity = Math.max(self.shakeIntensity, intensity) },
+      addParticle(x, y, vx, vy, life, color, size = 3) {
+        self.particles.push({ x, y, vx, vy, life, maxLife: life, color, size })
+      },
+
+      spawnHazard(h)       { self.hazards.push(h) },
+      spawnItem(item)      { self.items.push(item) },
+      removeHazardById(h)  {
+        const i = self.hazards.indexOf(h)
+        if (i >= 0) self.hazards.splice(i, 1)
+      },
+
+      modifyPlayerHp(delta) {
+        const p = self.player
+        p.hp = Math.max(0, Math.min(p.maxHp, p.hp + delta))
+        if (p.hp <= 0) self._die(p)
+      },
+      resetCombo()                   { self._gameStats.combo = 0 },
+      setTimescale(_s, _d)           { /* TODO: timescale implementation */ },
+
+      setKills(n)                    { self._gameStats.kills = n },
+      setCombo(n)                    {
+        self._gameStats.combo = n
+        if (n > self._gameStats.maxCombo) self._gameStats.maxCombo = n
+      },
+      addBeatHit()                   { self._gameStats.beatHits++ },
+      setBeatHazardInverted(v)       { self._gameStats.beatHazardInverted = v },
+    }
   }
 }
