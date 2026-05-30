@@ -13,7 +13,7 @@ import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { createShootState, updateShoot } from './shootSystem'
 import type { ShootState } from './shootSystem'
 import { HAZARD_VFX } from '../../data/tunables'
-import { getGenre } from '../../engine/GameRegistry'
+import { getGenre, getActiveSystems } from '../../engine/GameRegistry'
 
 export class ShootFeature implements FeatureSystem {
   readonly handles = ['shoot', 'three_way', 'charge_shot', 'spread_shot', 'enemy_hp', 'bomb'] as const
@@ -60,8 +60,16 @@ export class ShootFeature implements FeatureSystem {
     }
 
     // GameStats に統計を同期
+    const oldCombo = world.gameStats.combo
     world.setKills(this.state.kills)
     world.setCombo(this.state.combo)
+
+    // コンボが変化した場合、フック発火
+    if (oldCombo !== this.state.combo) {
+      for (const sys of getActiveSystems(world.rules.features)) {
+        sys.onComboChange?.(world, this.state.combo)
+      }
+    }
 
     // world.bullets に同期（sideScroller や他システムが参照できる）
     ;(world.bullets as typeof this.state.bullets).length = 0

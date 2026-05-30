@@ -193,11 +193,13 @@ interface FeatureSystem {
 | `onPlayerHit` | sideScroller._onPlayerHit → dispatch | ✅ |
 | `onSafeHazardTouch` | 衝突ループの safe 分岐 | ✅ |
 | `onManualUpdated` | sideScroller.updateRules | ✅ |
-| `onPlayerDeath` | **未呼び出し** (`_die()` から dispatch していない) | ⚠️ |
-| `onComboChange` | **未呼び出し** | ⚠️ |
-| `onItemPickup` | **未呼び出し** | ⚠️ |
-| `onBossSpawn` | **未呼び出し** | ⚠️ |
-| `onPlayerJump` | **未呼び出し** | ⚠️ |
+| `onPlayerDeath` | sideScroller._die() | ✅ |
+| `onComboChange` | ShootFeature.update（combo 変化時） | ✅ |
+| `onItemPickup` | RpgFeature.update（アイテム収集時） | ✅ |
+| `onBossSpawn` | sideScroller（ボススポーン時） | ✅ |
+| `onPlayerJump` | sideScroller（ジャンプ発動時） | ✅ |
+| `onPlayerLand` | sideScroller（着地時） | ✅ |
+| `onHazardDestroyed` | ShootFeature.update（ハザード破壊時） | ✅ |
 
 ### 登録
 
@@ -405,32 +407,20 @@ debugPrint(): void
 
 ## 10. 🚧 課題と不足箇所
 
-### A. フック呼び出しの漏れ（優先度: 高）
+### A. フック呼び出しの実装状況（実装完了 ✅）
 
-定義されているがゲームループから一切呼ばれていないフックが 5 個ある。  
-これらが呼ばれない限り、FeatureSystem を実装しても機能しない。
+すべてのフックが実装され、適切なタイミングで呼び出されるようになりました。
 
-| フック | 想定呼び出し元 | 影響 |
+| フック | 実装時期 | 呼び出し元 |
 |---|---|---|
-| `onPlayerDeath?(world)` | `sideScroller._die()` | 死亡演出を Feature 側で追加できない |
-| `onComboChange?(world, combo)` | コンボ変化時（ShootFeature がコンボを更新した後） | コンボエフェクト・倍率 HUD が実装できない |
-| `onItemPickup?(world, type)` | RpgFeature.update の item 収集後 | アイテム種別ごとの演出が Feature に持てない |
-| `onBossSpawn?(world)` | ボススポーン時（SpecialFeature 未実装のため現在未発火） | ボス登場演出が実装できない |
-| `onPlayerJump?(world)` | sideScroller のジャンプ発動箇所 | ジャンプ連動エフェクトが実装できない |
-
-```
-// 修正例: sideScroller._die() に追加
-private _die(p: Player): void {
-  this.dead = true
-  this.shakeIntensity = VFX.deathShakeIntensity
-  this._spawnDeathExplosion(p.x + p.w / 2, p.y + p.h / 2)
-  // ↓ 追加が必要
-  const world = this._buildWorld()
-  for (const sys of getActiveSystems(this.rules.features)) {
-    sys.onPlayerDeath?.(world)
-  }
-}
-```
+| `onPlayerDeath` | ✅ 実装済み | `sideScroller._die()` |
+| `onComboChange` | ✅ 実装済み | `ShootFeature.update()` |
+| `onItemPickup` | ✅ 実装済み | `RpgFeature.update()` |
+| `onBossSpawn` | ✅ 実装済み | `sideScroller._update()` |
+| `onPlayerJump` | ✅ 実装済み | `sideScroller._update()` |
+| `onPlayerLand` | ✅ 実装済み | `sideScroller._update()` |
+| `onHazardDestroyed` | ✅ 実装済み | `ShootFeature.update()` |
+| `onManualUpdated` | ✅ 実装済み | `sideScroller.updateRules()` |
 
 ---
 
@@ -542,60 +532,81 @@ DESIGN.md の M6 に「学習ルール + 仕上げ」として計画されてい
 
 ---
 
-### G. setTimescale の未実装（優先度: 低）
+### G. setTimescale の実装（優先度: 完了 ✅）
+
+`world.setTimescale()` は完全に実装されており、以下のメカニズムで動作します：
 
 ```typescript
-// sideScroller._buildWorld() 内
-setTimescale(_s, _d) { /* TODO: timescale implementation */ },
+// sideScroller.ts 内
+private _timescaleScale = 1.0
+private _timescaleRemaining = -1
+
+// フレーム内で適用
+const dt = rawDt * this._timescaleScale
 ```
 
-`world.setTimescale(0.3, 1.0)` を呼んでもスロー演出が発生しない。  
-RhythmFeature の「ジャスト入力でスロー」などに使われる想定だが未接続。
+`RhythmFeature` など、スロー演出が必要な Feature はこれを活用できます。
 
 ---
 
-### H. framework/ ディレクトリの欠如（優先度: 中）
+### H. framework/ ディレクトリ（実装完了 ✅）
 
-`docs/architecture.md` には以下が記載されているが、実際には存在しない：
+`src/framework/` は完全に実装されており、以下で構成されます：
 
 ```
 src/framework/
-  ManualLoader.ts    JSON → ManualVersion のパース
-  ManualBuilder.ts   プログラム的な説明書生成 API
-  ManualValidator.ts 開発時バリデーション
+  index.ts              — 公開 API エクスポート
+  ManualLoader.ts       — JSON → ManualVersion のパース
+  ManualBuilder.ts      — プログラム的な説明書生成 API
+  ManualValidator.ts    — 開発時・実行時バリデーション
+  types.ts              — 型定義
 ```
 
-現在は `data/manualDeck.ts` が JSON ロードを担当しており、バリデーションは手動。  
-説明書 JSON のスキーマが壊れていても実行時まで気づけない。
+説明書 JSON はスキーマバリデーション済みで、不正な構造は早期に検出されます。
 
 ---
 
-### I. GenrePlugin の基底クラス欠如（優先度: 低）
+### I. GenrePluginBase（実装完了 ✅）
 
-`GenrePlugin` はインターフェースのみ。`drawFarLayer` や `drawMidLayer` の「星なし・山なし」  
-デフォルト実装をすべてのプラグインが重複して書いている（または空実装する）。
+`engine/GenrePluginBase.ts` が実装され、すべてのジャンルプラグインが継承できるようになりました：
 
 ```typescript
-// 推奨案: 追加する
 abstract class GenrePluginBase implements GenrePlugin {
-  drawFarLayer(ctx, cam, W, gY) { /* デフォルト: 空実装 */ }
-  drawMidLayer(ctx, cam, W, gY) { /* デフォルト: 空実装 */ }
-  // ...
+  // 必須フィールド・メソッド（サブクラスで実装）
+  abstract readonly id: GenreId
+  abstract drawFarLayer(ctx, offsetX, W, gY): void
+  abstract drawMidLayer(ctx, offsetX, W, gY): void
+  abstract drawPlayer(ctx, w, h, onGround, runCycle): void
+
+  // オプショナルメソッド（no-op デフォルト実装）
+  onGenreLocked(_world): void { }
+  onUpdate(_world, _dt): void { }
+  drawHazard(...): boolean { return false }
+  // ...その他
 }
 ```
 
+これにより、プラグイン間のコード重複が最小化されました。
+
 ---
 
-## 課題サマリー
+## 課題サマリー（2026-05-30 更新）
 
-| # | 課題 | 優先度 | 影響範囲 |
+### 実装完了 ✅
+
+| 課題 | 完了内容 |
+|---|---|
+| A | フック呼び出し実装 | すべてのフック（onPlayerDeath, onComboChange, onItemPickup 等）が実装され、適切に呼び出されている |
+| G | setTimescale 実装 | タイムスケール機構が完全実装。RhythmFeature などで活用可能 |
+| H | framework/ 実装 | ManualLoader, ManualBuilder, ManualValidator が完全実装 |
+| I | GenrePluginBase 実装 | 抽象基底クラスが実装されすべてのプラグインが継承 |
+
+### 設計改善提案（将来の最適化）
+
+| # | 課題 | 優先度 | 説明 |
 |---|---|---|---|
-| A | フック呼び出し漏れ (5個) | **高** | Feature 拡張性が損なわれている |
-| B | buildWorld 多重コール | 中 | GC 負荷・フレーム内一貫性 |
-| C | 座標系の不統一 | 中 | FeatureSystem 実装のたびに混乱 |
-| D | sideScroller 肥大 | 中 | 保守性・テスト容易性 |
-| E | 空スタブで有効化が無症状 | 中 | デバッグ困難 |
-| F | Learning System 未統合 | 低 | デッドコード |
-| G | setTimescale 未実装 | 低 | スロー演出が機能しない |
-| H | framework/ ディレクトリ欠如 | 中 | JSON 仕様変更時に無音で壊れる |
-| I | GenrePlugin 基底クラス欠如 | 低 | プラグイン間のコード重複 |
+| B | buildWorld 多重コール | 中 | フレーム内で複数回コールされている。mutable world の再利用で GC 負荷削減可能 |
+| C | 座標系の不統一 | 中 | MutableWorld にヘルパーメソッド追加で FeatureSystem の実装が簡潔化可能 |
+| D | sideScroller 肥大 | 低 | 関心の分離（物理・衝突・描画の分割）で保守性向上 |
+| E | 空スタブ警告 | 低 | 未実装 Feature 有効化時に console.warn を出すことで調査速度向上 |
+| F | Learning System | 低 | 実装されているが未統合。DESIGN.md M6 参照 |
