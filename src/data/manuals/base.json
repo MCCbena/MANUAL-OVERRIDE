@@ -1,0 +1,40 @@
+{
+  "id": "base",
+  "description": "ルートデッキ: チュートリアル + 最初の2択（間接的なテキストでジャンル方向を隠す）",
+  "entries": [
+    {
+      "key": "1.0",
+      "version": "1.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "青いオブジェクトは安全です。",
+        "できるだけ遠くまで走ってください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "ステージに登場するものに個性を加える",
+          "next": "2.0-a",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "戦闘・探索方向（STG/RPG/survival/aerial_stg）"
+        },
+        {
+          "label": "キャラクターの動きをなめらかにする",
+          "next": "2.0-b",
+          "genreParams": { "tempo": 2, "aerial": 1 },
+          "hint": "速度・空中・音楽方向（runner/bullet_runner/rhythm/platformer）"
+        }
+      ]
+    }
+  ]
+}

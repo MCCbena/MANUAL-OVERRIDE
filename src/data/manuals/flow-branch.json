@@ -1,0 +1,199 @@
+{
+  "id": "flow-branch",
+  "description": "速度・空中・音楽分岐 (ver 1.0 で 'キャラクターの動きをなめらかにする' を選んだ場合)\n→ runner / bullet_runner / rhythm / platformer の4ジャンルへ収束",
+  "entries": [
+    {
+      "key": "2.0-b",
+      "version": "2.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "青いオブジェクトは安全です。",
+        "動きがなめらかになりました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "スピード感をどんどん上げる",
+          "next": "3.0-b-speed",
+          "genreParams": { "tempo": 3 },
+          "hint": "runner / bullet_runner 方向"
+        },
+        {
+          "label": "音楽を中心にしたステージにする",
+          "next": "3.0-b-beat",
+          "genreParams": { "rhythm": 3, "tempo": 1 },
+          "hint": "rhythm / platformer 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "3.0-b-speed",
+      "version": "3.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "スピードが大幅に上がりました。",
+        "直感で動いてください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "移動を全自動にして、障害物回避に集中させる",
+          "next": "4.0-runner",
+          "genreParams": { "tempo": 2 },
+          "hint": "runner 確定（tempo:7 超過）"
+        },
+        {
+          "label": "走りながら敵とも戦えるようにする",
+          "next": "4.0-bullet-runner",
+          "genreParams": { "enemy": 5, "range": 2 },
+          "hint": "bullet_runner 確定（tempo:5, enemy:5 超過 → bullet_runner 余剰が大きい）"
+        }
+      ]
+    },
+
+    {
+      "key": "3.0-b-beat",
+      "version": "3.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "音楽とステージが連動し始めました。",
+        "リズムを感じてください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "障害物をリズムに合わせて出現させる",
+          "next": "4.0-rhythm",
+          "genreParams": { "rhythm": 2, "tempo": 1 },
+          "hint": "rhythm 確定（tempo:4, rhythm:5 超過）"
+        },
+        {
+          "label": "ジャンプの爽快感を最大限に引き出す",
+          "next": "4.0-platformer",
+          "genreParams": { "aerial": 2, "combo": 3 },
+          "hint": "platformer 確定（aerial:3, combo:3 超過）"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-runner",
+      "version": "4.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトを避けてください。",
+        "青いオブジェクトは安全です。",
+        "できるだけ長く生き延びてください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-bullet-runner",
+      "version": "4.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "Zキーで弾を撃てます。",
+        "走りながら敵を倒してください。",
+        "止まることはできません。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-rhythm",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "リズムに合わせてアクションすると高スコアになります。",
+        "障害物の色がビートに合わせて変化します。",
+        "ジャストタイミングで入力してください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-platformer",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーで二段ジャンプできます。",
+        "赤いオブジェクトに触れると失敗です。",
+        "コンボをつなげると高スコアになります。",
+        "空中での動きが格段に向上しました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    }
+  ]
+}

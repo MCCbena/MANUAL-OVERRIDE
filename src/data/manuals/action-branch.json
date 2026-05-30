@@ -1,0 +1,207 @@
+{
+  "id": "action-branch",
+  "description": "戦闘・探索分岐 (ver 1.0 で 'ステージに個性を加える' を選んだ場合)\n→ STG / aerial_stg / RPG / survival の4ジャンルへ収束",
+  "entries": [
+    {
+      "key": "2.0-a",
+      "version": "2.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "青いオブジェクトは安全です。",
+        "ステージに登場するものが増えました。",
+        "動きに注意してください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "ステージのキャラクターをもっと活発に動かす",
+          "next": "3.0-a-fight",
+          "genreParams": { "enemy": 2, "range": 2 },
+          "hint": "STG / aerial_stg 方向"
+        },
+        {
+          "label": "キャラクターに何かを集める理由を作る",
+          "next": "3.0-a-grow",
+          "genreParams": { "survive": 2, "growth": 2 },
+          "hint": "RPG / survival 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "3.0-a-fight",
+      "version": "3.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトは積極的に動きます。",
+        "青いオブジェクトは安全です。",
+        "撃退が推奨される状況になってきました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "キャラクターに遠距離攻撃を持たせる",
+          "next": "4.0-stg",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "STG 確定（range:4, enemy:4 超過）"
+        },
+        {
+          "label": "ステージを空高く移動させる",
+          "next": "4.0-aerial",
+          "genreParams": { "vertical": 3, "range": 1, "enemy": 1 },
+          "hint": "aerial_stg 確定（vertical:3, range:4, enemy:4 超過 → aerial_stg 余剰が大きい）"
+        }
+      ]
+    },
+
+    {
+      "key": "3.0-a-grow",
+      "version": "3.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトに触れると失敗です。",
+        "消えていくものから何かを得られます。",
+        "蓄積していくことが大切です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "生き延びるほど評価される仕組みにする",
+          "next": "4.0-survival",
+          "genreParams": { "survive": 2, "growth": 1 },
+          "hint": "survival 確定（survive:4, growth:3 超過）"
+        },
+        {
+          "label": "キャラクターが経験を積んで強くなる",
+          "next": "4.0-rpg",
+          "genreParams": { "growth": 3 },
+          "hint": "RPG 確定（growth:5 超過）"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-stg",
+      "version": "4.0",
+      "manualText": [
+        "Zキーで弾を撃てます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤い敵を撃って倒してください。",
+        "コンボをつなげると高スコアになります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-aerial",
+      "version": "4.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで上方向に弾を撃てます。",
+        "上から降ってくる敵を撃ってください。",
+        "赤い敵に触れると失敗です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-survival",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "HPが追加されました。数回被弾できます。",
+        "青いアイテムを積極的に集めてください。",
+        "生き延びることが最大の目的です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeOverrides": {
+        "playerMaxHp": 5
+      },
+      "choices": []
+    },
+
+    {
+      "key": "4.0-rpg",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "HPが追加されました。",
+        "経験値を集めると強くなります。",
+        "アイテムを積極的に拾ってください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeOverrides": {
+        "playerMaxHp": 4
+      },
+      "choices": []
+    }
+  ]
+}

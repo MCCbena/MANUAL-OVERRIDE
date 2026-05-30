@@ -1,0 +1,75 @@
+{
+  "$comment": "このファイルは新ブランチ追加時のテンプレートです。コピーして使ってください。",
+  "id": "my-branch",
+  "description": "ここにブランチの説明を書く（開発者向けメモ、必須ではない）",
+  "entries": [
+    {
+      "key": "2.0-my-branch",
+      "version": "2.0",
+      "manualText": [
+        "ここに説明書の本文を書きます（1行1要素）。",
+        "行数に制限はありませんが、4〜6行が見やすいです。"
+      ],
+      "image": "my_branch_v2.png",
+      "$comment_image": "public/manuals/ に画像を置いてファイル名を指定。省略可能。",
+      "imageAlt": "バージョン2のイラスト",
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "$comment_shoot": "ショット機能が必要な場合: \"shoot\": \"z\""
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "プレイヤーに見せる選択肢のテキスト（ジャンル方向は隠す）",
+          "next": "3.0-my-branch-a",
+          "genreParams": { "tempo": 2 },
+          "hint": "開発者メモ: RUNNER 方向（プレイヤーには非表示）"
+        },
+        {
+          "label": "2番目の選択肢テキスト",
+          "next": "3.0-my-branch-b",
+          "genreParams": { "range": 2, "enemy": 2 }
+        }
+      ]
+    },
+    {
+      "key": "3.0-my-branch-a",
+      "version": "3.0",
+      "manualText": [
+        "こちらのルートを選んだ場合のテキスト。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+    {
+      "key": "3.0-my-branch-b",
+      "version": "3.0",
+      "manualText": [
+        "こちらのルートを選んだ場合のテキスト。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    }
+  ]
+}
