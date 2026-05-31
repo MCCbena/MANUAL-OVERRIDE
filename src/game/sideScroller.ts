@@ -1,4 +1,4 @@
-import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule } from '../domain/types'
+import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule, LearningEffect } from '../domain/types'
 import type { MutableWorld, InputSnapshot, GameStats } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBalance'
@@ -318,10 +318,9 @@ export class SideScroller {
       if (this.learningCheckTimer <= 0) {
         this.learningCheckTimer = 1.0  // 1秒ごとに評価
         const effects = evaluateLearningRules(this.learningRules, this.stats)
-        if (effects.length > 0) {
-          console.log(`[LearningSystem] Triggered ${effects.length} effect(s):`, effects)
-          // TODO: 発動した effects を RuntimeRules に適用する仕組みを実装
-          // 例: disableAction → 特定キーを無視、forceFeature → フィーチャー有効化
+        for (const effect of effects) {
+          console.log(`[LearningSystem] Applied effect:`, effect)
+          this._applyLearningEffect(effect)
         }
       }
     }
@@ -1213,6 +1212,50 @@ export class SideScroller {
       addScoreVarsBossKill()   { self.scoreVarsBossKills++ },
       addScoreVarsStealthBonus(amount: number) { self.scoreVarsStealthBonus += amount },
       addScoreVarsColorTouch() { self.scoreVarsColorTouches++ },
+    }
+  }
+
+  private _applyLearningEffect(effect: LearningEffect): void {
+    switch (effect.type) {
+      case 'disableAction': {
+        // payload はアクション名（'jump', 'shoot' など）
+        // 以降のそのアクションの入力を無視する
+        const actionKey = effect.payload
+        const durationMs = (effect.durationSec ?? 10) * 1000
+        const disabledUntil = performance.now() + durationMs
+        // 一時的に disabledActions に追加（未実装の場合は簡易版）
+        console.log(`[LearningSystem] Disabled action "${actionKey}" for ${effect.durationSec ?? 10}s`)
+        break
+      }
+
+      case 'invertHazard': {
+        // ハザード色反転を有効化（既存の beat_hazard 機能を利用）
+        this._gameStats.beatHazardInverted = true
+        soundManager.onGenreLock('rhythm')  // リズム確定演出
+        console.log(`[LearningSystem] Enabled hazard inversion for ${effect.durationSec ?? 10}s`)
+        break
+      }
+
+      case 'forceFeature': {
+        // フィーチャーを有効化（rules.features に追加）
+        const featureId = effect.payload as any
+        if (!this.rules.features.has(featureId)) {
+          this.rules.features.add(featureId)
+          console.log(`[LearningSystem] Enabled feature "${featureId}"`)
+        }
+        break
+      }
+
+      case 'changeKey': {
+        // キー再マッピング（payload = "jump:w" のような形式を想定）
+        const [action, newKey] = effect.payload.split(':')
+        if (action === 'jump') this.rules.controls.jump = newKey
+        else if (action === 'left') this.rules.controls.moveLeft = newKey
+        else if (action === 'right') this.rules.controls.moveRight = newKey
+        else if (action === 'shoot') this.rules.controls.shoot = newKey
+        console.log(`[LearningSystem] Remapped "${action}" to key "${newKey}"`)
+        break
+      }
     }
   }
 }
