@@ -128,15 +128,15 @@ function keyLabel(key: string): string {
   position: absolute;
   bottom: 58px; right: 16px;
   width: 340px;
-  background: #fefdfb;
-  border: 2.5px solid #c9a876;
-  border-radius: 8px;
+  background: #0d120d;
+  border: 2px solid #33aa55;
+  border-radius: 2px;
   padding: 16px 18px;
-  font-family: 'Noto Sans JP', 'Courier New', sans-serif;
+  font-family: 'Caveat', cursive;
   font-size: 13px;
   line-height: 1.8;
-  color: #2a1810;
-  box-shadow: 8px 8px 24px rgba(0,0,0,0.25), 0 2px 8px rgba(0,0,0,0.15);
+  color: #b8ffb8;
+  box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
   z-index: 20;
   transition: font-family 0.6s, background 0.6s, border-color 0.6s, box-shadow 0.6s;
   user-select: none;
@@ -148,7 +148,7 @@ function keyLabel(key: string): string {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   padding-bottom: 5px;
   margin-bottom: 7px;
 }
@@ -159,41 +159,43 @@ function keyLabel(key: string): string {
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #333;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
 }
 .manual-ver-dot {
   display: inline-block;
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #cc2222;
+  background: #00ff41;
+  box-shadow: 0 0 6px #00ff41;
 }
 .history-btn {
   font-size: 9px;
-  background: none;
-  border: 1px solid #ccc;
+  background: transparent;
+  border: 1px solid #33aa55;
   cursor: pointer;
   padding: 1px 6px;
   border-radius: 2px;
-  color: #888;
-  font-family: inherit;
+  color: #33aa55;
+  font-family: 'Share Tech Mono', monospace;
   transition: all 0.15s;
 }
-.history-btn:hover { background: #f0f0f0; border-color: #999; color: #333; }
+.history-btn:hover { background: #001a00; border-color: #00ff41; color: #00ff41; }
 
 /* ── 履歴 ── */
 .manual-history {
-  border-bottom: 1px dashed #ddd;
+  border-bottom: 1px dashed rgba(0,255,65,0.2);
   margin-bottom: 7px;
   padding-bottom: 7px;
   max-height: 110px;
   overflow-y: auto;
   font-size: 10px;
-  color: #aaa;
+  color: rgba(184,255,184,0.45);
 }
-.history-empty { font-style: italic; color: #ccc; }
+.history-empty { font-style: italic; color: rgba(184,255,184,0.25); }
 .history-item { margin-bottom: 5px; }
-.history-ver { font-weight: bold; font-size: 9px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; }
-.history-line { padding-left: 4px; color: #bbb; }
+.history-ver { font-weight: bold; font-size: 9px; color: rgba(184,255,184,0.35); text-transform: uppercase; letter-spacing: 1px; font-family: 'Share Tech Mono', monospace; }
+.history-line { padding-left: 4px; color: rgba(184,255,184,0.35); font-family: 'Caveat', cursive; }
 
 /* ── イラスト ── */
 .manual-image-wrap {
@@ -215,32 +217,34 @@ function keyLabel(key: string): string {
 .manual-body { margin-bottom: 8px; }
 .manual-line { display: block; padding: 1px 0; }
 
-.line-unchanged { color: #1a1a1a; font-weight: 500; }
+.line-unchanged { color: #b8ffb8; font-weight: 500; font-family: 'Caveat', cursive; }
 .line-removed {
   display: block;
   text-decoration: line-through;
-  color: #cc2222;
-  opacity: 0.55;
-  background: rgba(200,0,0,0.05);
+  color: rgba(255,51,51,0.5);
+  opacity: 0.7;
+  background: transparent;
   padding: 0 2px;
 }
 .line-added {
   display: block;
-  color: #cc2222;
+  color: #00ff88;
   font-weight: 700;
   animation: inkIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   position: relative;
   padding-left: 12px;
   max-height: 100px;
   overflow: hidden;
+  font-family: 'Caveat', cursive;
 }
 .line-added::before {
-  content: '▶';
+  content: '>';
   position: absolute;
   left: 0;
-  font-size: 8px;
-  top: 3px;
-  color: #cc2222;
+  font-size: 12px;
+  top: 0px;
+  color: #00ff88;
+  font-family: 'Share Tech Mono', monospace;
 }
 @keyframes inkIn {
   0%   { opacity: 0; transform: translateX(-5px); max-height: 0; }
@@ -249,16 +253,17 @@ function keyLabel(key: string): string {
 
 /* ── 操作キー ── */
 .manual-controls {
-  border-top: 1px solid rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(0,255,65,0.2);
   padding-top: 6px;
 }
 .controls-title {
   font-size: 10px;
-  color: #666;
+  color: #33aa55;
   letter-spacing: 1.5px;
   text-transform: uppercase;
   margin-bottom: 5px;
   font-weight: 600;
+  font-family: 'Share Tech Mono', monospace;
 }
 .controls-grid {
   display: grid;
@@ -267,18 +272,19 @@ function keyLabel(key: string): string {
   align-items: center;
 }
 .key-badge {
-  background: #1a1a1a;
-  color: #fff;
+  background: #001a00;
+  color: #00ff41;
   padding: 2px 6px;
-  border-radius: 3px;
+  border-radius: 1px;
   font-size: 11px;
   min-width: 35px;
   text-align: center;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid rgba(0,0,0,0.4);
+  border: 1px solid #33aa55;
   font-weight: 600;
+  font-family: 'Share Tech Mono', monospace;
 }
-.key-action { font-size: 12px; color: #333; font-weight: 500; }
+.key-action { font-size: 12px; color: #b8ffb8; font-weight: 500; font-family: 'Caveat', cursive; }
 
 /* ── 履歴トランジション ── */
 .slide-enter-active, .slide-leave-active { transition: all 0.2s ease; max-height: 200px; }

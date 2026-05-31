@@ -311,13 +311,34 @@ onUnmounted(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Caveat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Caveat:wght@400;700&display=swap');
+
+/* グローバルCSS変数 */
+:root {
+  --bg:          #0a0a0a;
+  --bg-panel:    #0d120d;
+  --green:       #00ff41;
+  --green-dim:   #33aa55;
+  --green-dark:  #001a00;
+  --green-glow:  rgba(0, 255, 65, 0.25);
+  --text:        #b8ffb8;
+  --text-dim:    rgba(184, 255, 184, 0.45);
+  --danger:      #ff3333;
+  --amber:       #ffbb00;
+  --font-mono:   'Share Tech Mono', 'Courier New', monospace;
+  --font-hand:   'Caveat', cursive;
+  --scanline: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 3px
+  );
+}
 
 /* グローバルリセット */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body, #app { width: 100%; height: 100%; overflow: hidden; background: #111; }
+html, body, #app { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
 button { outline: none; }
-body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
+body { font-family: var(--font-mono); }
 </style>
 
 <style scoped>
@@ -340,7 +361,7 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 8, 18, 0.96);
+  background: var(--bg);
   z-index: 100;
 }
 
@@ -348,26 +369,34 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
 .title-scanlines {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 3px,
-    rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
-  );
+  background: var(--scanline);
   pointer-events: none;
+}
+
+/* グリッド背景（説明書イメージ） */
+.title-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(0,255,65,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,255,65,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .title-card {
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  color: #e8e8ee;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.10);
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: var(--bg-panel);
+  border: 1px solid var(--green-dim);
   padding: 36px 48px 30px;
   max-width: 480px;
   width: 90%;
   box-shadow:
-    0 0 60px rgba(0,0,0,0.8),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+    0 0 30px var(--green-glow),
+    inset 0 1px 0 rgba(0,255,65,0.1);
   animation: titleCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -385,41 +414,44 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
 .title-doc-tag {
   font-size: 9px;
   letter-spacing: 2px;
-  color: rgba(255,255,255,0.2);
+  color: var(--green-dim);
   text-transform: uppercase;
+  font-family: var(--font-mono);
 }
 
 .title-rule {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(to right, transparent, var(--green-dim), transparent);
   margin-bottom: 22px;
 }
 
 .title-main {
-  font-size: clamp(24px, 4.5vw, 38px);
+  font-size: clamp(28px, 5vw, 42px);
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   margin-bottom: 18px;
   line-height: 1.35;
-  color: #ffffff;
-  text-shadow: 0 0 30px rgba(255,255,255,0.15);
+  color: var(--green);
+  text-shadow: 0 0 20px var(--green-glow);
+  font-family: var(--font-hand);
 }
 
 .title-sub {
   font-size: 13px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-dim);
   line-height: 2.1;
   margin-bottom: 30px;
   letter-spacing: 0.3px;
+  font-family: var(--font-mono);
 }
 
 .title-btn {
   background: transparent;
-  color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.5);
+  color: var(--green);
+  border: 1.5px solid var(--green-dim);
   padding: 11px 36px;
   font-size: 15px;
-  font-family: inherit;
+  font-family: var(--font-mono);
   cursor: pointer;
   letter-spacing: 3px;
   transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
@@ -427,13 +459,13 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
   display: inline-block;
 }
 .title-btn:hover {
-  background: #cc0000;
-  border-color: #cc0000;
-  color: #fff;
-  box-shadow: 0 0 20px rgba(200,0,0,0.4);
+  background: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 20px var(--green-glow);
 }
 .title-btn:active { transform: translateY(1px); }
-.title-btn-bracket { color: rgba(255,255,255,0.4); }
+.title-btn-bracket { color: var(--green-dim); }
 
 /* 操作説明 */
 .title-controls {
@@ -447,18 +479,18 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
 .ctrl-group { display: flex; align-items: center; gap: 4px; }
 .ctrl-key {
   display: inline-block;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: var(--green-dark);
+  border: 1px solid var(--green-dim);
   border-bottom-width: 2px;
-  color: rgba(255,255,255,0.55);
-  font-family: inherit;
+  color: var(--green);
+  font-family: var(--font-mono);
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 2px;
   letter-spacing: 0;
 }
-.ctrl-desc { color: rgba(255,255,255,0.22); letter-spacing: 0.5px; }
-.ctrl-sep { color: rgba(255,255,255,0.15); }
+.ctrl-desc { color: var(--text-dim); letter-spacing: 0.5px; }
+.ctrl-sep { color: var(--green-dim); }
 
 /* ── ギブアップエリア ── */
 .giveup-area {
@@ -473,28 +505,29 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
   z-index: 15;
 }
 .giveup-btn {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  border-bottom: 2px solid var(--green-dim);
+  color: var(--green);
   padding: 7px 20px;
   font-size: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
   cursor: pointer;
   border-radius: 3px;
   letter-spacing: 0.5px;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
 }
 .giveup-btn:hover {
-  background: rgba(180, 0, 0, 0.35);
-  border-color: rgba(200, 50, 50, 0.7);
-  color: #fff;
+  background: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
 }
 .giveup-hint {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.22);
-  font-family: monospace;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
   letter-spacing: 0.5px;
 }
 
@@ -537,17 +570,17 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0,0,0,0.88);
-  border: 2px solid rgba(255,255,255,0.3);
-  color: #fff;
+  background: var(--bg-panel);
+  border: 2px solid var(--green);
+  color: var(--green);
   padding: 16px 40px;
-  font-family: 'Georgia', serif;
+  font-family: var(--font-mono);
   font-size: 18px;
   z-index: 26;
   max-width: 520px;
   text-align: center;
   backdrop-filter: blur(6px);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  box-shadow: 0 8px 30px var(--green-glow);
   letter-spacing: 0.5px;
   font-weight: 500;
   animation: genreNameReveal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both;

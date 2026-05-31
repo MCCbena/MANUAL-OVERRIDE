@@ -71,7 +71,7 @@ function pick(choiceId: string) {
 .choice-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,40 +86,27 @@ function pick(choiceId: string) {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px,
-    transparent 3px,
-    rgba(0, 0, 0, 0.06) 3px,
-    rgba(0, 0, 0, 0.06) 4px
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 3px
   );
   pointer-events: none;
 }
 
 /* カード */
 .choice-card {
-  background: #faf7f3;
-  border: 2px solid #d4c9bc;
-  border-radius: 6px;
+  background: #0d120d;
+  border: 2px solid #33aa55;
+  border-radius: 2px;
   padding: 28px 32px 22px;
   max-width: 420px;
   width: 92%;
   box-shadow:
-    8px 8px 0 rgba(0,0,0,0.12),
-    0 0 50px rgba(0,0,0,0.3),
-    inset 0 1px 2px rgba(255,255,255,0.7);
-  font-family: 'Noto Sans JP', 'Courier New', sans-serif;
+    0 0 20px rgba(0,255,65,0.15),
+    0 0 50px rgba(0,0,0,0.5),
+    inset 0 1px 2px rgba(0,255,65,0.05);
+  font-family: 'Caveat', cursive;
   animation: cardEntrance 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-
-  /* 和紙のような質感 */
-  background-image:
-    repeating-linear-gradient(
-      45deg,
-      transparent 0px, transparent 1px,
-      rgba(180,150,100,0.02) 1px, rgba(180,150,100,0.02) 2px
-    ),
-    repeating-linear-gradient(
-      to bottom,
-      transparent 0px, transparent 18px,
-      rgba(0,0,0,0.018) 18px, rgba(0,0,0,0.018) 19px
-    );
 }
 
 @keyframes cardEntrance {
@@ -131,39 +118,41 @@ function pick(choiceId: string) {
 .choice-header {
   text-align: center;
   margin-bottom: 22px;
-  border-bottom: 2px solid #d4c9bc;
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   padding-bottom: 14px;
   position: relative;
 }
 
 .choice-stamp {
   display: inline-block;
-  background: #c94f3b;
-  color: #fff;
+  background: transparent;
+  color: #00ff41;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: 2px;
   padding: 4px 12px;
   margin-bottom: 8px;
   transform: rotate(-1.8deg);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
-  border-radius: 2px;
+  box-shadow: 0 0 8px rgba(0,255,65,0.15);
+  border: 1px solid #00ff41;
+  border-radius: 1px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .choice-ver {
   font-size: 10px;
-  color: #998876;
+  color: #33aa55;
   letter-spacing: 1.5px;
   margin-bottom: 8px;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .choice-prompt {
   font-size: 14px;
-  color: #3d2416;
+  color: #b8ffb8;
   font-weight: 600;
   letter-spacing: 0.4px;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Caveat', cursive;
 }
 
 /* 選択肢リスト */
@@ -178,17 +167,17 @@ function pick(choiceId: string) {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #fef7f1;
-  border: 2px solid #c9a876;
+  background: #001a00;
+  border: 1px solid #33aa55;
   padding: 14px 18px;
   text-align: left;
   cursor: pointer;
-  font-family: inherit;
-  border-radius: 8px;
+  font-family: 'Caveat', cursive;
+  border-radius: 2px;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 
   /* 初期は非表示 */
   opacity: 0;
@@ -208,34 +197,34 @@ function pick(choiceId: string) {
   content: '';
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, rgba(200,100,50,0.15) 0%, rgba(180,80,40,0.1) 100%);
+  background: linear-gradient(135deg, rgba(0,255,65,0.05) 0%, rgba(0,255,65,0.02) 100%);
   opacity: 0;
   transition: opacity 0.22s ease;
 }
 
 .choice-btn:hover {
-  background: #fff5ed;
-  border-color: #b89a7d;
-  box-shadow: 0 4px 12px rgba(180,100,60,0.18);
+  background: #002a00;
+  border-color: #00ff41;
+  box-shadow: 0 4px 12px rgba(0,255,65,0.15);
 }
 .choice-btn:hover::after { opacity: 1; }
 
 .choice-btn:active { transform: translateY(2px); }
 
 .choice-btn.selected {
-  background: #d4673b;
-  border-color: #b84a1f;
-  box-shadow: 0 6px 16px rgba(212,103,59,0.28);
+  background: #003300;
+  border-color: #00ff41;
+  box-shadow: 0 6px 16px rgba(0,255,65,0.2);
   animation: selectedFlash 0.35s ease;
 }
 .choice-btn.selected .choice-label,
 .choice-btn.selected .choice-index,
-.choice-btn.selected .choice-arrow { color: #fff; }
+.choice-btn.selected .choice-arrow { color: #00ff41; }
 
 @keyframes selectedFlash {
-  0%   { background: #fef7f1; }
-  40%  { background: #f5d5c8; }
-  100% { background: #d4673b; }
+  0%   { background: #001a00; }
+  40%  { background: #002a00; }
+  100% { background: #003300; }
 }
 
 .choice-btn.faded {
