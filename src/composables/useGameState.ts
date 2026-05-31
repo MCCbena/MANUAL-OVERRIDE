@@ -57,6 +57,10 @@ export function useGameState() {
 
     // ジャンル収束チェック
     const nextVer = MANUAL_DECK[choice.next]
+    if (!nextVer) {
+      console.error(`[choose] invalid choice.next: ${choice.next}`)
+      return
+    }
     const accumulated = accumulateParams(choiceHistory.map(h => h.genreParams))
     const resolved = resolveGenre(accumulated, GENRES)
 

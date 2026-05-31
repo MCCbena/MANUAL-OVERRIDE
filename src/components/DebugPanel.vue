@@ -1,19 +1,25 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, onUnmounted } from 'vue'
 import { accumulateParams, resolveGenre, resolveGenreProgress } from '../domain/genreResolver'
 import { GENRES } from '../data/genres'
-import type { GenreId } from '../domain/types'
+import type { GenreId, GenreParam } from '../domain/types'
 
 interface Props {
   choiceHistory: any[]
   currentManual: () => any
   lockedGenre: GenreId | null
   phase: string
+  onAutoChoose?: (choiceId: string) => void
 }
 
 const props = withDefaults(defineProps<Props>(), {})
+const emit = defineEmits<{ autoChoose: [choiceId: string] }>()
+
 const isOpen = ref(true)
 const expandedGenres = ref<Set<GenreId>>(new Set())
+const isAutoPlaying = ref(false)
+let autoPlayTimer: number | null = null
+let keySimulationTimer: number | null = null
 
 // 蓄積されたパラメータを計算
 const accumulatedParams = computed(() => {
@@ -40,7 +46,7 @@ const genreStatuses = computed(() => {
     let isMet = true
 
     for (const [key, required] of Object.entries(genre.thresholds || {})) {
-      const current = accumulated[key as any] ?? 0
+      const current = accumulated[key as GenreParam] ?? 0
       gaps[key] = Math.max(0, required - current)
       if (gaps[key] > 0) isMet = false
     }
@@ -50,7 +56,7 @@ const genreStatuses = computed(() => {
       label: genre.label,
       thresholds: genre.thresholds || {},
       current: Object.keys(genre.thresholds || {}).reduce((acc, k) => {
-        acc[k] = accumulated[k as any] ?? 0
+        acc[k] = accumulated[k as GenreParam] ?? 0
         return acc
       }, {} as Record<string, number>),
       gaps,
@@ -69,7 +75,7 @@ const genreProgress = computed(() => {
 // 次の選択肢の効果を表示
 const nextChoices = computed(() => {
   const manual = props.currentManual()
-  return (manual?.choices || []).map(c => ({
+  return (manual?.choices || []).map((c: any) => ({
     id: c.id,
     label: c.label,
     genreParams: c.genreParams || {},
@@ -89,6 +95,127 @@ function toggleGenre(genreId: GenreId) {
     expandedGenres.value.add(genreId)
   }
 }
+
+// 自動プレイ機能（障害物検出＆自動ジャンプ）
+function startAutoPlay() {
+  if (isAutoPlaying.value) return
+  isAutoPlaying.value = true
+
+  // キーボード入力をシミュレート
+  const simulateKeyPress = (key: string) => {
+    const event = new KeyboardEvent('keydown', {
+      key,
+      code: key === ' ' ? 'Space' : `Arrow${key === 'ArrowLeft' ? 'Left' : key === 'ArrowRight' ? 'Right' : 'Up'}`,
+    })
+    window.dispatchEvent(event)
+
+    setTimeout(() => {
+      const keyupEvent = new KeyboardEvent('keyup', { key })
+      window.dispatchEvent(keyupEvent)
+    }, 100)
+  }
+
+  // キャンバスから障害物を検出
+  const detectHazardAhead = (): boolean => {
+    const canvas = document.querySelector('canvas')
+    if (!canvas) return false
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return false
+
+    // プレイヤーは画面の左下付近にいると仮定
+    // 画面幅の45-55%、高さの60-80%付近をチェック
+    const checkX = Math.floor(canvas.width * 0.5)
+    const checkY = Math.floor(canvas.height * 0.65)
+
+    try {
+      const imageData = ctx.getImageData(checkX, checkY, 100, 30)
+      const data = imageData.data
+
+      // 赤系の色（障害物）を検出
+      let redPixels = 0
+      for (let i = 0; i < data.length; i += 4) {
+        const r = data[i]
+        const g = data[i + 1]
+        const b = data[i + 2]
+        // 赤系：R > 150 かつ G < 100 かつ B < 100
+        if (r > 150 && g < 100 && b < 100) {
+          redPixels++
+        }
+      }
+
+      // ある程度赤ピクセルが多い場合は障害物と判定
+      return redPixels > 50
+    } catch (e) {
+      return false
+    }
+  }
+
+  // 定期的に入力を実行
+  const doSmartInput = () => {
+    if (!isAutoPlaying.value) return
+
+    // 障害物が前方にあればジャンプ、なければ移動
+    if (detectHazardAhead()) {
+      simulateKeyPress(' ')
+    } else {
+      // ランダムに左右移動（または何もしない）
+      const actions = ['ArrowLeft', 'ArrowRight', null]
+      const randomAction = actions[Math.floor(Math.random() * actions.length)]
+      if (randomAction) {
+        simulateKeyPress(randomAction)
+      }
+    }
+
+    // 次の入力まで150-300msで実行
+    keySimulationTimer = window.setTimeout(doSmartInput, 150 + Math.random() * 150)
+  }
+
+  // 選択肢パネルが表示されたら自動クリック
+  const monitorChoices = () => {
+    if (!isAutoPlaying.value) return
+
+    const choiceBtns = document.querySelectorAll('button[data-choice-id]')
+    if (choiceBtns.length > 0) {
+      // キー入力を停止
+      if (keySimulationTimer !== null) {
+        clearTimeout(keySimulationTimer)
+      }
+
+      // ランダムに選択肢をクリック
+      const randomBtn = choiceBtns[Math.floor(Math.random() * choiceBtns.length)]
+      setTimeout(() => {
+        ;(randomBtn as HTMLButtonElement).click()
+      }, 500)
+
+      // クリック後、キー入力を再開
+      autoPlayTimer = window.setTimeout(doSmartInput, 500)
+    } else {
+      // 選択肢がまだない場合は監視を続ける
+      autoPlayTimer = window.setTimeout(monitorChoices, 100)
+    }
+  }
+
+  // 初期化
+  doSmartInput()
+  monitorChoices()
+}
+
+function stopAutoPlay() {
+  isAutoPlaying.value = false
+  if (autoPlayTimer !== null) {
+    clearTimeout(autoPlayTimer)
+    autoPlayTimer = null
+  }
+  if (keySimulationTimer !== null) {
+    clearTimeout(keySimulationTimer)
+    keySimulationTimer = null
+  }
+}
+
+onUnmounted(() => {
+  stopAutoPlay()
+})
 
 // パラメータをフォーマット（表示用）
 function formatParams(params: Record<string, number>) {
@@ -114,7 +241,17 @@ function formatCurrentParams() {
     <!-- ヘッダー -->
     <div class="debug-header">
       <h3>🔧 Debug Panel</h3>
-      <button @click="isOpen = false" class="close-btn">✕</button>
+      <div class="header-buttons">
+        <button
+          @click="isAutoPlaying ? stopAutoPlay() : startAutoPlay()"
+          class="auto-play-btn"
+          :class="{ active: isAutoPlaying }"
+          :title="isAutoPlaying ? 'Stop auto play' : 'Start auto play'"
+        >
+          {{ isAutoPlaying ? '⏸ 自動中' : '▶ 自動プレイ' }}
+        </button>
+        <button @click="isOpen = false" class="close-btn">✕</button>
+      </div>
     </div>
 
     <!-- フェーズ情報 -->
@@ -262,6 +399,37 @@ function formatCurrentParams() {
   margin: 0;
   font-size: 14px;
   color: #4a90e2;
+  flex: 1;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.auto-play-btn {
+  background: rgba(74, 144, 226, 0.2);
+  border: 1px solid #4a90e2;
+  color: #4a90e2;
+  cursor: pointer;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 3px;
+  transition: background 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  font-weight: bold;
+}
+
+.auto-play-btn:hover {
+  background: rgba(74, 144, 226, 0.3);
+  border-color: #7ab8ff;
+}
+
+.auto-play-btn.active {
+  background: rgba(46, 213, 115, 0.3);
+  border-color: #2ed573;
+  color: #2ed573;
 }
 
 .close-btn {
@@ -281,6 +449,7 @@ function formatCurrentParams() {
 .close-btn:hover {
   color: #ff6b6b;
 }
+
 
 .section {
   margin-bottom: 12px;

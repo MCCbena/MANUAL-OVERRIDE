@@ -58,16 +58,16 @@
       },
       "choices": [
         {
-          "label": "移動を全自動にして、障害物回避に集中させる",
-          "next": "4.0-runner",
-          "genreParams": { "tempo": 2 },
-          "hint": "runner 確定（tempo:7 超過）"
+          "label": "加速度をさらに上げる",
+          "next": "4.0-b-acceleration",
+          "genreParams": { "tempo": 1, "speed": 1 },
+          "hint": "runner/racing方向に進行中"
         },
         {
-          "label": "走りながら敵とも戦えるようにする",
-          "next": "4.0-bullet-runner",
-          "genreParams": { "enemy": 5, "range": 2 },
-          "hint": "bullet_runner 確定（tempo:5, enemy:5 超過 → bullet_runner 余剰が大きい）"
+          "label": "敵との交戦シーンを取り入れる",
+          "next": "4.0-b-combat",
+          "genreParams": { "tempo": 1, "enemy": 1 },
+          "hint": "bullet_runner方向に進行中"
         }
       ]
     },
@@ -93,29 +93,977 @@
       },
       "choices": [
         {
-          "label": "障害物をリズムに合わせて出現させる",
-          "next": "4.0-rhythm",
-          "genreParams": { "rhythm": 2, "tempo": 1 },
-          "hint": "rhythm 確定（tempo:4, rhythm:5 超過）"
+          "label": "障害物の出現をより精密にリズムに同期させる",
+          "next": "4.0-b-rhythm",
+          "genreParams": { "rhythm": 1, "tempo": 1 },
+          "hint": "rhythm/sports方向に進行中"
         },
         {
-          "label": "ジャンプの爽快感を最大限に引き出す",
-          "next": "4.0-platformer",
-          "genreParams": { "aerial": 2, "combo": 3 },
-          "hint": "platformer 確定（aerial:3, combo:3 超過）"
+          "label": "ジャンプのタイミングを音に合わせる",
+          "next": "4.0-b-rhythm-jump",
+          "genreParams": { "rhythm": 1, "aerial": 1 },
+          "hint": "platformer/rhythm方向に進行中"
         }
       ]
     },
 
     {
-      "key": "4.0-runner",
+      "key": "4.0-b-acceleration",
       "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "どんどん加速し続けます。",
+        "赤いオブジェクトを避けてください。",
+        "スピード感が強調されています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "移動を自動化して避けることに集中させる",
+          "next": "5.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner方向"
+        },
+        {
+          "label": "最高速度の限界を引き出す",
+          "next": "5.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing方向"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-b-combat",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵が現れ始めました。",
+        "スピード感を保ちながら対抗してください。",
+        "戦闘と移動が同時進行します。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "武器を装備して敵を撃つ",
+          "next": "5.0-b-bullet-runner",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "bullet_runner方向"
+        },
+        {
+          "label": "敵とのインタラクションを深める",
+          "next": "5.0-b-sports",
+          "genreParams": { "speed": 1, "rhythm": 1 },
+          "hint": "sports方向"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-b-rhythm",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてが音楽に同期し始めました。",
+        "ビート毎に障害物が配置されます。",
+        "正確なタイミングが重要です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "リズム判定をもっと厳密にする",
+          "next": "5.0-b-rhythm",
+          "genreParams": { "rhythm": 1 },
+          "hint": "rhythm方向"
+        },
+        {
+          "label": "速さと音を組み合わせる",
+          "next": "5.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports方向"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-b-rhythm-jump",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ジャンプが音に反応するようになりました。",
+        "空中での動きが重要になります。",
+        "音に合わせて飛び跳ねてください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "二段ジャンプで空中時間を伸ばす",
+          "next": "5.0-b-platformer",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer方向"
+        },
+        {
+          "label": "ジャンプのタイミング判定を厳密にする",
+          "next": "5.0-b-rhythm",
+          "genreParams": { "rhythm": 1, "combo": 1 },
+          "hint": "rhythm方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-runner",
+      "version": "5.0",
       "manualText": [
         "移動は自動になりました。",
         "Spaceキーでジャンプします。",
         "赤いオブジェクトを避けてください。",
         "青いオブジェクトは安全です。",
-        "できるだけ長く生き延びてください。"
+        "スピードが自動で加速します。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "ひたすら走り続けることを強調する",
+          "next": "6.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner確定方向"
+        },
+        {
+          "label": "敵を撃ちながら走る",
+          "next": "6.0-b-bullet-runner",
+          "genreParams": { "tempo": 1, "enemy": 1, "range": 1 },
+          "hint": "bullet_runner確定方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-racing",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "タイムアタック的な雰囲気が強まりました。",
+        "最速を目指すゲームになっています。",
+        "走破時間が重要です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "自動移動で速度を極める",
+          "next": "6.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing確定方向"
+        },
+        {
+          "label": "スポーツ的な競争要素を入れる",
+          "next": "6.0-b-sports",
+          "genreParams": { "speed": 1, "rhythm": 1 },
+          "hint": "sports方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-bullet-runner",
+      "version": "5.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "Zキーで敵を撃てます。",
+        "走りながら戦ってください。",
+        "スピードと戦闘の両立が必要です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を倒すことに重点を置く",
+          "next": "6.0-b-bullet-runner",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "bullet_runner確定方向"
+        },
+        {
+          "label": "走ることを最優先にする",
+          "next": "6.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-rhythm",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてのアクションが音に同期します。",
+        "ビート感が非常に強いです。",
+        "正確さが高スコアをもたらします。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "リズムゲームとして確定する",
+          "next": "6.0-b-rhythm",
+          "genreParams": { "rhythm": 1, "tempo": 1 },
+          "hint": "rhythm確定方向"
+        },
+        {
+          "label": "速度感とリズムを融合させる",
+          "next": "6.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports確定方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-platformer",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーで二段ジャンプできます。",
+        "空中での自由度が高まりました。",
+        "高さを活かしたコース設計になります。",
+        "ジャンプの快感が最優先です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "空中アクションをとことん深める",
+          "next": "6.0-b-platformer",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer確定方向"
+        },
+        {
+          "label": "着地のタイミングをリズム判定にする",
+          "next": "6.0-b-rhythm",
+          "genreParams": { "aerial": 1, "rhythm": 1 },
+          "hint": "rhythm方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-b-sports",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "速度と精密さの両立が必要です。",
+        "スポーツのようなテンポになりました。",
+        "タイミングと高速性が合わさります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "競技的な様式美を優先する",
+          "next": "6.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports確定方向"
+        },
+        {
+          "label": "音への同期をより厳密にする",
+          "next": "6.0-b-rhythm",
+          "genreParams": { "rhythm": 1 },
+          "hint": "rhythm方向"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-runner",
+      "version": "6.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトを避けてください。",
+        "スピード感が強まり続けています。",
+        "自動走行が定着しました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "加速を極限まで上げる",
+          "next": "7.0-b-runner-extreme",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner確定方向へ"
+        },
+        {
+          "label": "敵との交戦シーンを加える",
+          "next": "7.0-b-runner-combat",
+          "genreParams": { "enemy": 1 },
+          "hint": "bullet_runner方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-bullet-runner",
+      "version": "6.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "Zキーで弾を撃てます。",
+        "走りながら敵を倒してください。",
+        "二つのアクションの融合が始まります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "走ることに専念する",
+          "next": "7.0-b-runner-extreme",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner方向へ"
+        },
+        {
+          "label": "敵を撃つことに專念する",
+          "next": "7.0-b-bullet-runner-combat",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "bullet_runner確定方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-rhythm",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "リズムに合わせてアクションすると高スコアになります。",
+        "障害物の色がビートに合わせて変化します。",
+        "音との一体感が強まっています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "リズム判定の精度を上げる",
+          "next": "7.0-b-rhythm-strict",
+          "genreParams": { "rhythm": 1 },
+          "hint": "rhythm確定方向へ"
+        },
+        {
+          "label": "ジャンプの爽快感を優先する",
+          "next": "7.0-b-platformer-rhythm",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-platformer",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーで二段ジャンプできます。",
+        "赤いオブジェクトに触れると失敗です。",
+        "コンボをつなげると高スコアになります。",
+        "空中での自由度がさらに増えています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "空中時間を最大化する",
+          "next": "7.0-b-platformer-air",
+          "genreParams": { "aerial": 1 },
+          "hint": "platformer確定方向へ"
+        },
+        {
+          "label": "ジャンプをリズムに同期させる",
+          "next": "7.0-b-rhythm-jump",
+          "genreParams": { "rhythm": 1, "combo": 1 },
+          "hint": "rhythm方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-racing",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "最高速度を目指してください。",
+        "障害物を避けて加速し続けます。",
+        "速度競争の本質が見えてきました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "自動走行の速度を極める",
+          "next": "7.0-b-racing-auto",
+          "genreParams": { "speed": 1, "tempo": 1 },
+          "hint": "racing確定方向へ"
+        },
+        {
+          "label": "手動で最高速を記録する",
+          "next": "7.0-b-sports-manual",
+          "genreParams": { "speed": 1, "rhythm": 1 },
+          "hint": "sports方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-b-sports",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "速度とタイミングの両立が必要です。",
+        "記録を更新してください。",
+        "スポーツ的な競争が本格化しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "スコア競争に専念する",
+          "next": "7.0-b-sports-record",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports確定方向へ"
+        },
+        {
+          "label": "速度を最優先にする",
+          "next": "7.0-b-racing-pure",
+          "genreParams": { "speed": 1 },
+          "hint": "racing方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-runner-extreme",
+      "version": "7.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "加速が极限に達しています。",
+        "敵を避けることが唯一の課題です。",
+        "走る喜びが極大化しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "加速をさらに進める",
+          "next": "8.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner最終確定"
+        },
+        {
+          "label": "敵の出現を増やす",
+          "next": "8.0-b-bullet-runner",
+          "genreParams": { "tempo": 1, "enemy": 1 },
+          "hint": "bullet_runner最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-runner-combat",
+      "version": "7.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "敵が出現し始めました。",
+        "走りながら敵との交戦が始まります。",
+        "自動走行と手動操作が混在します。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "走ることに特化する",
+          "next": "8.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner最終確定"
+        },
+        {
+          "label": "敵を撃つメカニズムを追加する",
+          "next": "8.0-b-bullet-runner",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "bullet_runner最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-bullet-runner-combat",
+      "version": "7.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "Zキーで敵を撃ちます。",
+        "走りながら敵を倒すバランスが重要です。",
+        "敵との交戦が激化しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を撃つことに集中する",
+          "next": "8.0-b-bullet-runner",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "bullet_runner最終確定"
+        },
+        {
+          "label": "走ることを最優先にする",
+          "next": "8.0-b-runner",
+          "genreParams": { "tempo": 1 },
+          "hint": "runner最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-rhythm-strict",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "リズム判定が非常に厳密になりました。",
+        "ビート毎の入力が要求されます。",
+        "音への同期が完璧でなければなりません。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "リズムゲームとして確定する",
+          "next": "8.0-b-rhythm",
+          "genreParams": { "rhythm": 1 },
+          "hint": "rhythm最終確定"
+        },
+        {
+          "label": "速度感を加える",
+          "next": "8.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-platformer-rhythm",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーで二段ジャンプできます。",
+        "ジャンプのタイミングが音に同期します。",
+        "空中での着地がリズム判定になります。",
+        "飛翔とリズムが一体化しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "プラットフォームアクションを優先する",
+          "next": "8.0-b-platformer",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer最終確定"
+        },
+        {
+          "label": "リズムゲームに傾く",
+          "next": "8.0-b-rhythm",
+          "genreParams": { "rhythm": 1, "combo": 1 },
+          "hint": "rhythm最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-platformer-air",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーで二段ジャンプできます。",
+        "空中時間が最大化されています。",
+        "浮遊感が強調されています。",
+        "飛び跳ねる快感が極大化しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "空中アクションを完璧にする",
+          "next": "8.0-b-platformer",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer最終確定"
+        },
+        {
+          "label": "着地タイミングを音に合わせる",
+          "next": "8.0-b-rhythm",
+          "genreParams": { "aerial": 1, "rhythm": 1 },
+          "hint": "rhythm最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-rhythm-jump",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ジャンプが音に同期します。",
+        "音に合わせて飛び跳ねるゲームです。",
+        "リズムと飛翔の融合が深まります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "リズム重視で進む",
+          "next": "8.0-b-rhythm",
+          "genreParams": { "rhythm": 1 },
+          "hint": "rhythm最終確定"
+        },
+        {
+          "label": "ジャンプのアクロバティクスを優先する",
+          "next": "8.0-b-platformer",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "platformer最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-racing-auto",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "自動走行がさらに加速します。",
+        "障害物を避けながら最高速を目指します。",
+        "スピード感が極限に達します。",
+        "レース的な興奮が高まっています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "速度極限化に進む",
+          "next": "8.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing最終確定"
+        },
+        {
+          "label": "スポーツ的な競争性を加える",
+          "next": "8.0-b-sports",
+          "genreParams": { "speed": 1, "rhythm": 1 },
+          "hint": "sports最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-sports-manual",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "手動操作で速度を制御します。",
+        "タイミングと速度が競争になります。",
+        "スポーツ的な競技性が強まります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "記録競争に進む",
+          "next": "8.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports最終確定"
+        },
+        {
+          "label": "純粋な速度競争にする",
+          "next": "8.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-sports-record",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "記録更新が全てです。",
+        "速度とタイミングの両立が必須です。",
+        "スポーツの競争性が完成しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "競技性を極める",
+          "next": "8.0-b-sports",
+          "genreParams": { "rhythm": 1, "speed": 1 },
+          "hint": "sports最終確定"
+        },
+        {
+          "label": "速度優先に切り替える",
+          "next": "8.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-b-racing-pure",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "最高速度の追求が唯一の目的です。",
+        "他の要素は全て排除されています。",
+        "純粋な速度競争が完成しています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "速度を最大化する",
+          "next": "8.0-b-racing",
+          "genreParams": { "speed": 1 },
+          "hint": "racing最終確定"
+        },
+        {
+          "label": "タイミング要素を加える",
+          "next": "8.0-b-sports",
+          "genreParams": { "speed": 1, "rhythm": 1 },
+          "hint": "sports最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "8.0-b-runner",
+      "version": "8.0",
+      "manualText": [
+        "移動は自動になりました。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトを避けてください。",
+        "加速は無限に続きます。",
+        "これはエンドレスランナーです。"
       ],
       "controls": {
         "jump": "Space",
@@ -130,14 +1078,14 @@
     },
 
     {
-      "key": "4.0-bullet-runner",
-      "version": "4.0",
+      "key": "8.0-b-bullet-runner",
+      "version": "8.0",
       "manualText": [
         "移動は自動になりました。",
         "Spaceキーでジャンプします。",
         "Zキーで弾を撃てます。",
         "走りながら敵を倒してください。",
-        "止まることはできません。"
+        "これは弾幕ランナーです。"
       ],
       "controls": {
         "jump": "Space",
@@ -153,14 +1101,14 @@
     },
 
     {
-      "key": "4.0-rhythm",
-      "version": "4.0",
+      "key": "8.0-b-rhythm",
+      "version": "8.0",
       "manualText": [
         "← → キーで左右に移動できます。",
         "Spaceキーでジャンプします。",
-        "リズムに合わせてアクションすると高スコアになります。",
-        "障害物の色がビートに合わせて変化します。",
-        "ジャストタイミングで入力してください。"
+        "リズムに完璧に同期します。",
+        "音のビート毎にアクション必須。",
+        "これはリズムゲームです。"
       ],
       "controls": {
         "jump": "Space",
@@ -175,14 +1123,58 @@
     },
 
     {
-      "key": "4.0-platformer",
-      "version": "4.0",
+      "key": "8.0-b-platformer",
+      "version": "8.0",
       "manualText": [
         "← → キーで左右に移動できます。",
         "Spaceキーで二段ジャンプできます。",
         "赤いオブジェクトに触れると失敗です。",
-        "コンボをつなげると高スコアになります。",
-        "空中での動きが格段に向上しました。"
+        "コンボを繋ぎ続けることが全て。",
+        "これはプラットフォームアクションです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-b-racing",
+      "version": "8.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "最高速度を目指してください。",
+        "障害物を避けて加速し続けます。",
+        "これはレーシングゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-b-sports",
+      "version": "8.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "速度とタイミングの完璧な融合。",
+        "記録を更新し続けてください。",
+        "これはスポーツゲームです。"
       ],
       "controls": {
         "jump": "Space",

@@ -47,6 +47,7 @@ function pick(choiceId: string) {
           v-for="(c, idx) in choices"
           :key="c.id"
           class="choice-btn"
+          :data-choice-id="c.id"
           :class="{
             selected: selected === c.id,
             faded:    selected !== null && selected !== c.id,

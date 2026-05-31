@@ -37,7 +37,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'runner',
     label: 'エンドレスランナー',
-    thresholds: { tempo: 5 },
+    thresholds: { tempo: 7 },
     enableFeatures: ['auto_run', 'double_jump', 'long_air'],
     disableFeatures: ['grid_stop', 'puzzle_solve'],
     scoreFormula: 'distance * 1.2 + survivedSec * 8 + combo * 50',
@@ -49,7 +49,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'stg',
     label: 'シューティングゲーム',
-    thresholds: { range: 4, enemy: 4 },
+    thresholds: { range: 5, enemy: 5 },
     enableFeatures: ['shoot', 'three_way', 'enemy_hp'],
     disableFeatures: ['grid_stop', 'puzzle_solve'],
     scoreFormula: 'kills * 120 + distance * 0.5 + combo * 80',
@@ -62,7 +62,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'rpg',
     label: 'ロールプレイングゲーム',
-    thresholds: { growth: 4 },
+    thresholds: { growth: 6 },
     enableFeatures: ['hp', 'exp', 'item_pickup', 'slow_precise'],
     disableFeatures: ['auto_run', 'beat_hazard'],
     scoreFormula: 'exp * 2 + kills * 60 + distance * 0.3',
@@ -75,7 +75,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'puzzle',
     label: 'パズルゲーム',
-    thresholds: { combo: 4 },
+    thresholds: { combo: 5 },
     enableFeatures: ['grid_stop', 'puzzle_solve'],
     disableFeatures: ['auto_run', 'shoot', 'beat_hazard'],
     scoreFormula: 'combo * 200 + survivedSec * 3',
@@ -87,7 +87,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'rhythm',
     label: 'リズムゲーム',
-    thresholds: { tempo: 4, rhythm: 4 },
+    thresholds: { tempo: 5, rhythm: 5 },
     enableFeatures: ['beat_hazard', 'just_input', 'beat_dash'],
     disableFeatures: ['grid_stop'],
     scoreFormula: 'beatHits * 150 + combo * 100 + distance * 0.4',
@@ -104,7 +104,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'aerial_stg',
     label: '縦スクロールシューティング',
-    thresholds: { vertical: 3, range: 3, enemy: 3 },
+    thresholds: { vertical: 4, range: 4, enemy: 4 },
     enableFeatures: ['shoot', 'vertical_scroll', 'enemy_hp', 'spread_shot'],
     disableFeatures: ['grid_stop', 'puzzle_solve', 'auto_run'],
     scoreFormula: 'kills * 130 + combo * 90 + survivedSec * 3',
@@ -119,7 +119,7 @@ export const GENRES: GenreDef[] = [
     id: 'bullet_hell',
     label: '弾幕シューティング',
     // range ではなく vertical + enemy で区別する（STGと同じ range+enemy だと衝突するため）
-    thresholds: { vertical: 3, enemy: 5 },
+    thresholds: { vertical: 4, enemy: 6 },
     enableFeatures: ['shoot', 'spread_shot', 'enemy_hp', 'vertical_scroll'],
     disableFeatures: ['grid_stop', 'auto_run', 'slow_precise'],
     scoreFormula: 'kills * 80 + combo * 150 + survivedSec * 10 + accuracy * 500',
@@ -133,7 +133,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'survival',
     label: 'サバイバルゲーム',
-    thresholds: { survive: 4, growth: 3 },
+    thresholds: { survive: 5, growth: 4 },
     enableFeatures: ['hp', 'item_pickup', 'shield'],
     disableFeatures: ['auto_run', 'beat_hazard', 'grid_stop'],
     scoreFormula: 'survivedSec * 15 + itemsCollected * 80 + distance * 0.2',
@@ -146,7 +146,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'stealth_action',
     label: 'ステルスアクション',
-    thresholds: { stealth: 4 },
+    thresholds: { stealth: 5 },
     enableFeatures: ['stealth_mode', 'slow_precise'],
     disableFeatures: ['shoot', 'auto_run', 'beat_hazard', 'boss'],
     scoreFormula: 'stealthBonus * 0.5 + survivedSec * 10 + distance * 0.4',
@@ -160,7 +160,7 @@ export const GENRES: GenreDef[] = [
     id: 'racing',
     label: 'レーシングゲーム',
     // tempo だけでは runner と競合するので speed も必須
-    thresholds: { speed: 4, tempo: 3 },
+    thresholds: { speed: 5, tempo: 4 },
     enableFeatures: ['auto_run', 'dash', 'time_bonus'],
     disableFeatures: ['grid_stop', 'puzzle_solve', 'beat_hazard', 'slow_precise'],
     scoreFormula: 'distance * 2.0 + survivedSec * 3 + combo * 30',
@@ -172,7 +172,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'platformer',
     label: 'プラットフォームアクション',
-    thresholds: { aerial: 3, combo: 3 },
+    thresholds: { aerial: 4, combo: 4 },
     enableFeatures: ['double_jump', 'long_air', 'wall_jump'],
     disableFeatures: ['auto_run', 'grid_stop', 'beat_hazard'],
     scoreFormula: 'combo * 150 + distance * 0.8 + survivedSec * 5',
@@ -186,7 +186,7 @@ export const GENRES: GenreDef[] = [
     id: 'dungeon',
     label: 'ダンジョン探索',
     // rpg と区別するため craft も必要にする
-    thresholds: { growth: 5, craft: 2 },
+    thresholds: { growth: 6, craft: 3 },
     enableFeatures: ['hp', 'exp', 'item_pickup', 'slow_precise'],
     disableFeatures: ['auto_run', 'beat_hazard', 'vertical_scroll'],
     scoreFormula: 'exp * 3 + kills * 70 + itemsCollected * 60 + distance * 0.2',
@@ -199,7 +199,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'tower_def',
     label: 'タワーディフェンス',
-    thresholds: { craft: 5, enemy: 3 },
+    thresholds: { craft: 6, enemy: 4 },
     enableFeatures: ['tower', 'enemy_hp', 'item_pickup'],
     disableFeatures: ['auto_run', 'beat_hazard', 'vertical_scroll', 'stealth_mode'],
     scoreFormula: 'kills * 90 + combo * 110 + survivedSec * 8',
@@ -212,7 +212,7 @@ export const GENRES: GenreDef[] = [
     id: 'sports',
     label: 'スポーツゲーム',
     // speed と rhythm の組み合わせ（racing と区別: racing は tempo も必要）
-    thresholds: { speed: 3, rhythm: 3 },
+    thresholds: { speed: 4, rhythm: 4 },
     enableFeatures: ['dash', 'time_bonus', 'just_input'],
     disableFeatures: ['grid_stop', 'puzzle_solve', 'enemy_hp', 'stealth_mode'],
     scoreFormula: 'combo * 180 + distance * 1.0 + beatHits * 80',
@@ -224,7 +224,7 @@ export const GENRES: GenreDef[] = [
   {
     id: 'idle',
     label: '放置ゲーム',
-    thresholds: { craft: 4 },
+    thresholds: { craft: 6 },
     enableFeatures: ['item_pickup', 'exp', 'tower'],
     disableFeatures: ['auto_run', 'shoot', 'beat_hazard', 'boss', 'stealth_mode'],
     scoreFormula: 'itemsCollected * 200 + exp * 4 + survivedSec * 5',
@@ -236,8 +236,8 @@ export const GENRES: GenreDef[] = [
   {
     id: 'bullet_runner',
     label: '弾幕ランナー',
-    // runner の変種。tempo=5 + enemy=4 の両立が必要
-    thresholds: { tempo: 5, enemy: 4 },
+    // runner の変種。tempo=7 + enemy=5 の両立が必要
+    thresholds: { tempo: 6, enemy: 5 },
     enableFeatures: ['auto_run', 'shoot', 'enemy_hp'],
     disableFeatures: ['grid_stop', 'puzzle_solve', 'slow_precise', 'stealth_mode'],
     scoreFormula: 'kills * 100 + distance * 1.5 + combo * 60',
@@ -250,7 +250,7 @@ export const GENRES: GenreDef[] = [
     id: 'arena',
     label: 'アリーナバトル',
     // hack_slash と区別: arena は enemy が高い（5）、hack_slash は combo が高い（5）
-    thresholds: { enemy: 5, combo: 4 },
+    thresholds: { enemy: 6, combo: 5 },
     enableFeatures: ['shoot', 'enemy_hp', 'boss', 'dash'],
     disableFeatures: ['auto_run', 'grid_stop', 'puzzle_solve', 'stealth_mode'],
     scoreFormula: 'kills * 110 + bossKills * 500 + combo * 130',
@@ -263,7 +263,7 @@ export const GENRES: GenreDef[] = [
     id: 'aquatic',
     label: '水中アドベンチャー',
     // vertical + aerial + survive の複合（スクロール方向も縦）
-    thresholds: { vertical: 2, aerial: 2, survive: 3 },
+    thresholds: { vertical: 3, aerial: 3, survive: 4 },
     enableFeatures: ['hp', 'item_pickup', 'slow_precise'],
     disableFeatures: ['auto_run', 'shoot', 'boss', 'beat_hazard'],
     scoreFormula: 'distance * 0.8 + itemsCollected * 100 + survivedSec * 12',
@@ -278,7 +278,7 @@ export const GENRES: GenreDef[] = [
     id: 'horror',
     label: 'サバイバルホラー',
     // survive と stealth の高い組み合わせ
-    thresholds: { survive: 5, stealth: 3 },
+    thresholds: { survive: 6, stealth: 4 },
     enableFeatures: ['hp', 'stealth_mode', 'slow_precise'],
     disableFeatures: ['auto_run', 'shoot', 'beat_hazard', 'boss'],
     scoreFormula: 'survivedSec * 20 + stealthBonus * 0.8 + deaths * -200',
@@ -292,7 +292,7 @@ export const GENRES: GenreDef[] = [
     id: 'hack_slash',
     label: 'ハックアンドスラッシュ',
     // arena と区別: combo が高い（5）、enemy は中程度（4）
-    thresholds: { enemy: 4, combo: 5 },
+    thresholds: { enemy: 5, combo: 6 },
     enableFeatures: ['shoot', 'enemy_hp', 'exp', 'dash'],
     disableFeatures: ['grid_stop', 'puzzle_solve', 'stealth_mode', 'slow_precise'],
     scoreFormula: 'kills * 90 + maxCombo * 200 + exp * 2 + bossKills * 400',

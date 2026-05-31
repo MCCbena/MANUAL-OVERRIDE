@@ -24,7 +24,7 @@ let scroller: SideScroller | null = null
 const snapshot = ref<GameSnapshot>({
   distance: 0, playScore: 0, combo: 0, kills: 0, exp: 0,
   beatHits: 0, survivedSec: 0, hp: 3, maxHp: 3, dead: false, shouldUpdate: null,
-  statJumps: 0, statMoveLeft: 0, statMoveRight: 0,
+  statJumps: 0, statMoveLeft: 0, statMoveRight: 0, firstJumpDone: false,
 })
 
 // ─── Canvas サイズをウィンドウに合わせる ───────────────────────────
