@@ -1,15 +1,16 @@
 # 取扱説明書を読むゲーム — Framework ドキュメント
 
-**最終更新:** 2026-05-30
+**最終更新:** 2026-05-31  
+**最新実装:** 永遠システム・100+ 選択肢・距離ベース難易度曲線
 
 横スクロールを起点にジャンルが変容するゲームの技術フレームワーク完全ドキュメント。  
 このドキュメントセットは、プロジェクト構造・データフロー・拡張ガイドを網羅しています。
 
 ---
 
-## 📚 ドキュメント体系
+## ドキュメント体系
 
-### ① 全体理解用（最初に読むべき）
+### 全体理解用（最初に読むべき）
 
 | ファイル | 対象読者 | 内容 |
 |---|---|---|
@@ -17,7 +18,15 @@
 | [architecture.md](architecture.md) | 開発者 | レイヤー構成・依存関係・ファイルマップ |
 | [framework.md](framework.md) | 開発者 | エンジン仕様・ライフサイクル・実装ステータス |
 
-### ② 要素別リファレンス（作成・拡張時に参照）
+### コード詳細解説
+
+| ファイル | 対象 | 内容 |
+|---|---|---|
+| [core-systems.md](core-systems.md) | コア実装 | 5つのコアシステムの詳細解説（sideScroller, genreResolver, useGameState, ruleEngine, scoreCalc） |
+| [architecture.md](architecture.md) | アーキテクチャ | レイヤー構成・依存関係・ファイルマップ |
+| [framework.md](framework.md) | エンジン仕様 | エンジン仕様・ライフサイクル・実装ステータス |
+
+### 要素別リファレンス（作成・拡張時に参照）
 
 | ファイル | 対象 | 内容 |
 |---|---|---|
@@ -30,7 +39,7 @@
 
 ---
 
-## 🏗️ フレームワーク全体図
+## フレームワーク全体図
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -77,9 +86,9 @@
 
 ---
 
-## ⚡ クイックスタート
+## クイックスタート
 
-### 🎮 新ジャンルを追加する
+### 新ジャンルを追加する
 
 **必要なステップ:** 5 ファイル修正
 
@@ -113,11 +122,11 @@ registerGenre(new MyNewGenrePlugin())
 }
 ```
 
-📖 詳細: [genre-plugin.md](genre-plugin.md) / [adding-content.md](adding-content.md)
+ 詳細: [genre-plugin.md](genre-plugin.md) / [adding-content.md](adding-content.md)
 
 ---
 
-### 🔧 新フィーチャーを追加する
+### 新フィーチャーを追加する
 
 **必要なステップ:** 3 ファイル修正
 
@@ -140,11 +149,11 @@ export class MyFeature implements FeatureSystem {
 registerFeature(new MyFeature())
 ```
 
-📖 詳細: [feature-system.md](feature-system.md) / [adding-content.md](adding-content.md)
+ 詳細: [feature-system.md](feature-system.md) / [adding-content.md](adding-content.md)
 
 ---
 
-### 📖 説明書ルートを追加する
+### 説明書ルートを追加する
 
 **必要なステップ:** 1 ファイル追加
 
@@ -173,13 +182,13 @@ registerFeature(new MyFeature())
 
 **コード修正は一切不要です。** JSON を追加するだけで自動認識されます。
 
-📖 詳細: [manual-json.md](manual-json.md)
+ 詳細: [manual-json.md](manual-json.md)
 
 ---
 
-## 🎯 設計原則（5つの基本方針）
+## 設計原則（5つの基本方針）
 
-### 1️⃣ JSON ドリブン設計
+### JSON ドリブン設計
 
 すべてのゲームルール・コンテンツは JSON で定義。TypeScript コード には「仕組み」だけを書く。
 
@@ -195,23 +204,23 @@ GenrePlugin          gameBalance.ts
 - デザイナーが JSON 直編集可能
 - 複数バリエーション の管理が容易
 
-### 2️⃣ プラグイン分離
+### プラグイン分離
 
 新しいジャンル・フィーチャーを追加してもコア（`sideScroller.ts`）を修正しない。
 
 ```typescript
-// ❌ 悪い例（sideScroller に分岐を追加）
+//  悪い例（sideScroller に分岐を追加）
 if (genre === 'my_new_genre') {
   // ...特別な処理
 }
 
-// ✅ 良い例（新しい GenrePlugin クラスを追加）
+//  良い例（新しい GenrePlugin クラスを追加）
 registerGenre(new MyNewGenrePlugin())
 ```
 
 `GameRegistry` がプラグインを動的に検出・呼び出す。
 
-### 3️⃣ オフライン完結
+### オフライン完結
 
 ビルド後の `dist/` フォルダだけで動作。API 呼び出し・サーバー連携なし。
 
@@ -223,7 +232,7 @@ dist/index.html + dist/assets/
 ブラウザで開く → 完全に動作
 ```
 
-### 4️⃣ sideScroller は物理エンジン
+### sideScroller は物理エンジン
 
 `sideScroller.ts` は以下に限定：
 - プレイヤーの位置・速度
@@ -233,7 +242,7 @@ dist/index.html + dist/assets/
 
 ゲームロジック（スコア・演出・ルール）は **FeatureSystem / GenrePlugin に委譲**。
 
-### 5️⃣ 座標系の一貫性
+### 座標系の一貫性
 
 ```
 MutableWorld.cameraX を使い、座標変換を統一：
@@ -246,32 +255,38 @@ MutableWorld.cameraX を使い、座標変換を統一：
 
 ---
 
-## 📋 実装ステータス（2026-05-30）
+## 📋 実装ステータス（2026-05-31）
 
-### ✅ 実装済み
+### コア実装
 
-- ✅ Canvas 基本エンジン（物理・衝突・描画）
-- ✅ GenrePlugin × 9 種（Base, Runner, STG, RPG, Rhythm, Puzzle, AerialSTG, Survival, BulletRunner, Platformer）
-- ✅ FeatureSystem × 7 種（Movement, Shoot, Rhythm, Rpg, ExtraMovement, Puzzle, Special）
-- ✅ すべてのイベントフック（onPlayerDeath, onComboChange, onItemPickup 等）
-- ✅ framework/ 完全実装（ManualLoader / Builder / Validator）
-- ✅ GenrePluginBase & setTimescale 基盤
+-  Canvas 物理エンジン（衝突・描画・パーティクル・シェイク）
+-  GenrePlugin × 12+ 種（STG, Aerial STG, Bullet Hell, Arena, Hack & Slash, Aquatic, Survival, RPG, Dungeon, Tower Defense, Idle, Horror 等）
+-  FeatureSystem × 8+ 種（Movement, Shoot, Enemy, Rhythm, RPG, Item, Extra Movement, Puzzle 等）
+-  すべてのイベントフック完装備
+-  ManualLoader / Builder / Validator / genreResolver 完全実装
 
-### 🚧 設計改善予定（スケーラビリティ向上）
+### 永遠システム実装（2026-05-31）
 
-| 改善項目 | 優先度 | 説明 |
-|---|---|---|
-| buildWorld() キャッシング | 中 | フレーム内多重呼び出しを1インスタンスに統一（GC 最適化） |
-| 座標系ヘルパーメソッド | 中 | MutableWorld に変換メソッド追加で FeatureSystem 実装の簡潔化 |
-| sideScroller モジュール分割 | 低 | PhysicsEngine / CollisionSystem / Renderer への責務分割 |
+-  **無限選択肢** - UPDATE_DISTANCES 動的生成 + 1500px 無限トリガー
+-  **距離ベース難易度曲線** - 1.0倍 → 1.5倍 段階加速
+-  **advanced-branch.json** - ver 9.0～15.0 の 100+ 選択肢
+-  **複雑ナラティブ** - 複雑さ → 秩序 → 次元超越 → 創造の壮大な物語
+
+### パフォーマンス & 品質
+
+-  JSON ドリブン（マニュアル・ルール・ジャンル全て JSON化）
+-  オフライン完全動作（dist 内自己完結）
+-  ビルドサイズ最適化（256KB JS bundle）
+-  テスト充実（Playwright 統合テスト）
 
 ---
 
-## 🔍 どこを読むべき？
+## どこを読むべき？
 
 | 状況 | 対象ドキュメント |
 |---|---|
 | **何もわからない** | このファイル → [architecture.md](architecture.md) |
+| **コアシステムの実装を理解したい** | [core-systems.md](core-systems.md) |
 | **新ジャンルを作りたい** | [genre-plugin.md](genre-plugin.md) → [adding-content.md](adding-content.md) |
 | **新フィーチャーを作りたい** | [feature-system.md](feature-system.md) → [adding-content.md](adding-content.md) |
 | **説明書を追加・修正したい** | [manual-json.md](manual-json.md) |

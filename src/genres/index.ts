@@ -20,6 +20,8 @@ import { AerialStgPlugin }            from './AerialStgPlugin'
 import { SurvivalPlugin }             from './SurvivalPlugin'
 import { BulletRunnerPlugin }         from './BulletRunnerPlugin'
 import { PlatformerPlugin }           from './PlatformerPlugin'
+import { pluginManager } from '../plugins/PluginManager'
+import { JSONGenrePlugin } from '../plugins/JSONGenrePlugin'
 
 registerGenre(new BasePlugin())
 registerGenre(new RunnerPlugin())
@@ -31,3 +33,11 @@ registerGenre(new AerialStgPlugin())
 registerGenre(new SurvivalPlugin())
 registerGenre(new BulletRunnerPlugin())
 registerGenre(new PlatformerPlugin())
+
+// Load user-installed genre plugins
+const installedPlugins = pluginManager.loadAll()
+for (const plugin of installedPlugins) {
+  if (plugin.type === 'genre') {
+    registerGenre(new JSONGenrePlugin(plugin) as any)
+  }
+}

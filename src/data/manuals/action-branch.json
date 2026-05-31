@@ -59,18 +59,921 @@
       },
       "choices": [
         {
-          "label": "キャラクターに遠距離攻撃を持たせる",
-          "next": "4.0-stg",
+          "label": "敵の種類を増やしていく",
+          "next": "4.0-a-arena",
           "genreParams": { "enemy": 1, "range": 1 },
-          "hint": "STG 確定（range:4, enemy:4 超過）"
+          "hint": "arena方向に進行中"
         },
         {
-          "label": "ステージを空高く移動させる",
-          "next": "4.0-aerial",
-          "genreParams": { "vertical": 3, "range": 1, "enemy": 1 },
-          "hint": "aerial_stg 確定（vertical:3, range:4, enemy:4 超過 → aerial_stg 余剰が大きい）"
+          "label": "ステージを上下に移動できるようにする",
+          "next": "4.0-a-vertical",
+          "genreParams": { "vertical": 1, "range": 1, "enemy": 1 },
+          "hint": "aerial_stg方向に進行中"
         }
       ]
+    },
+
+    {
+      "key": "4.0-a-arena",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "赤いオブジェクトが増え始めました。",
+        "様々な動きをする敵が登場します。",
+        "回避と対抗が両立し始めています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "遠距離から敵を撃つ仕掛けを入れる",
+          "next": "5.0-a-shooting",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "STG/arena方向"
+        },
+        {
+          "label": "敵のボスキャラが出現するようにする",
+          "next": "5.0-a-boss",
+          "genreParams": { "enemy": 2 },
+          "hint": "arena/hack_slash方向"
+        }
+      ]
+    },
+
+    {
+      "key": "4.0-a-vertical",
+      "version": "4.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ステージの上下が流動的になりました。",
+        "敵も多次元的に配置されます。",
+        "立体的な判断が必要になります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を撃つメカニズムを追加する",
+          "next": "5.0-a-vertical-shot",
+          "genreParams": { "vertical": 1, "range": 1, "enemy": 1 },
+          "hint": "aerial_stg方向"
+        },
+        {
+          "label": "落下速度を調整してより浮遊感を出す",
+          "next": "5.0-a-aerial-feel",
+          "genreParams": { "vertical": 1, "aerial": 1 },
+          "hint": "aquatic/platformer方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-shooting",
+      "version": "5.0",
+      "manualText": [
+        "Zキーで遠距離攻撃ができるようになりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵との距離を考えて戦ってください。",
+        "回避と射撃のバランスが大切です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "攻撃範囲をもっと広げる",
+          "next": "6.0-a-stg",
+          "genreParams": { "range": 1 },
+          "hint": "STG確定方向"
+        },
+        {
+          "label": "ボス敵を倒すことに注力させる",
+          "next": "6.0-a-arena",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena確定方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-boss",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ボスキャラが出現し始めました。",
+        "多くの敵の群れが現れます。",
+        "戦略的に対抗する必要があります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "攻撃スキルを増やす",
+          "next": "6.0-a-arena",
+          "genreParams": { "enemy": 1, "range": 1 },
+          "hint": "arena確定方向"
+        },
+        {
+          "label": "撃ち続けるアクションを強調する",
+          "next": "6.0-a-stg",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "STG確定方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-vertical-shot",
+      "version": "5.0",
+      "manualText": [
+        "Zキーで上方向に攻撃できます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "上空の敵を撃ってください。",
+        "立体的な戦闘が始まります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を次々と撃つ快感を優先する",
+          "next": "6.0-a-aerial",
+          "genreParams": { "vertical": 1, "range": 1, "enemy": 1 },
+          "hint": "aerial_stg確定方向"
+        },
+        {
+          "label": "敵の攻撃を避けることを強調する",
+          "next": "6.0-a-bullet-hell",
+          "genreParams": { "vertical": 1, "enemy": 1 },
+          "hint": "bullet_hell方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-aerial-feel",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "浮遊感が強調されました。",
+        "敵をかわすことが中心になります。",
+        "水中のような漂う感覚が出ています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を撃つメカニズムを追加する",
+          "next": "6.0-a-bullet-hell",
+          "genreParams": { "vertical": 1, "range": 1, "enemy": 1 },
+          "hint": "bullet_hell方向"
+        },
+        {
+          "label": "このジャンルの曲がり角を活かす",
+          "next": "6.0-a-aquatic",
+          "genreParams": { "vertical": 1, "aerial": 1 },
+          "hint": "aquatic方向"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-stg",
+      "version": "6.0",
+      "manualText": [
+        "Zキーで敵を撃てます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を倒すことが主軸になりました。",
+        "射撃の精度が問われ始めています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "複数方向への射撃を追加する",
+          "next": "7.0-a-stg-multi",
+          "genreParams": { "range": 1 },
+          "hint": "STG/aerial_stg方向に深化"
+        },
+        {
+          "label": "コンボを繋ぐことで敵全滅を目指す",
+          "next": "7.0-a-arena-combo",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena/hack_slash方向に深化"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-arena",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "多くの敵が一度に現れます。",
+        "敵を全て倒してください。",
+        "ボスキャラとの対決が近づいています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵の数をさらに増やす",
+          "next": "7.0-a-arena-rush",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena確定方向へ"
+        },
+        {
+          "label": "敵の攻撃パターンを複雑化させる",
+          "next": "7.0-a-hack-slash-pattern",
+          "genreParams": { "combo": 1 },
+          "hint": "hack_slash方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-aerial",
+      "version": "6.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで上方向に弾を撃てます。",
+        "上から降ってくる敵を撃ってください。",
+        "空間認識がより重要になります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵の波状攻撃を強くする",
+          "next": "7.0-a-aerial-waves",
+          "genreParams": { "enemy": 1, "vertical": 1 },
+          "hint": "aerial_stg確定方向へ"
+        },
+        {
+          "label": "敵の弾を避けることを強調する",
+          "next": "7.0-a-bullet-hell-dodge",
+          "genreParams": { "vertical": 1 },
+          "hint": "bullet_hell方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-bullet-hell",
+      "version": "6.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで弾を撃てます。",
+        "無数の敵の弾が降り注ぎます。",
+        "回避のテクニックが要求されます。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を倒しながら生き残る",
+          "next": "7.0-a-bullet-hell-combat",
+          "genreParams": { "enemy": 1, "vertical": 1 },
+          "hint": "aerial_stg方向へ"
+        },
+        {
+          "label": "弾の隙間を縫う集中力を深める",
+          "next": "7.0-a-bullet-hell-focus",
+          "genreParams": { "vertical": 1 },
+          "hint": "bullet_hell確定方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-aquatic",
+      "version": "6.0",
+      "manualText": [
+        "ステージが水中になりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーで上下移動できます。",
+        "敵を避けて深く潜ってください。",
+        "浮力の感覚が大切になっています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "深海のアイテムを積極的に集める",
+          "next": "7.0-a-aquatic-gather",
+          "genreParams": { "vertical": 1, "survival": 1 },
+          "hint": "aquatic確定方向へ"
+        },
+        {
+          "label": "海底の危険を回避することに専念する",
+          "next": "7.0-a-aquatic-survive",
+          "genreParams": { "vertical": 1, "survival": 1 },
+          "hint": "survival方向へ"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-stg-multi",
+      "version": "7.0",
+      "manualText": [
+        "Zキーで複数方向に弾を撃てるようになりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵をより効率的に倒せるようになります。",
+        "3方向同時射撃の爽快感が広がります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を撃つことに特化する",
+          "next": "8.0-a-stg",
+          "genreParams": { "range": 1 },
+          "hint": "STG最終確定"
+        },
+        {
+          "label": "敵を撃ちながらステージを進む",
+          "next": "8.0-a-aerial-stg",
+          "genreParams": { "range": 1, "vertical": 1 },
+          "hint": "aerial_stg最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-arena-combo",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵の撃破でコンボが繋がります。",
+        "コンボを途切れさせないことが重要です。",
+        "敵のタイミングを読むゲームになりました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "コンボ数を最大化させる",
+          "next": "8.0-a-hack-slash",
+          "genreParams": { "combo": 1, "enemy": 1 },
+          "hint": "hack_slash最終確定"
+        },
+        {
+          "label": "全敵を倒すことに集中する",
+          "next": "8.0-a-arena",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-arena-rush",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵が次々と押し寄せてきます。",
+        "敵の数が指数関数的に増えました。",
+        "生存すること自体が困難になります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "すべての敵を倒し続ける",
+          "next": "8.0-a-arena",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena最終確定"
+        },
+        {
+          "label": "敵との複雑な相互作用を優先する",
+          "next": "8.0-a-hack-slash",
+          "genreParams": { "enemy": 1, "combo": 1 },
+          "hint": "hack_slash最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-hack-slash-pattern",
+      "version": "7.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵の攻撃パターンが複雑化しました。",
+        "敵を倒す順序が重要になります。",
+        "タイミングとコンボの同期が必要です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "コンボを繋ぎ続ける快感を優先する",
+          "next": "8.0-a-hack-slash",
+          "genreParams": { "combo": 1 },
+          "hint": "hack_slash最終確定"
+        },
+        {
+          "label": "すべての敵を同時に撃退する",
+          "next": "8.0-a-arena",
+          "genreParams": { "enemy": 1 },
+          "hint": "arena最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-aerial-waves",
+      "version": "7.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで上方向に弾を撃てます。",
+        "敵が波状に襲い掛かってきます。",
+        "敵の流れに乗るゲームになっています。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵の波をすべて撃ち落とす",
+          "next": "8.0-a-aerial-stg",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "aerial_stg最終確定"
+        },
+        {
+          "label": "敵の隙間を見つけて進む",
+          "next": "8.0-a-bullet-hell",
+          "genreParams": { "vertical": 1, "enemy": 1 },
+          "hint": "bullet_hell最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-bullet-hell-dodge",
+      "version": "7.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "敵の弾が無数に降り注ぎます。",
+        "射撃より回避が優先されます。",
+        "弾の隙間を見つけることが全てです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "避けながら敵を倒す",
+          "next": "8.0-a-aerial-stg",
+          "genreParams": { "vertical": 1, "enemy": 1 },
+          "hint": "aerial_stg最終確定"
+        },
+        {
+          "label": "ひたすら避けることに集中する",
+          "next": "8.0-a-bullet-hell",
+          "genreParams": { "vertical": 1 },
+          "hint": "bullet_hell最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-bullet-hell-combat",
+      "version": "7.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで敵を撃ちながら回避します。",
+        "撃つことと避けることが同時に必要です。",
+        "二つの操作を同期させるゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を撃つことをより優先する",
+          "next": "8.0-a-aerial-stg",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "aerial_stg最終確定"
+        },
+        {
+          "label": "避けることをより優先する",
+          "next": "8.0-a-bullet-hell",
+          "genreParams": { "vertical": 1 },
+          "hint": "bullet_hell最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-bullet-hell-focus",
+      "version": "7.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "敵の弾が画面を埋め尽くします。",
+        "敵を撃つよりも避けることが最優先です。",
+        "フォーカスを絞った集中が必要になります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "敵を倒す快感も加える",
+          "next": "8.0-a-aerial-stg",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "aerial_stg最終確定"
+        },
+        {
+          "label": "弾幕の中で完全に無敵になる",
+          "next": "8.0-a-bullet-hell",
+          "genreParams": { "vertical": 1 },
+          "hint": "bullet_hell最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-aquatic-gather",
+      "version": "7.0",
+      "manualText": [
+        "ステージが水中になりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーで上下移動できます。",
+        "深海のアイテムが輝いて見えます。",
+        "アイテムを集めることが目的になりました。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "アイテムを優先して生き残る",
+          "next": "8.0-a-aquatic",
+          "genreParams": { "vertical": 1, "survival": 1 },
+          "hint": "aquatic最終確定"
+        },
+        {
+          "label": "危険を冒してでもアイテムを集める",
+          "next": "8.0-a-survival",
+          "genreParams": { "survival": 1 },
+          "hint": "survival最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "7.0-a-aquatic-survive",
+      "version": "7.0",
+      "manualText": [
+        "ステージが水中になりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーで上下移動できます。",
+        "敵を避けることが最優先です。",
+        "深海からの脱出を目指してください。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "生き残ることに全力を注ぐ",
+          "next": "8.0-a-survival",
+          "genreParams": { "survival": 1 },
+          "hint": "survival最終確定"
+        },
+        {
+          "label": "水中の謎を探索する",
+          "next": "8.0-a-aquatic",
+          "genreParams": { "vertical": 1, "survival": 1 },
+          "hint": "aquatic最終確定"
+        }
+      ]
+    },
+
+    {
+      "key": "8.0-a-stg",
+      "version": "8.0",
+      "manualText": [
+        "Zキーで敵を撃てます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を倒すことが唯一の目的です。",
+        "これは完全なシューティングゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-aerial-stg",
+      "version": "8.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで上方向に弾を撃てます。",
+        "上から降ってくる敵を撃ってください。",
+        "これは縦スクロールシューティングです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-bullet-hell",
+      "version": "8.0",
+      "manualText": [
+        "ステージが縦方向に流れています。",
+        "← → キーで左右に移動できます。",
+        "Zキーで弾を撃てます。",
+        "無数の敵の弾を避けてください。",
+        "これは弾幕シューティングです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight",
+        "shoot": "z"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-arena",
+      "version": "8.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "多くの敵が一度に現れます。",
+        "敵を全て倒してください。",
+        "これはアリーナバトルです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-hack-slash",
+      "version": "8.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を倒す順序が複雑になりました。",
+        "コンボを繋ぎ続けることが最優先です。",
+        "これはハックアンドスラッシュです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-aquatic",
+      "version": "8.0",
+      "manualText": [
+        "ステージが水中になりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーで上下移動できます。",
+        "敵を避けて深海を探索してください。",
+        "これは水中アドベンチャーです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "8.0-a-survival",
+      "version": "8.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を避けて生き残ってください。",
+        "HPが追加されました。",
+        "これはサバイバルゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeOverrides": {
+        "playerMaxHp": 5
+      },
+      "choices": []
     },
 
     {
@@ -94,75 +997,29 @@
       },
       "choices": [
         {
-          "label": "生き延びるほど評価される仕組みにする",
-          "next": "4.0-survival",
-          "genreParams": { "survive": 2, "growth": 1 },
-          "hint": "survival 確定（survive:4, growth:3 超過）"
+          "label": "得られるアイテムの種類を増やす",
+          "next": "4.0-a-craft",
+          "genreParams": { "craft": 1, "growth": 1 },
+          "hint": "idle/tower_def方向に進行中"
         },
         {
-          "label": "キャラクターが経験を積んで強くなる",
-          "next": "4.0-rpg",
-          "genreParams": { "growth": 3 },
-          "hint": "RPG 確定（growth:5 超過）"
+          "label": "敵を倒して経験値を得る仕組みを作る",
+          "next": "4.0-a-battle",
+          "genreParams": { "growth": 1, "enemy": 1 },
+          "hint": "RPG/survival方向に進行中"
         }
       ]
     },
 
     {
-      "key": "4.0-stg",
-      "version": "4.0",
-      "manualText": [
-        "Zキーで弾を撃てます。",
-        "← → キーで左右に移動できます。",
-        "Spaceキーでジャンプします。",
-        "赤い敵を撃って倒してください。",
-        "コンボをつなげると高スコアになります。"
-      ],
-      "controls": {
-        "jump": "Space",
-        "moveLeft": "ArrowLeft",
-        "moveRight": "ArrowRight",
-        "shoot": "z"
-      },
-      "hazards": {
-        "colors": ["red"],
-        "safeColors": ["blue"]
-      },
-      "choices": []
-    },
-
-    {
-      "key": "4.0-aerial",
-      "version": "4.0",
-      "manualText": [
-        "ステージが縦方向に流れています。",
-        "← → キーで左右に移動できます。",
-        "Zキーで上方向に弾を撃てます。",
-        "上から降ってくる敵を撃ってください。",
-        "赤い敵に触れると失敗です。"
-      ],
-      "controls": {
-        "jump": "Space",
-        "moveLeft": "ArrowLeft",
-        "moveRight": "ArrowRight",
-        "shoot": "z"
-      },
-      "hazards": {
-        "colors": ["red"],
-        "safeColors": ["blue"]
-      },
-      "choices": []
-    },
-
-    {
-      "key": "4.0-survival",
+      "key": "4.0-a-craft",
       "version": "4.0",
       "manualText": [
         "← → キーで左右に移動できます。",
         "Spaceキーでジャンプします。",
-        "HPが追加されました。数回被弾できます。",
-        "青いアイテムを積極的に集めてください。",
-        "生き延びることが最大の目的です。"
+        "集めたアイテムは自動に蓄積されます。",
+        "その数が画面に表示されています。",
+        "積み上げることが重要になります。"
       ],
       "controls": {
         "jump": "Space",
@@ -173,21 +1030,31 @@
         "colors": ["red"],
         "safeColors": ["blue"]
       },
-      "runtimeOverrides": {
-        "playerMaxHp": 5
-      },
-      "choices": []
+      "choices": [
+        {
+          "label": "アイテムから何かを作れるようにする",
+          "next": "5.0-a-tower",
+          "genreParams": { "craft": 1 },
+          "hint": "tower_def方向"
+        },
+        {
+          "label": "操作を最小限にして自動進行させる",
+          "next": "5.0-a-idle",
+          "genreParams": { "craft": 1 },
+          "hint": "idle方向"
+        }
+      ]
     },
 
     {
-      "key": "4.0-rpg",
+      "key": "4.0-a-battle",
       "version": "4.0",
       "manualText": [
         "← → キーで左右に移動できます。",
         "Spaceキーでジャンプします。",
-        "HPが追加されました。",
-        "経験値を集めると強くなります。",
-        "アイテムを積極的に拾ってください。"
+        "赤い敵に接触すると被ダメージを受けます。",
+        "敵を避けながら経験値を集めてください。",
+        "成長することが目的になりました。"
       ],
       "controls": {
         "jump": "Space",
@@ -200,6 +1067,309 @@
       },
       "runtimeOverrides": {
         "playerMaxHp": 4
+      },
+      "choices": [
+        {
+          "label": "敵との直接戦闘を可能にする",
+          "next": "5.0-a-rpg",
+          "genreParams": { "growth": 1, "enemy": 1 },
+          "hint": "RPG方向"
+        },
+        {
+          "label": "生き残ることをより重視する",
+          "next": "5.0-a-survival",
+          "genreParams": { "survive": 1, "growth": 1 },
+          "hint": "survival方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-tower",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "集めたアイテムを配置できるようになりました。",
+        "敵を遠距離から防ぐ配置が可能です。",
+        "戦略的な配置が勝敗を分けます。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "配置の自由度を高める",
+          "next": "6.0-a-tower-def",
+          "genreParams": { "craft": 1, "enemy": 1 },
+          "hint": "tower_def確定方向"
+        },
+        {
+          "label": "敵を倒すことを主軸に加える",
+          "next": "6.0-a-dungeon",
+          "genreParams": { "growth": 1, "craft": 1 },
+          "hint": "dungeon方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-idle",
+      "version": "5.0",
+      "manualText": [
+        "画面を見守るだけで自動に進みます。",
+        "Spaceキーで手動操作も可能です。",
+        "アイテムが自動に増殖し始めました。",
+        "たまに見ると増えています。",
+        "放置するほど積み上がります。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": [
+        {
+          "label": "自動化をさらに進める",
+          "next": "6.0-a-idle",
+          "genreParams": { "craft": 1 },
+          "hint": "idle確定方向"
+        },
+        {
+          "label": "たまに積極的な操作も混ぜる",
+          "next": "6.0-a-tower-def",
+          "genreParams": { "craft": 1, "enemy": 1 },
+          "hint": "tower_def方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-rpg",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵に接触して戦闘が始まります。",
+        "経験値を得て成長してください。",
+        "HPとパラメータが強化されていきます。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 4
+      },
+      "choices": [
+        {
+          "label": "装備やスキルを組み合わせる奥行きを加える",
+          "next": "6.0-a-rpg",
+          "genreParams": { "growth": 1 },
+          "hint": "RPG確定方向"
+        },
+        {
+          "label": "より奥深いダンジョンに進める",
+          "next": "6.0-a-dungeon",
+          "genreParams": { "growth": 1, "craft": 1 },
+          "hint": "dungeon確定方向"
+        }
+      ]
+    },
+
+    {
+      "key": "5.0-a-survival",
+      "version": "5.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を倒すより避けることが重要です。",
+        "拾ったアイテムはHPを回復します。",
+        "生き残ることが最優先です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 5
+      },
+      "choices": [
+        {
+          "label": "シェルターのような配置を追加する",
+          "next": "6.0-a-survival",
+          "genreParams": { "survive": 1 },
+          "hint": "survival確定方向"
+        },
+        {
+          "label": "敵の恐怖を強調する",
+          "next": "6.0-a-horror",
+          "genreParams": { "survive": 1, "stealth": 1 },
+          "hint": "horror方向"
+        }
+      ]
+    },
+
+    {
+      "key": "6.0-a-rpg",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "HPが追加されました。",
+        "経験値を集めると強くなります。",
+        "これはロールプレイングゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 4
+      },
+      "choices": []
+    },
+
+    {
+      "key": "6.0-a-survival",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "HPが追加されました。数回被弾できます。",
+        "青いアイテムを積極的に集めてください。",
+        "これはサバイバルゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 5
+      },
+      "choices": []
+    },
+
+    {
+      "key": "6.0-a-tower-def",
+      "version": "6.0",
+      "manualText": [
+        "敵の群れが向かってきます。",
+        "← → キーで左右に移動できます。",
+        "配置したタワーで敵を防ぎます。",
+        "陣地を守ってください。",
+        "これはタワーディフェンスです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "6.0-a-dungeon",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵を倒して経験値を得ます。",
+        "装備を整えて奥へ進みます。",
+        "これはダンジョン探索です。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 4
+      },
+      "choices": []
+    },
+
+    {
+      "key": "6.0-a-idle",
+      "version": "6.0",
+      "manualText": [
+        "画面を見ているだけです。",
+        "アイテムが自動に増殖し続けます。",
+        "表示される数字が大きくなっていきます。",
+        "たまにSpaceキーで手動操作もできます。",
+        "これは放置ゲームです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "choices": []
+    },
+
+    {
+      "key": "6.0-a-horror",
+      "version": "6.0",
+      "manualText": [
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "周囲の敵に見つかると危険です。",
+        "見つからないようにそっと進みます。",
+        "これはサバイバルホラーです。"
+      ],
+      "controls": {
+        "jump": "Space",
+        "moveLeft": "ArrowLeft",
+        "moveRight": "ArrowRight"
+      },
+      "hazards": {
+        "colors": ["red"],
+        "safeColors": ["blue"]
+      },
+      "runtimeConfig": {
+        "playerMaxHp": 3
       },
       "choices": []
     }

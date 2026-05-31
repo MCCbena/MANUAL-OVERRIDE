@@ -15,14 +15,13 @@ const selected = ref<string | null>(null)
 const revealed = ref(false)
 
 onMounted(() => {
-  // カードが入ってきてから選択肢を表示するまでの遅延
-  setTimeout(() => { revealed.value = true }, 120)
+  revealed.value = true
 })
 
 function pick(choiceId: string) {
   if (selected.value) return
   selected.value = choiceId
-  setTimeout(() => emit('choose', choiceId), 480)
+  setTimeout(() => emit('choose', choiceId), 150)
 }
 </script>
 
@@ -47,6 +46,7 @@ function pick(choiceId: string) {
           v-for="(c, idx) in choices"
           :key="c.id"
           class="choice-btn"
+          :data-choice-id="c.id"
           :class="{
             selected: selected === c.id,
             faded:    selected !== null && selected !== c.id,
@@ -71,7 +71,7 @@ function pick(choiceId: string) {
 .choice-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0, 0, 0, 0.78);
+  background: rgba(0, 0, 0, 0.85);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,33 +86,27 @@ function pick(choiceId: string) {
   background: repeating-linear-gradient(
     to bottom,
     transparent 0px,
-    transparent 3px,
-    rgba(0, 0, 0, 0.06) 3px,
-    rgba(0, 0, 0, 0.06) 4px
+    transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px,
+    rgba(0, 0, 0, 0.15) 3px
   );
   pointer-events: none;
 }
 
 /* カード */
 .choice-card {
-  background: #fff;
-  border: 2px solid #1a1a1a;
-  border-radius: 3px;
-  padding: 26px 30px 20px;
-  max-width: 400px;
+  background: #0d120d;
+  border: 2px solid #33aa55;
+  border-radius: 2px;
+  padding: 28px 32px 22px;
+  max-width: 420px;
   width: 92%;
   box-shadow:
-    6px 6px 0 #1a1a1a,
-    0 0 40px rgba(0,0,0,0.5);
-  font-family: 'Courier New', Courier, monospace;
+    0 0 20px rgba(0,255,65,0.15),
+    0 0 50px rgba(0,0,0,0.5),
+    inset 0 1px 2px rgba(0,255,65,0.05);
+  font-family: 'M PLUS 1 Code', cursive;
   animation: cardEntrance 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
-
-  /* 微細な紙質 */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 22px,
-    rgba(0,0,0,0.022) 22px, rgba(0,0,0,0.022) 23px
-  );
 }
 
 @keyframes cardEntrance {
@@ -123,36 +117,42 @@ function pick(choiceId: string) {
 /* ヘッダー */
 .choice-header {
   text-align: center;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #ddd;
+  margin-bottom: 22px;
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   padding-bottom: 14px;
+  position: relative;
 }
 
 .choice-stamp {
   display: inline-block;
-  background: #cc0000;
-  color: #fff;
-  font-size: 10px;
-  font-weight: bold;
-  letter-spacing: 3px;
-  padding: 3px 10px;
+  background: transparent;
+  color: #00ff41;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  padding: 4px 12px;
   margin-bottom: 8px;
-  transform: rotate(-1.5deg);
-  box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+  transform: rotate(-1.8deg);
+  box-shadow: 0 0 8px rgba(0,255,65,0.15);
+  border: 1px solid #00ff41;
+  border-radius: 1px;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .choice-ver {
-  font-size: 11px;
-  color: #999;
+  font-size: 10px;
+  color: #33aa55;
   letter-spacing: 1.5px;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .choice-prompt {
   font-size: 14px;
-  color: #222;
+  color: #b8ffb8;
   font-weight: 600;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.4px;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 /* 選択肢リスト */
@@ -167,16 +167,17 @@ function pick(choiceId: string) {
   display: flex;
   align-items: center;
   gap: 12px;
-  background: #fff;
-  border: 2px solid #222;
-  padding: 13px 16px;
+  background: #001a00;
+  border: 1px solid #33aa55;
+  padding: 14px 18px;
   text-align: left;
   cursor: pointer;
-  font-family: inherit;
+  font-family: 'M PLUS 1 Code', cursive;
   border-radius: 2px;
-  transition: background 0.18s, border-color 0.18s, transform 0.1s;
+  transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
   position: relative;
   overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
 
   /* 初期は非表示 */
   opacity: 0;
@@ -196,32 +197,34 @@ function pick(choiceId: string) {
   content: '';
   position: absolute;
   inset: 0;
-  background: #222;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.22s ease;
+  background: linear-gradient(135deg, rgba(0,255,65,0.05) 0%, rgba(0,255,65,0.02) 100%);
+  opacity: 0;
+  transition: opacity 0.22s ease;
 }
 
-.choice-btn:hover::after { transform: scaleX(1); }
-.choice-btn:hover .choice-label,
-.choice-btn:hover .choice-index,
-.choice-btn:hover .choice-arrow { color: #fff; position: relative; z-index: 1; }
+.choice-btn:hover {
+  background: #002a00;
+  border-color: #00ff41;
+  box-shadow: 0 4px 12px rgba(0,255,65,0.15);
+}
+.choice-btn:hover::after { opacity: 1; }
 
-.choice-btn:active { transform: translateY(1px); }
+.choice-btn:active { transform: translateY(2px); }
 
 .choice-btn.selected {
-  background: #cc0000;
-  border-color: #aa0000;
+  background: #003300;
+  border-color: #00ff41;
+  box-shadow: 0 6px 16px rgba(0,255,65,0.2);
   animation: selectedFlash 0.35s ease;
 }
 .choice-btn.selected .choice-label,
 .choice-btn.selected .choice-index,
-.choice-btn.selected .choice-arrow { color: #fff; }
+.choice-btn.selected .choice-arrow { color: #00ff41; }
 
 @keyframes selectedFlash {
-  0%   { background: #fff; }
-  40%  { background: #ffcccc; }
-  100% { background: #cc0000; }
+  0%   { background: #001a00; }
+  40%  { background: #002a00; }
+  100% { background: #003300; }
 }
 
 .choice-btn.faded {
@@ -233,41 +236,57 @@ function pick(choiceId: string) {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
-  background: #222;
-  color: #fff;
+  width: 24px;
+  height: 24px;
+  background: transparent;
+  color: #33aa55;
   font-size: 11px;
-  font-weight: bold;
-  border-radius: 2px;
+  font-weight: 700;
+  border-radius: 1px;
   flex-shrink: 0;
-  transition: background 0.18s, color 0.18s;
+  transition: background 0.2s, color 0.2s;
+  box-shadow: 0 0 4px rgba(0,255,65,0.1);
+  border: 1px solid #33aa55;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
-.choice-btn.selected .choice-index { background: rgba(255,255,255,0.2); }
+.choice-btn:hover .choice-index {
+  background: rgba(0,255,65,0.1);
+  color: #00ff41;
+}
+
+.choice-btn.selected .choice-index {
+  background: rgba(0,255,65,0.2);
+  color: #00ff41;
+}
 
 .choice-label {
   flex: 1;
   font-size: 13px;
-  font-weight: 600;
-  color: #1a1a1a;
-  line-height: 1.4;
-  transition: color 0.18s;
+  font-weight: 500;
+  color: #b8ffb8;
+  line-height: 1.45;
+  transition: color 0.2s;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .choice-arrow {
   font-size: 14px;
-  color: #bbb;
-  transition: color 0.18s;
+  color: #33aa55;
+  transition: color 0.2s;
+  margin-left: 4px;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* フッター */
 .choice-footnote {
   font-size: 10px;
-  color: #bbb;
+  color: rgba(184,255,184,0.35);
   text-align: center;
   letter-spacing: 0.5px;
-  border-top: 1px solid #eee;
-  padding-top: 10px;
+  border-top: 1px solid rgba(0,255,65,0.2);
+  padding-top: 12px;
+  margin-top: 2px;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 </style>

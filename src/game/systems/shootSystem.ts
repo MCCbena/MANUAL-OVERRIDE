@@ -17,6 +17,7 @@ export function createShootState(): ShootState {
 export interface ShootResult {
   scoreGain: number
   destroyedHazards: Hazard[]
+  shotFired: boolean
 }
 
 /**
@@ -45,11 +46,13 @@ export function updateShoot(
   if (state.comboTimer <= 0) state.combo = 0
 
   const isVertical = rules.scrollAxis === 'y'
+  let shotFired = false
 
   // ─── 発射 ────────────────────────────────────────────────
   if (shootPressed && state.shotCooldown <= 0 && rules.features.has('shoot')) {
     state.shotCooldown = SHOOT.shotCooldown
     const spd = SHOOT.bulletSpeed
+    shotFired = true
 
     if (isVertical) {
       // 縦モード: プレイヤー上部中心から上方向へ
@@ -134,5 +137,5 @@ export function updateShoot(
     if (!state.bullets[i].alive) state.bullets.splice(i, 1)
   }
 
-  return { scoreGain, destroyedHazards }
+  return { scoreGain, destroyedHazards, shotFired }
 }

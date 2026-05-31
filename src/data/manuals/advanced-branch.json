@@ -1,0 +1,1422 @@
+{
+  "id": "advanced-branch",
+  "description": "ver 8.0 以降の高度な分岐ツリー。永遠に続く選択肢システムを支える。",
+  "entries": [
+    {
+      "key": "9.0-a",
+      "version": "9.0",
+      "manualText": [
+        "ゲームがより複雑になってきました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここからは、さらに多くの道が分かれます。",
+        "あなたの選択が世界を決定します。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "時間をかけて考える道へ進む",
+          "next": "10.0-puzzle",
+          "genreParams": { "combo": 2, "tempo": -1 },
+          "hint": "puzzle 方向"
+        },
+        {
+          "label": "音楽と同期させる道へ進む",
+          "next": "10.0-rhythm",
+          "genreParams": { "rhythm": 2, "tempo": 1 },
+          "hint": "rhythm 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "9.0-b",
+      "version": "9.0",
+      "manualText": [
+        "ステージの構造が大きく変わろうとしています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "プラットフォーム系とローグライク系の道が見えます。",
+        "どちらの複雑さを選びますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "プラットフォーム難易度を極める",
+          "next": "10.0-platformer",
+          "genreParams": { "tempo": 1, "aerial": 2 },
+          "hint": "platformer 方向"
+        },
+        {
+          "label": "ランダム性の中で生き残る",
+          "next": "10.0-roguelike",
+          "genreParams": { "growth": 1, "survival": 1, "combo": 1 },
+          "hint": "roguelike 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "9.0-c",
+      "version": "9.0",
+      "manualText": [
+        "ステージが過去と未来を行き来し始めました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "メトロイドヴァニアとソウルライク、2つの時間軸。",
+        "どの歴史を辿りますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "能力の開放と探索を繰り返す",
+          "next": "10.0-metroidvania",
+          "genreParams": { "growth": 2, "range": 1 },
+          "hint": "metroidvania 方向"
+        },
+        {
+          "label": "死と学習の喜びを得る",
+          "next": "10.0-soulslike",
+          "genreParams": { "survival": 2, "enemy": 1, "combo": 1 },
+          "hint": "soulslike 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "9.0-d",
+      "version": "9.0",
+      "manualText": [
+        "ステージが有限から無限へ転換しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "無限スクロールと終わりなきサイクル。",
+        "どちらの永遠を選びますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "スコアと記録の無限競争へ",
+          "next": "10.0-endless",
+          "genreParams": { "tempo": 2, "combo": 1 },
+          "hint": "endless 方向"
+        },
+        {
+          "label": "意思決定の無限ループへ",
+          "next": "10.0-choices",
+          "genreParams": { "combo": 2, "growth": 1 },
+          "hint": "choices 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-puzzle",
+      "version": "10.0",
+      "manualText": [
+        "時間が止まったかのように、思考が深まります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてが計算可能になってきました。",
+        "パズルは深く、その先は何でしょう？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "複雑さの極限へ",
+          "next": "11.0-a",
+          "genreParams": { "combo": 1 },
+          "hint": "深層パズル方向"
+        },
+        {
+          "label": "シンプルさへ回帰する",
+          "next": "11.0-b",
+          "genreParams": { "tempo": 1 },
+          "hint": "簡潔へ向かう"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-rhythm",
+      "version": "10.0",
+      "manualText": [
+        "すべてが音に同期し始めました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "リズムが世界のすべてになります。",
+        "ビートの先へ進みますか、心に従いますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "BPM の多様化へ",
+          "next": "11.0-c",
+          "genreParams": { "rhythm": 2 },
+          "hint": "多拍子方向"
+        },
+        {
+          "label": "心のリズムへ帰る",
+          "next": "11.0-d",
+          "genreParams": { "aerial": 1 },
+          "hint": "感覚的へ"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-platformer",
+      "version": "10.0",
+      "manualText": [
+        "プラットフォーム上での修行が始まります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ピクセルパーフェクトな動きが要求されます。",
+        "さらに高みへ向かいますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "ボスラッシュへ突入",
+          "next": "11.0-e",
+          "genreParams": { "enemy": 1, "tempo": 1 },
+          "hint": "boss rush 方向"
+        },
+        {
+          "label": "無限ダンジョンへ潜る",
+          "next": "11.0-f",
+          "genreParams": { "growth": 1, "survival": 1 },
+          "hint": "infinite dungeon 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-roguelike",
+      "version": "10.0",
+      "manualText": [
+        "ランダムがすべてを支配します。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "同じランは二度と来ません。",
+        "次のランに希望を託しますか、それとも別の道を？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "ビルドの深さを追求",
+          "next": "11.0-g",
+          "genreParams": { "growth": 2 },
+          "hint": "deep build 方向"
+        },
+        {
+          "label": "スケジュール管理を極める",
+          "next": "11.0-h",
+          "genreParams": { "combo": 1, "tempo": 1 },
+          "hint": "time management 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-metroidvania",
+      "version": "10.0",
+      "manualText": [
+        "かつて来た場所に、新しい力で戻ります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "世界は一つですが、段階的に開かれていきます。",
+        "どのアビリティを優先しますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "攻撃力強化の道へ",
+          "next": "11.0-i",
+          "genreParams": { "range": 1, "enemy": 1 },
+          "hint": "power route 方向"
+        },
+        {
+          "label": "移動能力強化の道へ",
+          "next": "11.0-j",
+          "genreParams": { "aerial": 2 },
+          "hint": "mobility route 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-soulslike",
+      "version": "10.0",
+      "manualText": [
+        "死は終わりではなく、始まりです。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "敵は常に強く、あなたの成長だけが答えです。",
+        "どの修行を選びますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "パリィのタイミング極致へ",
+          "next": "11.0-k",
+          "genreParams": { "combo": 2 },
+          "hint": "parry mastery 方向"
+        },
+        {
+          "label": "大型武器の力へ",
+          "next": "11.0-l",
+          "genreParams": { "enemy": 2 },
+          "hint": "heavy weapons 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-endless",
+      "version": "10.0",
+      "manualText": [
+        "スコアの数字だけが現実です。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "高みを求め、果てしなく上昇します。",
+        "いつまで上り続けますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "難易度無限上昇へ",
+          "next": "11.0-m",
+          "genreParams": { "tempo": 2, "enemy": 1 },
+          "hint": "difficulty hell 方向"
+        },
+        {
+          "label": "多様な挑戦へ",
+          "next": "11.0-n",
+          "genreParams": { "combo": 2 },
+          "hint": "challenges 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "10.0-choices",
+      "version": "10.0",
+      "manualText": [
+        "すべてが選択肢です。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "2択から始まった世界は、今や無限です。",
+        "あなたはどこまで選び続けますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "ナレッジツリーの深さへ",
+          "next": "11.0-o",
+          "genreParams": { "growth": 2 },
+          "hint": "knowledge tree 方向"
+        },
+        {
+          "label": "並行世界の分岐へ",
+          "next": "11.0-p",
+          "genreParams": { "survival": 1, "combo": 1 },
+          "hint": "multiverse 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-a",
+      "version": "11.0",
+      "manualText": [
+        "パズルが複雑さの極限に達しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "この複雑さの先にあるのは？",
+        "さらに深く潜りますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "さらに深層へ",
+          "next": "12.0-complex",
+          "genreParams": { "combo": 1 },
+          "hint": "deeper 方向"
+        },
+        {
+          "label": "別の次元へ脱出",
+          "next": "12.0-escape",
+          "genreParams": { "aerial": 1 },
+          "hint": "escape 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-b",
+      "version": "11.0",
+      "manualText": [
+        "複雑さが剥がれ落ち、本質だけが残ります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "シンプルさの中に無限がありますか？",
+        "さらに削ぎ落としますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "極限のミニマリズムへ",
+          "next": "12.0-minimal",
+          "genreParams": { "tempo": 1 },
+          "hint": "minimal 方向"
+        },
+        {
+          "label": "本質の反復へ",
+          "next": "12.0-repetition",
+          "genreParams": { "combo": 2 },
+          "hint": "repetition 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-c",
+      "version": "11.0",
+      "manualText": [
+        "複数のビートが交錯し始めました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ポリリズムの世界へようこそ。",
+        "さらに複雑なビートを求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "無限にビートを複雑化",
+          "next": "12.0-polyrhythm",
+          "genreParams": { "rhythm": 2, "tempo": 1 },
+          "hint": "polyrhythm 方向"
+        },
+        {
+          "label": "複数ジャンルの融合へ",
+          "next": "12.0-fusion",
+          "genreParams": { "rhythm": 1, "combo": 1 },
+          "hint": "fusion 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-d",
+      "version": "11.0",
+      "manualText": [
+        "リズムが感覚に帰ってきました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "直感だけが頼りです。",
+        "感覚をさらに研ぎ澄ましますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "超感覚へ到達",
+          "next": "12.0-hypersense",
+          "genreParams": { "aerial": 2 },
+          "hint": "hypersense 方向"
+        },
+        {
+          "label": "音との合一へ",
+          "next": "12.0-union",
+          "genreParams": { "rhythm": 1, "growth": 1 },
+          "hint": "union 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-e",
+      "version": "11.0",
+      "manualText": [
+        "連続したボスが次々と現れます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ボスラッシュは終わりませんか？",
+        "さらに強い敵へ挑みますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "最強ボスへ",
+          "next": "12.0-ultimate",
+          "genreParams": { "enemy": 2 },
+          "hint": "ultimate boss 方向"
+        },
+        {
+          "label": "変種ボスへ",
+          "next": "12.0-variants",
+          "genreParams": { "combo": 1, "enemy": 1 },
+          "hint": "boss variants 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-f",
+      "version": "11.0",
+      "manualText": [
+        "ダンジョンの底が見えません。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "いつまで下り続けますか？",
+        "さらに深く潜りますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "魔界の底へ",
+          "next": "12.0-abyss",
+          "genreParams": { "survival": 2 },
+          "hint": "abyss 方向"
+        },
+        {
+          "label": "無限の宝へ",
+          "next": "12.0-infinite-treasure",
+          "genreParams": { "growth": 2 },
+          "hint": "infinite treasure 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-g",
+      "version": "11.0",
+      "manualText": [
+        "ビルド構築が複雑に進化しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "相乗効果の世界へ迷い込みました。",
+        "さらに複合効果を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "シナジー爆発へ",
+          "next": "12.0-synergy",
+          "genreParams": { "growth": 2, "combo": 1 },
+          "hint": "synergy 方向"
+        },
+        {
+          "label": "ビルド破壊へ",
+          "next": "12.0-chaos-build",
+          "genreParams": { "survival": 1, "combo": 1 },
+          "hint": "chaos 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-h",
+      "version": "11.0",
+      "manualText": [
+        "時間が制約になり始めました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "スケジュール管理がゲーム性になります。",
+        "さらに厳しい制限を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "時間制約の極限へ",
+          "next": "12.0-speedrun",
+          "genreParams": { "tempo": 2 },
+          "hint": "speedrun 方向"
+        },
+        {
+          "label": "マルチスレッド計画へ",
+          "next": "12.0-multitask",
+          "genreParams": { "combo": 2 },
+          "hint": "multitask 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-i",
+      "version": "11.0",
+      "manualText": [
+        "攻撃力が指数関数的に増加しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "力で世界を破壊しますか？",
+        "さらに強力な攻撃を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "絶対破壊へ",
+          "next": "12.0-omnipotence",
+          "genreParams": { "range": 2, "enemy": 1 },
+          "hint": "omnipotence 方向"
+        },
+        {
+          "label": "多様な攻撃へ",
+          "next": "12.0-arsenal",
+          "genreParams": { "range": 1, "combo": 1 },
+          "hint": "arsenal 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-j",
+      "version": "11.0",
+      "manualText": [
+        "移動能力が自由を与えます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "空間的制約がなくなってきました。",
+        "さらに自由な移動を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "完全な浮遊化へ",
+          "next": "12.0-full-flight",
+          "genreParams": { "aerial": 2, "tempo": 1 },
+          "hint": "full flight 方向"
+        },
+        {
+          "label": "次元移動へ",
+          "next": "12.0-teleport",
+          "genreParams": { "aerial": 1, "combo": 1 },
+          "hint": "teleport 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-k",
+      "version": "11.0",
+      "manualText": [
+        "パリィのタイミングが完璧に近づいています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "一瞬のズレも許されません。",
+        "さらに難しいタイミングに挑みますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "フレーム単位の完璧へ",
+          "next": "12.0-frame-perfect",
+          "genreParams": { "combo": 2, "tempo": 1 },
+          "hint": "frame perfect 方向"
+        },
+        {
+          "label": "連鎖パリィへ",
+          "next": "12.0-chain-parry",
+          "genreParams": { "combo": 2, "enemy": 1 },
+          "hint": "chain parry 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-l",
+      "version": "11.0",
+      "manualText": [
+        "大型武器の重みが世界を揺らがします。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "一撃の力が戦局を決します。",
+        "さらに巨大な武器へ？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "超兵器へ",
+          "next": "12.0-megaweapon",
+          "genreParams": { "enemy": 2, "range": 1 },
+          "hint": "megaweapon 方向"
+        },
+        {
+          "label": "複数武器の組み合わせへ",
+          "next": "12.0-dual-wield",
+          "genreParams": { "enemy": 1, "combo": 1 },
+          "hint": "dual wield 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-m",
+      "version": "11.0",
+      "manualText": [
+        "スコア獲得難易度が爆発しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "あの時の敵は幼く見えます。",
+        "さらに強敵の地獄へ？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "超困難へ",
+          "next": "12.0-inferno",
+          "genreParams": { "tempo": 2, "enemy": 2 },
+          "hint": "inferno 方向"
+        },
+        {
+          "label": "狂気の領域へ",
+          "next": "12.0-madness",
+          "genreParams": { "tempo": 1, "combo": 2 },
+          "hint": "madness 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-n",
+      "version": "11.0",
+      "manualText": [
+        "様々な挑戦が次々と現れます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "単調さは死です。",
+        "さらに多様な試練を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "組み合わせ爆発へ",
+          "next": "12.0-variations",
+          "genreParams": { "combo": 2, "growth": 1 },
+          "hint": "variations 方向"
+        },
+        {
+          "label": "究極のサバイバルへ",
+          "next": "12.0-apex",
+          "genreParams": { "tempo": 1, "survival": 1 },
+          "hint": "apex 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-o",
+      "version": "11.0",
+      "manualText": [
+        "知識の樹が成長し続けます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "学べば学ぶほど、選択肢が増えます。",
+        "無限の知識を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "全知への道へ",
+          "next": "12.0-omniscience",
+          "genreParams": { "growth": 2, "combo": 1 },
+          "hint": "omniscience 方向"
+        },
+        {
+          "label": "実践的知恵へ",
+          "next": "12.0-wisdom",
+          "genreParams": { "growth": 1, "survival": 1 },
+          "hint": "wisdom 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "11.0-p",
+      "version": "11.0",
+      "manualText": [
+        "複数の並行世界が同時に存在します。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべての選択肢があなたの前に。",
+        "すべての世界を支配したいですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "全世界統一へ",
+          "next": "12.0-multiverse",
+          "genreParams": { "survival": 2, "combo": 1 },
+          "hint": "multiverse 方向"
+        },
+        {
+          "label": "最高の分岐へ",
+          "next": "12.0-perfect-path",
+          "genreParams": { "growth": 2 },
+          "hint": "perfect path 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "12.0-complex",
+      "version": "12.0",
+      "manualText": [
+        "複雑さが無限に続きます。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "この複雑さの中に美しさがありますか？",
+        "さらに複雑な世界へ？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "フラクタル構造へ",
+          "next": "13.0-a",
+          "genreParams": { "combo": 1 },
+          "hint": "fractal 方向"
+        },
+        {
+          "label": "秩序の発見へ",
+          "next": "13.0-b",
+          "genreParams": { "growth": 1 },
+          "hint": "order 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "12.0-escape",
+      "version": "12.0",
+      "manualText": [
+        "別の次元へようこそ。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここは何ですか？",
+        "さらに奥へ進みますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "より高い次元へ",
+          "next": "13.0-c",
+          "genreParams": { "aerial": 1 },
+          "hint": "higher dimension 方向"
+        },
+        {
+          "label": "元の世界への帰還",
+          "next": "13.0-d",
+          "genreParams": { "survival": 1 },
+          "hint": "return 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "13.0-a",
+      "version": "13.0",
+      "manualText": [
+        "フラクタルパターンが世界を支配しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "大と小が同じ構造を持っています。",
+        "この無限ループを極めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "無限拡大へ",
+          "next": "14.0-a",
+          "genreParams": { "combo": 1, "growth": 1 },
+          "hint": "infinity 方向"
+        },
+        {
+          "label": "極小の宇宙へ",
+          "next": "14.0-b",
+          "genreParams": { "survival": 1, "aerial": 1 },
+          "hint": "micro 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "13.0-b",
+      "version": "13.0",
+      "manualText": [
+        "複雑さの中から秩序が浮かび上がります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "カオスはパターンを持っていました。",
+        "その法則を支配しますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "究極の秩序へ",
+          "next": "14.0-c",
+          "genreParams": { "combo": 2 },
+          "hint": "absolute order 方向"
+        },
+        {
+          "label": "秩序と混沌の融合へ",
+          "next": "14.0-d",
+          "genreParams": { "growth": 1, "tempo": 1 },
+          "hint": "balance 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "13.0-c",
+      "version": "13.0",
+      "manualText": [
+        "より高い次元が見えています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "現在の視点がちっぽけに見えます。",
+        "さらに高みへ？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "次元を超越へ",
+          "next": "14.0-e",
+          "genreParams": { "aerial": 2 },
+          "hint": "transcendence 方向"
+        },
+        {
+          "label": "次元操作の習得へ",
+          "next": "14.0-f",
+          "genreParams": { "range": 1, "combo": 1 },
+          "hint": "dimension control 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "13.0-d",
+      "version": "13.0",
+      "manualText": [
+        "元の世界への道が見えています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "帰還しますか、それとも先へ進みますか？",
+        "決めてください。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "本当に帰還する",
+          "next": "14.0-g",
+          "genreParams": { "survival": 2 },
+          "hint": "true return 方向"
+        },
+        {
+          "label": "新しい世界を創造",
+          "next": "14.0-h",
+          "genreParams": { "growth": 2, "combo": 1 },
+          "hint": "creation 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-a",
+      "version": "14.0",
+      "manualText": [
+        "無限が現実になりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてが無限です。",
+        "この無限に終わりはありますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "無限の果てへ",
+          "next": "15.0-end",
+          "genreParams": { "combo": 1, "growth": 1 },
+          "hint": "ultimate infinity 方向"
+        },
+        {
+          "label": "無限のループへ",
+          "next": "15.0-loop",
+          "genreParams": { "survival": 1, "tempo": 1 },
+          "hint": "eternal loop 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-b",
+      "version": "14.0",
+      "manualText": [
+        "極小の世界で無限の可能性があります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "小さいことは美しいことですか？",
+        "さらに縮小しますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "原子レベルへ",
+          "next": "15.0-atomic",
+          "genreParams": { "combo": 1 },
+          "hint": "atomic 方向"
+        },
+        {
+          "label": "量子の世界へ",
+          "next": "15.0-quantum",
+          "genreParams": { "growth": 1, "combo": 1 },
+          "hint": "quantum 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-c",
+      "version": "14.0",
+      "manualText": [
+        "究極の秩序が世界を支配しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "完璧な秩序は退屈ではありませんか？",
+        "さらに秩序を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "超秩序へ",
+          "next": "15.0-hyperorder",
+          "genreParams": { "combo": 2 },
+          "hint": "hyperorder 方向"
+        },
+        {
+          "label": "秩序の反乱へ",
+          "next": "15.0-rebellion",
+          "genreParams": { "survival": 1, "combo": 1 },
+          "hint": "rebellion 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-d",
+      "version": "14.0",
+      "manualText": [
+        "秩序と混沌が完璧に調和しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "この調和の先にあるのは？",
+        "さらなる進化を求めますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "平衡の極致へ",
+          "next": "15.0-equilibrium",
+          "genreParams": { "growth": 1, "tempo": 1, "combo": 1 },
+          "hint": "perfect equilibrium 方向"
+        },
+        {
+          "label": "新しい世界へ",
+          "next": "15.0-newworld",
+          "genreParams": { "growth": 2 },
+          "hint": "new world 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-e",
+      "version": "14.0",
+      "manualText": [
+        "次元を超越しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここはもはや次元ではありません。",
+        "さらに先へ？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "神域へ到達",
+          "next": "15.0-divine",
+          "genreParams": { "aerial": 2, "growth": 1 },
+          "hint": "divine 方向"
+        },
+        {
+          "label": "虚無へ帰還",
+          "next": "15.0-void",
+          "genreParams": { "survival": 1 },
+          "hint": "void 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-f",
+      "version": "14.0",
+      "manualText": [
+        "次元を自由に操作できるようになりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "世界はあなたの手に委ねられました。",
+        "何をしますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "次元を折りたたむ",
+          "next": "15.0-fold",
+          "genreParams": { "range": 1, "combo": 1, "tempo": 1 },
+          "hint": "fold 方向"
+        },
+        {
+          "label": "新次元を生成",
+          "next": "15.0-genesis",
+          "genreParams": { "growth": 2, "combo": 1 },
+          "hint": "genesis 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-g",
+      "version": "14.0",
+      "manualText": [
+        "本当に帰還しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "元の世界は何も変わっていません。",
+        "でもあなたは変わった。",
+        "もう一度、進みますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "再び旅立つ",
+          "next": "15.0-restart",
+          "genreParams": { "growth": 1, "survival": 1 },
+          "hint": "restart 方向"
+        },
+        {
+          "label": "この世界で満足",
+          "next": "15.0-acceptance",
+          "genreParams": { "survival": 2 },
+          "hint": "acceptance 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "14.0-h",
+      "version": "14.0",
+      "manualText": [
+        "新しい世界を創造する力を得ました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "あなたは創造主になりました。",
+        "何の世界を作りますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": [
+        {
+          "label": "完璧な世界へ",
+          "next": "15.0-paradise",
+          "genreParams": { "growth": 2, "combo": 1 },
+          "hint": "paradise 方向"
+        },
+        {
+          "label": "混沌の世界へ",
+          "next": "15.0-chaos",
+          "genreParams": { "survival": 2, "tempo": 1 },
+          "hint": "chaos 方向"
+        }
+      ]
+    },
+
+    {
+      "key": "15.0-end",
+      "version": "15.0",
+      "manualText": [
+        "無限の果てに到達しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここが終わりですか？",
+        "それとも、始まりですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-loop",
+      "version": "15.0",
+      "manualText": [
+        "永遠のループに足を踏み入れました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "同じことを繰り返していますか？",
+        "それとも、新しいことを繰り返していますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-atomic",
+      "version": "15.0",
+      "manualText": [
+        "原子レベルの世界へようこそ。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "見えないものが全てを支配しています。",
+        "ここが現実ですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-quantum",
+      "version": "15.0",
+      "manualText": [
+        "量子の世界の不確定性の中で。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "粒子と波が同時に存在しています。",
+        "あなたはどちらですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-hyperorder",
+      "version": "15.0",
+      "manualText": [
+        "超秩序が絶対的に支配しています。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "自由はありません。",
+        "ただ完璧さだけがあります。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-rebellion",
+      "version": "15.0",
+      "manualText": [
+        "秩序は破壊されました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "混沌が解放をもたらしました。",
+        "新しい秩序が生まれます。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-equilibrium",
+      "version": "15.0",
+      "manualText": [
+        "完璧な平衡に達しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "この状態は永遠に続きます。",
+        "あなたはここで何をしますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-newworld",
+      "version": "15.0",
+      "manualText": [
+        "新しい世界が始まりました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてが新しい。",
+        "この冒険は終わりませんか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-divine",
+      "version": "15.0",
+      "manualText": [
+        "神域に到達しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここであなたは神です。",
+        "神は何をしますか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-void",
+      "version": "15.0",
+      "manualText": [
+        "虚無に帰還しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "ここには何もありません。",
+        "ただ無があります。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-fold",
+      "version": "15.0",
+      "manualText": [
+        "次元を折りたたみました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "今、すべてが一つです。",
+        "統一された世界へようこそ。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-genesis",
+      "version": "15.0",
+      "manualText": [
+        "新次元が生成されました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "無から有が生まれました。",
+        "これが創造です。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-restart",
+      "version": "15.0",
+      "manualText": [
+        "旅が再び始まります。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "今度はどこへ向かいますか？",
+        "同じ道は二度と現れません。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-acceptance",
+      "version": "15.0",
+      "manualText": [
+        "あなたはここにいることを受け入れました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "平和があります。",
+        "これで十分ですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-paradise",
+      "version": "15.0",
+      "manualText": [
+        "楽園が完成しました。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "すべてが完璧です。",
+        "ここが終焉ですか？"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    },
+
+    {
+      "key": "15.0-chaos",
+      "version": "15.0",
+      "manualText": [
+        "混沌の世界へようこそ。",
+        "← → キーで左右に移動できます。",
+        "Spaceキーでジャンプします。",
+        "秩序はありません。",
+        "ただ自由があります。"
+      ],
+      "controls": { "jump": "Space", "moveLeft": "ArrowLeft", "moveRight": "ArrowRight" },
+      "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+      "choices": []
+    }
+  ]
+}

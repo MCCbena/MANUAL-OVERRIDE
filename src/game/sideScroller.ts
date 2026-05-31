@@ -5,6 +5,7 @@ import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBala
 import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '../data/tunables'
 import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
+import { soundManager } from '../plugins/SoundManager'
 // ジャンルプラグインとフィーチャーシステムを一括登録
 import '../genres/index'
 import '../game/systems/index'
@@ -25,6 +26,8 @@ export interface GameSnapshot {
   statJumps: number
   statMoveLeft: number
   statMoveRight: number
+  // 最初のジャンプが完了したかを示すフラグ
+  firstJumpDone: boolean
 }
 
 type Particle = { x: number; y: number; vx: number; vy: number; life: number; maxLife: number; color: string; size: number }
@@ -48,6 +51,7 @@ export class SideScroller {
   private survivedSec = 0
   private dead = false
   private paused = false
+  private firstJumpDone = false
 
   // カメラ
   private cameraX = 0
@@ -112,7 +116,13 @@ export class SideScroller {
       const key = this._normalizeKey(e)
       this.keys.add(key)
       // ゲームで使うキーのみ preventDefault
-      if (['Space', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'z', 'Z'].includes(key)) {
+      const gameKeys = [
+        rules.controls.jump,
+        rules.controls.moveLeft,
+        rules.controls.moveRight,
+        rules.controls.shoot ?? 'z'
+      ]
+      if (gameKeys.includes(key)) {
         e.preventDefault()
       }
     }
@@ -125,8 +135,8 @@ export class SideScroller {
 
   // ─── キー正規化 ──────────────────────────────────────────────────
   private _normalizeKey(e: KeyboardEvent): string {
-    // Space bar: e.key === ' '
     if (e.key === ' ') return 'Space'
+    if (e.key === 'z' || e.key === 'Z') return 'z'
     return e.key
   }
 
@@ -163,9 +173,22 @@ export class SideScroller {
   setPaused(v: boolean): void { this.paused = v }
 
   getSnapshot(): GameSnapshot {
-    const pending = UPDATE_DISTANCES.findIndex(
+    let pending = UPDATE_DISTANCES.findIndex(
       (d, i) => this.distance >= d && !this.updateTriggeredFor.has(i)
     )
+
+    // UPDATE_DISTANCES の範囲外でも無限に更新を続ける（1500px 間隔）
+    if (pending < 0) {
+      const lastDist = UPDATE_DISTANCES[UPDATE_DISTANCES.length - 1]
+      const infiniteInterval = 1500
+      if (this.distance >= lastDist) {
+        const extraIdx = UPDATE_DISTANCES.length + Math.floor((this.distance - lastDist) / infiniteInterval)
+        if (!this.updateTriggeredFor.has(extraIdx)) {
+          pending = extraIdx
+        }
+      }
+    }
+
     return {
       distance: this.distance,
       playScore: this.playScore,
@@ -181,6 +204,7 @@ export class SideScroller {
       statJumps: this.stats.jumps,
       statMoveLeft: this.stats.moveLeft,
       statMoveRight: this.stats.moveRight,
+      firstJumpDone: this.firstJumpDone,
     }
   }
 
@@ -245,9 +269,14 @@ export class SideScroller {
     const jumpKey  = r.controls.jump
     const leftKey  = r.controls.moveLeft
     const rightKey = r.controls.moveRight
-    const shootKey = r.controls.shoot ?? 'z'
+    const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
     const isVertical = r.scrollAxis === 'y'
+
+    // ─── 距離ベースの自動加速 ─────────────────────────────────────────
+    // 4000px で 20% 加速、8000px で 40% 加速 など段階的に難しくなる
+    const distanceAccelFactor = 1 + Math.min(this.distance / 20000, 0.5)
+    const effectiveScrollSpeed = r.scrollSpeed * distanceAccelFactor
 
     // ─── Pre-physics: 移動 Feature が vx をセット ────────────────────
     {
@@ -280,12 +309,12 @@ export class SideScroller {
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
 
       // スクロール距離（時間経過でカウント）
-      this.distance += r.scrollSpeed * dt
+      this.distance += effectiveScrollSpeed * dt
       this.cameraX = 0  // 横カメラは動かない
 
       // ─── ハザード降下 ─────────────────────────────────────
       for (const h of this.hazards) {
-        h.y += r.scrollSpeed * dt
+        h.y += effectiveScrollSpeed * dt
         h.pulse += dt * VFX.hazardPulseRate
       }
       this.hazards = this.hazards.filter(h => h.y < H + 200)
@@ -296,7 +325,7 @@ export class SideScroller {
         const interval = HAZARD_SPAWN.baseInterval *
           Math.exp(-HAZARD_SPAWN.decayRate * this.distance)
         const ms = Math.max(HAZARD_SPAWN.minInterval, interval)
-        this.nextSpawnDist += (ms / 1000) * r.scrollSpeed
+        this.nextSpawnDist += (ms / 1000) * effectiveScrollSpeed
       }
 
       // ─── 衝突判定（縦モード: 両者スクリーン座標） ───────────
@@ -358,7 +387,9 @@ export class SideScroller {
           this.jumpBufferTimer = 0
           this.coyoteTimer = 0
           this.stats.jumps++
+          this.firstJumpDone = true
           this._spawnJumpParticles(p.x + p.w / 2, p.y + p.h)
+          soundManager.onJump()
           // Hook: onPlayerJump
           {
             const jw = this._getWorld()
@@ -387,6 +418,7 @@ export class SideScroller {
         if (wasInAir) {
           p.landSquash = 1.0
           this._spawnLandParticles(p.x + p.w / 2, gY)
+          soundManager.onLand()
           // Hook: onPlayerLand
           getGenre(r.genre).onPlayerLand?.(this._getWorld())
           if (this.jumpBufferTimer > 0) {
@@ -415,7 +447,7 @@ export class SideScroller {
       p.x = Math.max(PHYSICS.playerMinX, Math.min(W * PHYSICS.playerMaxXRatio, p.x))
 
       // ─── スクロール ───────────────────────────────────────
-      this.distance += r.scrollSpeed * dt
+      this.distance += effectiveScrollSpeed * dt
       this.cameraX = this.distance - CAMERA.leadOffset
 
       // ─── ハザードスポーン ─────────────────────────────────
@@ -424,7 +456,7 @@ export class SideScroller {
         const interval = HAZARD_SPAWN.baseInterval *
           Math.exp(-HAZARD_SPAWN.decayRate * this.distance)
         const ms = Math.max(HAZARD_SPAWN.minInterval, interval)
-        this.nextSpawnDist += (ms / 1000) * r.scrollSpeed
+        this.nextSpawnDist += (ms / 1000) * effectiveScrollSpeed
       }
 
       for (const h of this.hazards) {
@@ -504,7 +536,7 @@ export class SideScroller {
     this.shakeY = (Math.random() - 0.5) * this.shakeIntensity * 2
 
     // ─── 距離スコア加算 ───────────────────────────────────────────
-    this.playScore += r.scrollSpeed * dt * SCORE.distanceScoreRate
+    this.playScore += effectiveScrollSpeed * dt * SCORE.distanceScoreRate
   }
 
   // ─── 死亡演出更新 ────────────────────────────────────────────────
@@ -525,6 +557,7 @@ export class SideScroller {
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
     const world = this._getWorld()
+    soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {
       sys.onPlayerHit?.(world)
     }
@@ -539,6 +572,7 @@ export class SideScroller {
     this.dead = true
     this.shakeIntensity = VFX.deathShakeIntensity
     this._spawnDeathExplosion(p.x + p.w / 2, p.y + p.h / 2)
+    soundManager.onDeath()
     // Hook: onPlayerDeath
     const dw = this._getWorld()
     for (const sys of getActiveSystems(this.rules.features)) sys.onPlayerDeath?.(dw)
@@ -1060,6 +1094,7 @@ export class SideScroller {
       ctx:              this.ctx,
       get cameraX()     { return self.cameraX },
       get gameStats()   { return self._gameStats },
+      get scrollMode()  { return self.rules.scrollAxis as 'x' | 'y' },
 
       addScore(amount)              { self.playScore += amount },
       addScorePopup(x, y, text, c) { self._addScorePopup(x, y, text, c) },
@@ -1084,6 +1119,13 @@ export class SideScroller {
       setTimescale(scale, durationSec) {
         self._timescaleScale = scale
         self._timescaleRemaining = durationSec ?? -1
+      },
+
+      getHazardScreenX(h) {
+        return self.rules.scrollAxis === 'x' ? h.x - self.cameraX : h.x
+      },
+      getPlayerWorldX() {
+        return self.rules.scrollAxis === 'x' ? self.player.x + self.cameraX : self.player.x
       },
 
       setKills(n)  { self._gameStats.kills = n },

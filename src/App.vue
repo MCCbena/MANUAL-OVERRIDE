@@ -10,6 +10,7 @@ import ChoicePanel from './components/ChoicePanel.vue'
 import ThrowOverlay from './components/ThrowOverlay.vue'
 import EndingPanel from './components/EndingPanel.vue'
 import TutorialHints from './components/TutorialHints.vue'
+import PluginLoader from './components/PluginLoader.vue'
 import { GENRES } from './data/genres'
 import type { ThrowResult } from './domain/types'
 
@@ -23,7 +24,7 @@ let scroller: SideScroller | null = null
 const snapshot = ref<GameSnapshot>({
   distance: 0, playScore: 0, combo: 0, kills: 0, exp: 0,
   beatHits: 0, survivedSec: 0, hp: 3, maxHp: 3, dead: false, shouldUpdate: null,
-  statJumps: 0, statMoveLeft: 0, statMoveRight: 0,
+  statJumps: 0, statMoveLeft: 0, statMoveRight: 0, firstJumpDone: false,
 })
 
 // ─── Canvas サイズをウィンドウに合わせる ───────────────────────────
@@ -54,8 +55,9 @@ function beginSnapshotLoop() {
     snapshot.value = scroller.getSnapshot()
 
     // 更新トリガー（tutorial と playing 両方で発火する）
+    // 最初のジャンプまで待つ
     const activePlay = gameState.phase.value === 'playing' || gameState.phase.value === 'tutorial'
-    if (snapshot.value.shouldUpdate !== null && activePlay) {
+    if (snapshot.value.shouldUpdate !== null && snapshot.value.firstJumpDone && activePlay) {
       scroller.setPaused(true)
       gameState.triggerUpdate()
     }
@@ -109,11 +111,32 @@ const currentTheme = computed(() => {
   return GENRES.find(g => g.id === genre)?.theme ?? 'plain'
 })
 
-// ─── 再開フェーズで一時停止解除 ────
+// ─── フェーズ遷移で一時停止/再開 ────
 watch(gameState.phase, (newPhase) => {
-  if (['playing', 'tutorial', 'genreLocked'].includes(newPhase)) {
+  if (newPhase === 'updating') {
+    // 選択肢が表示されるときはゲーム一時停止（スムーズに選択できるように）
+    scroller?.setPaused(true)
+  } else if (['playing', 'tutorial', 'genreLocked'].includes(newPhase)) {
+    // ゲーム再開
     scroller?.setPaused(false)
   }
+})
+
+// ─── ジャンル確定時の加速エフェクト ────
+let genreLockedBoostTimer: number | null = null
+watch(() => gameState.lockedGenre.value, (newGenre) => {
+  if (!newGenre || !scroller) return
+
+  // ジャンル確定時、スクロール速度を一時的にアップ（0.8秒間）
+  const originalSpeed = gameState.rules.scrollSpeed
+  gameState.rules.scrollSpeed = originalSpeed * 1.35  // 35%加速
+  scroller.updateRules(gameState.rules)
+
+  if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
+  genreLockedBoostTimer = window.setTimeout(() => {
+    gameState.rules.scrollSpeed = originalSpeed
+    scroller?.updateRules(gameState.rules)
+  }, 800)
 })
 
 onMounted(() => {
@@ -137,6 +160,9 @@ onUnmounted(() => {
         <!-- スキャンライン -->
         <div class="title-scanlines" />
 
+        <!-- グリッド背景 -->
+        <div class="title-grid-bg" />
+
         <div class="title-card">
           <!-- 書類風ヘッダー -->
           <div class="title-doc-header">
@@ -146,11 +172,11 @@ onUnmounted(() => {
 
           <div class="title-rule" />
 
-          <div class="title-main">取扱説明書を<br>読むゲーム</div>
+          <div class="title-main">MANUAL<br>OVERRIDE</div>
 
           <div class="title-sub">
             説明書が更新されるたびにゲームが変わる。<br>
-            あなたはどんなゲームを作りますか？
+            あなたはどんなゲームを作りますか？<span class="title-cursor">|</span>
           </div>
 
           <button class="title-btn" @click="startGame">
@@ -196,6 +222,7 @@ onUnmounted(() => {
         :diff-lines="manualCtl.diffLines.value"
         :is-animating="manualCtl.isAnimating.value"
         :history="manualCtl.history.value"
+        :features="gameState.rules.features"
       />
 
       <!-- チュートリアルヒント（序盤のみ表示） -->
@@ -222,14 +249,20 @@ onUnmounted(() => {
         </div>
       </Transition>
 
-      <!-- ジャンル確定バナー -->
-      <Transition name="genre-reveal">
-        <div v-if="gameState.phase.value === 'genreLocked'" class="genre-locked-banner">
-          <div class="genre-locked-text">
-            {{ gameState.lockedGenreDef()?.manualReveal }}
+      <!-- ジャンル確定演出 -->
+      <div v-if="gameState.phase.value === 'genreLocked'" class="genre-locked-effect">
+        <!-- インク滲みエフェクト -->
+        <div class="genre-ink-bleed" />
+
+        <!-- ジャンル確定バナー -->
+        <Transition name="genre-reveal">
+          <div class="genre-locked-banner">
+            <div class="genre-locked-text">
+              {{ gameState.lockedGenreDef()?.manualReveal }}
+            </div>
           </div>
-        </div>
-      </Transition>
+        </Transition>
+      </div>
     </template>
 
     <!-- ─── 2択選択 ─── -->
@@ -262,14 +295,41 @@ onUnmounted(() => {
         @restart="restart"
       />
     </Transition>
+
+    <!-- ─── プラグインローダー ─── -->
+    <PluginLoader />
   </div>
 </template>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1+Code&display=swap');
+
+/* グローバルCSS変数 */
+:root {
+  --bg:          #0a0a0a;
+  --bg-panel:    #0d120d;
+  --green:       #00ff41;
+  --green-dim:   #33aa55;
+  --green-dark:  #001a00;
+  --green-glow:  rgba(0, 255, 65, 0.25);
+  --text:        #b8ffb8;
+  --text-dim:    rgba(184, 255, 184, 0.45);
+  --danger:      #ff3333;
+  --amber:       #ffbb00;
+  --font-mono:   'M PLUS 1 Code', monospace;
+  --font-hand:   'M PLUS 1 Code', monospace;
+  --scanline: repeating-linear-gradient(
+    to bottom,
+    transparent 0px, transparent 2px,
+    rgba(0, 0, 0, 0.15) 2px, rgba(0, 0, 0, 0.15) 3px
+  );
+}
+
 /* グローバルリセット */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body, #app { width: 100%; height: 100%; overflow: hidden; background: #111; }
+html, body, #app { width: 100%; height: 100%; overflow: hidden; background: var(--bg); }
 button { outline: none; }
+body { font-family: var(--font-mono); }
 </style>
 
 <style scoped>
@@ -292,7 +352,7 @@ button { outline: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(8, 8, 18, 0.96);
+  background: var(--bg);
   z-index: 100;
 }
 
@@ -300,26 +360,34 @@ button { outline: none; }
 .title-scanlines {
   position: absolute;
   inset: 0;
-  background: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 3px,
-    rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
-  );
+  background: var(--scanline);
   pointer-events: none;
+}
+
+/* グリッド背景（説明書イメージ） */
+.title-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(0,255,65,0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0,255,65,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .title-card {
   text-align: center;
-  font-family: 'Courier New', Courier, monospace;
-  color: #e8e8ee;
-  background: rgba(255,255,255,0.02);
-  border: 1px solid rgba(255,255,255,0.10);
+  font-family: var(--font-mono);
+  color: var(--text);
+  background: var(--bg-panel);
+  border: 1px solid var(--green-dim);
   padding: 36px 48px 30px;
   max-width: 480px;
   width: 90%;
   box-shadow:
-    0 0 60px rgba(0,0,0,0.8),
-    inset 0 1px 0 rgba(255,255,255,0.04);
+    0 0 30px var(--green-glow),
+    inset 0 1px 0 rgba(0,255,65,0.1);
   animation: titleCardIn 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -337,41 +405,44 @@ button { outline: none; }
 .title-doc-tag {
   font-size: 9px;
   letter-spacing: 2px;
-  color: rgba(255,255,255,0.2);
+  color: var(--green-dim);
   text-transform: uppercase;
+  font-family: var(--font-mono);
 }
 
 .title-rule {
   height: 1px;
-  background: linear-gradient(to right, transparent, rgba(255,255,255,0.15), transparent);
+  background: linear-gradient(to right, transparent, var(--green-dim), transparent);
   margin-bottom: 22px;
 }
 
 .title-main {
-  font-size: clamp(24px, 4.5vw, 38px);
+  font-size: clamp(28px, 5vw, 42px);
   font-weight: bold;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   margin-bottom: 18px;
   line-height: 1.35;
-  color: #ffffff;
-  text-shadow: 0 0 30px rgba(255,255,255,0.15);
+  color: var(--green);
+  text-shadow: 0 0 20px var(--green-glow);
+  font-family: var(--font-hand);
 }
 
 .title-sub {
   font-size: 13px;
-  color: rgba(255,255,255,0.45);
+  color: var(--text-dim);
   line-height: 2.1;
   margin-bottom: 30px;
   letter-spacing: 0.3px;
+  font-family: var(--font-mono);
 }
 
 .title-btn {
   background: transparent;
-  color: #fff;
-  border: 1.5px solid rgba(255,255,255,0.5);
+  color: var(--green);
+  border: 1.5px solid var(--green-dim);
   padding: 11px 36px;
   font-size: 15px;
-  font-family: inherit;
+  font-family: var(--font-mono);
   cursor: pointer;
   letter-spacing: 3px;
   transition: background 0.18s, border-color 0.18s, color 0.18s, box-shadow 0.18s;
@@ -379,13 +450,13 @@ button { outline: none; }
   display: inline-block;
 }
 .title-btn:hover {
-  background: #cc0000;
-  border-color: #cc0000;
-  color: #fff;
-  box-shadow: 0 0 20px rgba(200,0,0,0.4);
+  background: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 20px var(--green-glow);
 }
 .title-btn:active { transform: translateY(1px); }
-.title-btn-bracket { color: rgba(255,255,255,0.4); }
+.title-btn-bracket { color: var(--green-dim); }
 
 /* 操作説明 */
 .title-controls {
@@ -399,18 +470,18 @@ button { outline: none; }
 .ctrl-group { display: flex; align-items: center; gap: 4px; }
 .ctrl-key {
   display: inline-block;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.18);
+  background: var(--green-dark);
+  border: 1px solid var(--green-dim);
   border-bottom-width: 2px;
-  color: rgba(255,255,255,0.55);
-  font-family: inherit;
+  color: var(--green);
+  font-family: var(--font-mono);
   font-size: 10px;
   padding: 2px 6px;
   border-radius: 2px;
   letter-spacing: 0;
 }
-.ctrl-desc { color: rgba(255,255,255,0.22); letter-spacing: 0.5px; }
-.ctrl-sep { color: rgba(255,255,255,0.15); }
+.ctrl-desc { color: var(--text-dim); letter-spacing: 0.5px; }
+.ctrl-sep { color: var(--green-dim); }
 
 /* ── ギブアップエリア ── */
 .giveup-area {
@@ -425,28 +496,29 @@ button { outline: none; }
   z-index: 15;
 }
 .giveup-btn {
-  background: rgba(255, 255, 255, 0.07);
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  border-bottom: 2px solid rgba(255, 255, 255, 0.18);
-  color: rgba(255, 255, 255, 0.55);
+  background: transparent;
+  border: 1px solid var(--green-dim);
+  border-bottom: 2px solid var(--green-dim);
+  color: var(--green);
   padding: 7px 20px;
   font-size: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: var(--font-mono);
   cursor: pointer;
   border-radius: 3px;
   letter-spacing: 0.5px;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, box-shadow 0.15s;
   white-space: nowrap;
 }
 .giveup-btn:hover {
-  background: rgba(180, 0, 0, 0.35);
-  border-color: rgba(200, 50, 50, 0.7);
-  color: #fff;
+  background: var(--green-dark);
+  border-color: var(--green);
+  color: var(--green);
+  box-shadow: 0 0 12px var(--green-glow);
 }
 .giveup-hint {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.22);
-  font-family: monospace;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
   letter-spacing: 0.5px;
 }
 
@@ -461,41 +533,99 @@ button { outline: none; }
   100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* ジャンル確定演出 */
+.genre-locked-effect {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+}
+
+/* インク滲みエフェクト */
+.genre-ink-bleed {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%);
+  animation: inkBleedPulse 0.8s ease-out forwards;
+}
+
+@keyframes inkBleedPulse {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* ジャンル確定バナー */
 .genre-locked-banner {
   position: absolute;
-  top: 68px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
-  background: rgba(0,0,0,0.88);
-  border: 1px solid rgba(255,255,255,0.22);
-  color: #fff;
-  padding: 10px 28px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  z-index: 20;
+  transform: translate(-50%, -50%);
+  background: var(--bg-panel);
+  border: 2px solid var(--green);
+  color: var(--green);
+  padding: 16px 40px;
+  font-family: var(--font-mono);
+  font-size: 18px;
+  z-index: 26;
   max-width: 520px;
   text-align: center;
   backdrop-filter: blur(6px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  letter-spacing: 0.3px;
+  box-shadow: 0 8px 30px var(--green-glow);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  animation: genreNameReveal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both;
 }
-.genre-locked-text { line-height: 1.6; }
+
+.genre-locked-text {
+  line-height: 1.8;
+  clip-path: inset(0 0 0 0);
+}
+
+@keyframes genreNameReveal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
 
 /* トランジション */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
 .genre-reveal-enter-active {
-  animation: revealBanner 0.5s ease;
+  /* Animation handled by .genre-locked-banner keyframes */
 }
 .genre-reveal-leave-active {
-  transition: opacity 1s 3s;
+  transition: opacity 0.5s;
 }
 .genre-reveal-leave-to { opacity: 0; }
 
-@keyframes revealBanner {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* グリッド背景（説明書イメージ） */
+.title-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* 点滅カーソル */
+.title-cursor {
+  display: inline-block;
+  animation: titleCursorBlink 1s steps(1, start) infinite;
+  color: #e8e8ee;
+}
+
+@keyframes titleCursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 </style>

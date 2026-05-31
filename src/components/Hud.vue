@@ -40,9 +40,9 @@ const distBar = computed(() => {
 
 // コンボカラー
 const comboColor = computed(() => {
-  if (props.combo >= 10) return '#ff4444'
-  if (props.combo >= 5)  return '#ffaa00'
-  return '#ffdd00'
+  if (props.combo >= 10) return '#00ff41'
+  if (props.combo >= 5)  return '#33aa55'
+  return '#88ff44'
 })
 </script>
 
@@ -121,10 +121,10 @@ const comboColor = computed(() => {
 .hud-score {
   font-size: 30px;
   font-weight: 900;
-  color: #fff;
-  font-family: 'Courier New', monospace;
+  color: #00ff41;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 2px;
-  text-shadow: 0 0 16px rgba(255,255,255,0.4), 0 2px 4px rgba(0,0,0,0.6);
+  text-shadow: 0 0 16px rgba(0,255,65,0.4), 0 2px 4px rgba(0,0,0,0.6);
   line-height: 1;
 }
 .hud-dist {
@@ -135,20 +135,20 @@ const comboColor = computed(() => {
 }
 .hud-dist-bar {
   width: 100px; height: 3px;
-  background: rgba(255,255,255,0.15);
-  border-radius: 2px;
+  background: rgba(0,255,65,0.15);
+  border-radius: 1px;
   overflow: hidden;
 }
 .hud-dist-fill {
   height: 100%;
-  background: linear-gradient(90deg, #4488ff, #44ffdd);
-  border-radius: 2px;
+  background: linear-gradient(90deg, #33aa55, #00ff41);
+  border-radius: 1px;
   transition: width 0.3s ease;
 }
 .hud-dist-text {
   font-size: 11px;
-  color: rgba(255,255,255,0.55);
-  font-family: monospace;
+  color: rgba(184,255,184,0.45);
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── ジャンルバッジ ─── */
@@ -156,14 +156,14 @@ const comboColor = computed(() => {
   position: absolute;
   top: 14px; left: 50%;
   transform: translateX(-50%);
-  background: rgba(255,255,255,0.1);
+  background: rgba(0,255,65,0.08);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255,255,255,0.2);
-  color: rgba(255,255,255,0.85);
+  border: 1px solid rgba(0,255,65,0.2);
+  color: #33aa55;
   font-size: 11px;
   padding: 3px 14px;
-  border-radius: 20px;
-  font-family: monospace;
+  border-radius: 2px;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -180,12 +180,12 @@ const comboColor = computed(() => {
 .hud-hp-row { display: flex; gap: 3px; }
 .hud-hp-heart {
   font-size: 20px;
-  color: #ff6666;
-  text-shadow: 0 0 8px #ff4444;
+  color: #ff3333;
+  text-shadow: 0 0 8px #ff3333;
   transition: color 0.2s, text-shadow 0.2s;
 }
 .hud-hp-heart.empty {
-  color: rgba(255,255,255,0.15);
+  color: rgba(0,255,65,0.15);
   text-shadow: none;
 }
 .hud-stat {
@@ -195,15 +195,15 @@ const comboColor = computed(() => {
 }
 .hud-stat-label {
   font-size: 10px;
-  color: rgba(255,255,255,0.4);
-  font-family: monospace;
+  color: rgba(184,255,184,0.45);
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 1px;
 }
 .hud-stat-val {
   font-size: 18px;
   font-weight: bold;
-  color: #fff;
-  font-family: monospace;
+  color: #00ff41;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── コンボ ─── */
@@ -219,7 +219,7 @@ const comboColor = computed(() => {
   display: block;
   font-size: 42px;
   font-weight: 900;
-  font-family: 'Courier New', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   text-shadow: 0 0 20px currentColor;
   line-height: 1;
 }
@@ -228,7 +228,7 @@ const comboColor = computed(() => {
   font-size: 12px;
   letter-spacing: 4px;
   opacity: 0.8;
-  font-family: monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── トランジション ─── */

@@ -14,6 +14,7 @@ import { createShootState, updateShoot } from './shootSystem'
 import type { ShootState } from './shootSystem'
 import { HAZARD_VFX } from '../../data/tunables'
 import { getGenre, getActiveSystems } from '../../engine/GameRegistry'
+import { soundManager } from '../../plugins/SoundManager'
 
 export class ShootFeature implements FeatureSystem {
   readonly handles = ['shoot', 'three_way', 'charge_shot', 'spread_shot', 'enemy_hp', 'bomb'] as const
@@ -36,7 +37,7 @@ export class ShootFeature implements FeatureSystem {
     const viewportLeft  = isVertical ? -100 : world.cameraX - 100
     const viewportRight = isVertical ? W + 100 : world.cameraX + W + 100
 
-    const { scoreGain, destroyedHazards } = updateShoot(
+    const { scoreGain, destroyedHazards, shotFired } = updateShoot(
       this.state,
       world.hazards,
       shootJust,
@@ -45,6 +46,10 @@ export class ShootFeature implements FeatureSystem {
       dt,
       viewportLeft, viewportRight, -100,
     )
+
+    if (shotFired) {
+      soundManager.onShoot()
+    }
 
     if (scoreGain > 0) {
       world.addScore(scoreGain)

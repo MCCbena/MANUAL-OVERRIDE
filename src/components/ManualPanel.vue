@@ -8,10 +8,27 @@ const props = defineProps<{
   diffLines: Array<{ text: string; type: 'added' | 'removed' | 'unchanged' }>
   isAnimating: boolean
   history: ManualVersion[]
+  features?: Set<string>
 }>()
 
 const showHistory = ref(false)
 const themeClass = computed(() => `theme-${props.theme}`)
+
+// auto_run が有効な場合、左右移動の説明を除外
+const filteredManualText = computed(() => {
+  if (!props.features?.has('auto_run')) return props.manual.manualText
+  return props.manual.manualText.filter(line =>
+    !line.includes('←') && !line.includes('→') && !line.includes('左右')
+  )
+})
+
+// 同様に差分ラインもフィルタ
+const filteredDiffLines = computed(() => {
+  if (!props.features?.has('auto_run')) return props.diffLines
+  return props.diffLines.filter(line =>
+    !line.text.includes('←') && !line.text.includes('→') && !line.text.includes('左右')
+  )
+})
 
 function keyLabel(key: string): string {
   const map: Record<string, string> = {
@@ -61,9 +78,9 @@ function keyLabel(key: string): string {
 
     <!-- 本文（差分強調） -->
     <div class="manual-body">
-      <template v-if="isAnimating && diffLines.length > 0">
+      <template v-if="isAnimating && filteredDiffLines.length > 0">
         <div
-          v-for="(line, i) in diffLines"
+          v-for="(line, i) in filteredDiffLines"
           :key="i"
           class="manual-line"
           :class="`line-${line.type}`"
@@ -75,7 +92,7 @@ function keyLabel(key: string): string {
         </div>
       </template>
       <template v-else>
-        <div v-for="line in manual.manualText" :key="line" class="manual-line line-unchanged">
+        <div v-for="line in filteredManualText" :key="line" class="manual-line line-unchanged">
           <span>{{ line }}</span>
         </div>
       </template>
@@ -85,10 +102,13 @@ function keyLabel(key: string): string {
     <div class="manual-controls">
       <div class="controls-title">操作</div>
       <div class="controls-grid">
-        <span class="key-badge">{{ keyLabel(manual.controls.moveLeft) }}</span>
-        <span class="key-action">左移動</span>
-        <span class="key-badge">{{ keyLabel(manual.controls.moveRight) }}</span>
-        <span class="key-action">右移動</span>
+        <!-- auto_run が有効な場合は左右キーを非表示 -->
+        <template v-if="!features?.has('auto_run')">
+          <span class="key-badge">{{ keyLabel(manual.controls.moveLeft) }}</span>
+          <span class="key-action">左移動</span>
+          <span class="key-badge">{{ keyLabel(manual.controls.moveRight) }}</span>
+          <span class="key-action">右移動</span>
+        </template>
         <span class="key-badge">{{ keyLabel(manual.controls.jump) }}</span>
         <span class="key-action">ジャンプ</span>
         <template v-if="manual.controls.shoot">
@@ -107,26 +127,28 @@ function keyLabel(key: string): string {
 .manual-panel {
   position: absolute;
   bottom: 58px; right: 16px;
-  width: 232px;
-  background: #fafafa;
-  border: 2px solid #1a1a1a;
+  width: 340px;
+  background: #0d120d;
+  border: 2px solid #33aa55;
   border-radius: 2px;
-  padding: 10px 12px;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 11.5px;
-  line-height: 1.65;
-  color: #1a1a1a;
-  box-shadow: 4px 4px 0 #1a1a1a, 0 0 0 1px rgba(0,0,0,0.05);
+  padding: 16px 18px;
+  font-family: 'M PLUS 1 Code', cursive;
+  font-size: 13px;
+  line-height: 1.8;
+  color: #b8ffb8;
+  box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
   z-index: 20;
   transition: font-family 0.6s, background 0.6s, border-color 0.6s, box-shadow 0.6s;
   user-select: none;
+  max-height: 380px;
+  overflow-y: auto;
 }
 
 .manual-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 1px solid rgba(0,0,0,0.12);
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   padding-bottom: 5px;
   margin-bottom: 7px;
 }
@@ -137,41 +159,43 @@ function keyLabel(key: string): string {
   font-size: 10.5px;
   font-weight: 700;
   letter-spacing: 0.5px;
-  color: #333;
+  color: #00ff41;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .manual-ver-dot {
   display: inline-block;
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: #cc2222;
+  background: #00ff41;
+  box-shadow: 0 0 6px #00ff41;
 }
 .history-btn {
   font-size: 9px;
-  background: none;
-  border: 1px solid #ccc;
+  background: transparent;
+  border: 1px solid #33aa55;
   cursor: pointer;
   padding: 1px 6px;
   border-radius: 2px;
-  color: #888;
-  font-family: inherit;
+  color: #33aa55;
+  font-family: 'M PLUS 1 Code', monospace;
   transition: all 0.15s;
 }
-.history-btn:hover { background: #f0f0f0; border-color: #999; color: #333; }
+.history-btn:hover { background: #001a00; border-color: #00ff41; color: #00ff41; }
 
 /* ── 履歴 ── */
 .manual-history {
-  border-bottom: 1px dashed #ddd;
+  border-bottom: 1px dashed rgba(0,255,65,0.2);
   margin-bottom: 7px;
   padding-bottom: 7px;
   max-height: 110px;
   overflow-y: auto;
   font-size: 10px;
-  color: #aaa;
+  color: rgba(184,255,184,0.45);
 }
-.history-empty { font-style: italic; color: #ccc; }
+.history-empty { font-style: italic; color: rgba(184,255,184,0.25); }
 .history-item { margin-bottom: 5px; }
-.history-ver { font-weight: bold; font-size: 9px; color: #bbb; text-transform: uppercase; letter-spacing: 1px; }
-.history-line { padding-left: 4px; color: #bbb; }
+.history-ver { font-weight: bold; font-size: 9px; color: rgba(184,255,184,0.35); text-transform: uppercase; letter-spacing: 1px; font-family: 'M PLUS 1 Code', monospace; }
+.history-line { padding-left: 4px; color: rgba(184,255,184,0.35); font-family: 'M PLUS 1 Code', cursive; }
 
 /* ── イラスト ── */
 .manual-image-wrap {
@@ -193,66 +217,74 @@ function keyLabel(key: string): string {
 .manual-body { margin-bottom: 8px; }
 .manual-line { display: block; padding: 1px 0; }
 
-.line-unchanged { color: #1a1a1a; }
+.line-unchanged { color: #b8ffb8; font-weight: 500; font-family: 'M PLUS 1 Code', cursive; }
 .line-removed {
   display: block;
   text-decoration: line-through;
-  color: #cc2222;
-  opacity: 0.55;
-  background: rgba(200,0,0,0.05);
+  color: rgba(255,51,51,0.5);
+  opacity: 0.7;
+  background: transparent;
   padding: 0 2px;
 }
 .line-added {
   display: block;
-  color: #cc2222;
+  color: #00ff88;
   font-weight: 700;
-  animation: inkIn 0.5s ease both;
+  animation: inkIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   position: relative;
   padding-left: 12px;
+  max-height: 100px;
+  overflow: hidden;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 .line-added::before {
-  content: '▶';
+  content: '>';
   position: absolute;
   left: 0;
-  font-size: 8px;
-  top: 3px;
-  color: #cc2222;
+  font-size: 12px;
+  top: 0px;
+  color: #00ff88;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 @keyframes inkIn {
-  0%   { opacity: 0; transform: translateX(-5px); filter: blur(2px); }
-  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+  0%   { opacity: 0; transform: translateX(-5px); max-height: 0; }
+  100% { opacity: 1; transform: translateX(0); max-height: 100px; }
 }
 
 /* ── 操作キー ── */
 .manual-controls {
-  border-top: 1px solid rgba(0,0,0,0.1);
+  border-top: 1px solid rgba(0,255,65,0.2);
   padding-top: 6px;
 }
 .controls-title {
-  font-size: 8.5px;
-  color: #bbb;
-  letter-spacing: 2px;
+  font-size: 10px;
+  color: #33aa55;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  font-weight: 600;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .controls-grid {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 2px 6px;
+  gap: 4px 8px;
   align-items: center;
 }
 .key-badge {
-  background: #1a1a1a;
-  color: #fff;
-  padding: 1px 5px;
-  border-radius: 2px;
-  font-size: 9.5px;
-  min-width: 30px;
+  background: #001a00;
+  color: #00ff41;
+  padding: 2px 6px;
+  border-radius: 1px;
+  font-size: 11px;
+  min-width: 35px;
   text-align: center;
   letter-spacing: 0.5px;
-  border-bottom: 2px solid rgba(0,0,0,0.4);
+  border: 1px solid #33aa55;
+  font-weight: 600;
+  font-family: 'M PLUS 1 Code', monospace;
 }
-.key-action { font-size: 10.5px; color: #555; }
+.key-action { font-size: 12px; color: #b8ffb8; font-weight: 500; font-family: 'M PLUS 1 Code', cursive; }
 
 /* ── 履歴トランジション ── */
 .slide-enter-active, .slide-leave-active { transition: all 0.2s ease; max-height: 200px; }
@@ -265,35 +297,45 @@ function keyLabel(key: string): string {
   background: #080818;
   color: #a8d8ff;
   border-color: #1a66ff;
-  box-shadow: 4px 4px 0 #1a66ff, 0 0 20px rgba(26,102,255,0.3);
+  border-width: 2px;
+  box-shadow: 4px 4px 0 #1a66ff, 0 0 20px rgba(26,102,255,0.3), inset 0 0 20px rgba(26,102,255,0.05);
   font-family: 'Courier New', monospace;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
 }
-.theme-stg .manual-header    { border-color: rgba(26,102,255,0.3); }
-.theme-stg .manual-ver-badge  { color: #a8d8ff; }
-.theme-stg .manual-ver-dot    { background: #1a66ff; box-shadow: 0 0 6px #1a66ff; }
-.theme-stg .history-btn       { color: #5588cc; border-color: #1a66ff; }
-.theme-stg .line-unchanged    { color: #a8d8ff; }
-.theme-stg .controls-title    { color: #446688; }
-.theme-stg .key-badge         { background: #1a66ff; border-color: #0033aa; }
+.theme-stg .manual-header    { border-color: rgba(26,102,255,0.4); }
+.theme-stg .manual-ver-badge  { color: #1a66ff; font-family: 'Courier New', monospace; }
+.theme-stg .manual-ver-dot    { background: #1a66ff; box-shadow: 0 0 8px #1a66ff; }
+.theme-stg .history-btn       { color: #5588cc; border-color: #1a66ff; background: rgba(26,102,255,0.1); }
+.theme-stg .line-unchanged    { color: #a8d8ff; font-family: 'Courier New', monospace; }
+.theme-stg .line-added        { color: #00ff88; }
+.theme-stg .controls-title    { color: #446688; font-family: 'Courier New', monospace; }
+.theme-stg .key-badge         { background: #1a66ff; border-color: #0033aa; font-family: 'Courier New', monospace; }
 .theme-stg .key-action        { color: #6699cc; }
-.theme-stg .manual-controls   { border-color: rgba(26,102,255,0.2); }
+.theme-stg .manual-controls   { border-color: rgba(26,102,255,0.3); }
 .theme-stg .manual-history    { border-color: rgba(26,102,255,0.2); }
 
 /* ──────────────────────────────────────
    テーマ: RPG
 ────────────────────────────────────── */
 .theme-rpg {
-  background: #f5edd0;
+  background: linear-gradient(135deg, #f5edd0 0%, #faf6e6 100%);
   color: #3a2200;
   border-color: #8b6100;
+  border-width: 3px;
   font-family: 'Georgia', 'Times New Roman', serif;
-  box-shadow: 5px 5px 0 #8b6100, 2px 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 5px 5px 0 #8b6100, 2px 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  letter-spacing: 0.2px;
 }
-.theme-rpg .manual-ver-dot { background: #8b6100; }
-.theme-rpg .key-badge      { background: #8b6100; border-color: #5a3e00; }
-.theme-rpg .controls-title { color: #c4a020; }
-.theme-rpg .key-action     { color: #8b6100; }
+.theme-rpg .manual-header  { border-color: #d4b896; }
+.theme-rpg .manual-ver-dot { background: #8b6100; box-shadow: 0 0 4px rgba(139,97,0,0.3); }
+.theme-rpg .manual-ver-badge { font-family: 'Georgia', serif; }
+.theme-rpg .line-unchanged { color: #4a3a00; font-family: 'Georgia', serif; }
+.theme-rpg .line-added     { color: #a84000; }
+.theme-rpg .key-badge      { background: #8b6100; border-color: #5a3e00; font-family: 'Georgia', serif; color: #fff; }
+.theme-rpg .controls-title { color: #c4a020; font-family: 'Georgia', serif; }
+.theme-rpg .key-action     { color: #8b6100; font-family: 'Georgia', serif; }
+.theme-rpg .manual-controls { border-color: #d4b896; }
 
 /* ──────────────────────────────────────
    テーマ: PUZZLE
@@ -318,13 +360,23 @@ function keyLabel(key: string): string {
   background: #0f0020;
   color: #ee88ff;
   border-color: #9900ff;
-  box-shadow: 4px 4px 0 #9900ff, 0 0 24px rgba(153,0,255,0.4);
+  border-width: 2px;
+  box-shadow: 4px 4px 0 #9900ff, 0 0 24px rgba(153,0,255,0.5), inset 0 0 16px rgba(153,0,255,0.1);
   font-family: 'Courier New', monospace;
+  letter-spacing: 0.3px;
+  font-weight: 500;
 }
-.theme-rhythm .manual-header  { border-color: rgba(153,0,255,0.3); }
-.theme-rhythm .manual-ver-dot { background: #ff00ff; box-shadow: 0 0 8px #ff00ff; }
-.theme-rhythm .key-badge      { background: #9900ff; border-color: #6600cc; }
+.theme-rhythm .manual-header  { border-color: rgba(153,0,255,0.4); }
+.theme-rhythm .manual-ver-dot { background: #ff00ff; box-shadow: 0 0 12px #ff00ff; animation: rhythm-pulse 1s infinite; }
+.theme-rhythm .line-unchanged { color: #dd88ff; font-family: 'Courier New', monospace; }
+.theme-rhythm .line-added     { color: #00ffff; text-decoration: underline wavy #00ff88; }
+.theme-rhythm .key-badge      { background: #9900ff; border-color: #6600cc; font-family: 'Courier New', monospace; }
 .theme-rhythm .key-action     { color: #cc66ff; }
-.theme-rhythm .line-unchanged { color: #dd88ff; }
-.theme-rhythm .controls-title { color: #660088; }
+.theme-rhythm .controls-title { color: #bb44ff; font-family: 'Courier New', monospace; }
+.theme-rhythm .manual-controls { border-color: rgba(153,0,255,0.3); }
+
+@keyframes rhythm-pulse {
+  0%, 100% { box-shadow: 0 0 8px #ff00ff; }
+  50% { box-shadow: 0 0 12px #ff00ff; }
+}
 </style>

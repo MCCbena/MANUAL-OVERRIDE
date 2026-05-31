@@ -19,6 +19,8 @@
  */
 
 import { loadFromGlob, devValidate } from '../framework'
+import { pluginManager } from '../plugins/PluginManager'
+import type { ManualVersion } from '../domain/types'
 
 // src/data/manuals/*.json を自動収集（ビルド時に静的バンドル）
 // TEMPLATE.json は除外（サンプルファイル）
@@ -29,6 +31,31 @@ const _rawModules = import.meta.glob(
 )
 
 export const MANUAL_DECK = loadFromGlob(_rawModules)
+
+// Load user-installed deck-extension plugins
+const installedPlugins = pluginManager.loadAll()
+for (const plugin of installedPlugins) {
+  if (plugin.type === 'deck-extension') {
+    // Add entries to MANUAL_DECK
+    for (const entry of plugin.entries) {
+      MANUAL_DECK[entry.key] = entry
+    }
+
+    // Inject choices into existing versions
+    if (plugin.inject) {
+      for (const injection of plugin.inject) {
+        const targetVer = MANUAL_DECK[injection.targetKey] as ManualVersion
+        if (targetVer) {
+          const choiceWithId = {
+            ...injection.choice,
+            id: injection.choice.id || `${injection.targetKey}-injected-${Math.random().toString(36).substr(2, 9)}`,
+          }
+          targetVer.choices.push(choiceWithId as any)
+        }
+      }
+    }
+  }
+}
 
 // 開発中のみ整合性チェックを実行（本番ビルドでは除去される）
 devValidate(MANUAL_DECK)

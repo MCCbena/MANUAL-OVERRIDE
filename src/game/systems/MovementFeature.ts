@@ -41,7 +41,7 @@ export class MovementFeature implements FeatureSystem {
       // 横スクロール: auto_run は右方向を強制
       const isAutoRun   = r.features.has('auto_run')
       const movingLeft  = !isAutoRun && input.keys.has(leftKey)
-      const movingRight =  isAutoRun || input.keys.has(rightKey)
+      const movingRight = isAutoRun || input.keys.has(rightKey)
       p.vx = movingRight ? runSpeed : movingLeft ? -runSpeed : 0
     }
   }
