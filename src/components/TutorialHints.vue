@@ -19,11 +19,11 @@ const allDone    = ref(false)
 watch(() => props.movesLeft + props.movesRight, v => { if (v > 0) movedDone.value = true })
 watch(() => props.jumps, v => { if (v > 0) jumpedDone.value = true })
 watch(() => props.distance, v => {
-  if (v > 200) manualDone.value = true  // 少し走ったら説明書ヒントも消す
-  if (v > 500) allDone.value = true     // 500m でオーバーレイ全消し
+  if (v > 150) manualDone.value = true  // 早めに説明書ヒントを消す
+  if (v > 350) allDone.value = true     // 350px でオーバーレイ全消し
 })
 watch(() => props.survivedSec, v => {
-  if (v > 10) allDone.value = true      // 10秒後に強制消去
+  if (v > 8) allDone.value = true       // 8秒後に強制消去
 })
 </script>
 
@@ -34,11 +34,11 @@ watch(() => props.survivedSec, v => {
       <!-- 移動ヒント -->
       <Transition name="hint-pop">
         <div v-if="!movedDone" class="hint hint-move">
+          <div class="hint-step">① 移動</div>
           <div class="hint-keys">
-            <kbd class="hint-key">←</kbd>
-            <kbd class="hint-key">→</kbd>
+            <kbd class="hint-key">← ArrowLeft</kbd>
+            <kbd class="hint-key">→ ArrowRight</kbd>
           </div>
-          <div class="hint-label">移動</div>
           <div class="hint-pulse" />
         </div>
       </Transition>
@@ -46,10 +46,10 @@ watch(() => props.survivedSec, v => {
       <!-- ジャンプヒント -->
       <Transition name="hint-pop">
         <div v-if="!jumpedDone" class="hint hint-jump">
+          <div class="hint-step">② ジャンプ</div>
           <div class="hint-keys">
-            <kbd class="hint-key hint-key-wide">SPACE</kbd>
+            <kbd class="hint-key hint-key-wide">SPACE キー</kbd>
           </div>
-          <div class="hint-label">ジャンプ</div>
           <div class="hint-pulse" />
         </div>
       </Transition>
@@ -127,6 +127,15 @@ watch(() => props.survivedSec, v => {
   color: rgba(255,255,255,0.55);
   font-family: monospace;
   letter-spacing: 1px;
+}
+
+.hint-step {
+  font-size: 12px;
+  font-weight: bold;
+  color: rgba(255,255,255,0.8);
+  font-family: monospace;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
 }
 
 /* キーが脈動 */

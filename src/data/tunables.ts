@@ -88,7 +88,7 @@ export const SHOOT = {
   /** コンボがリセットされるまでの秒数 */
   comboResetTime: 2.5,
   /** 1キルあたりのベーススコア（コンボ倍率をかける前） */
-  baseScorePerKill: 120,
+  baseScorePerKill: 160,
 
   // ── 三方向弾 ──────────────────────────────────────
   /** 斜め弾のX速度倍率 */
@@ -130,7 +130,7 @@ export const THROW = {
 export const SPAWN = {
   // ── 初期スポーン距離 ──────────────────────────────
   /** ゲーム開始時に最初のハザードが出る距離 px */
-  firstSpawnDist: 480,
+  firstSpawnDist: 320,
 
   // ── enemy_hp ──────────────────────────────────────
   /** enemy_hp feature が有効な時のハザードHP */
@@ -434,9 +434,9 @@ export const UI = {
 // ─────────────────────────────────────────────────────────────
 export const SCORE = {
   /** scrollSpeed * dt * この値 が毎フレームのスコア加算量 */
-  distanceScoreRate: 0.12,
+  distanceScoreRate: 0.22,
   /** long_air: 空中1秒あたりのスコアボーナス */
-  longAirScoreRate: 0.8,
+  longAirScoreRate: 1.2,
 } as const
 
 // ─────────────────────────────────────────────────────────────
@@ -445,7 +445,7 @@ export const SCORE = {
 export const DIFFICULTY = {
   // ── 説明書更新タイミング ────────────────────────────────────
   /** 説明書更新が発動する走行距離（px）。配列の長さ = 更新回数 */
-  updateDistances: [1500, 2800, 4200] as readonly number[],
+  updateDistances: [450, 1200, 2200] as readonly number[],
 
   // ── ジャンル収束 ────────────────────────────────────────────
   /** ジャンル確定後のプレイ継続推奨距離 px（ギブアップ可能になる距離） */

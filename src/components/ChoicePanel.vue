@@ -15,14 +15,13 @@ const selected = ref<string | null>(null)
 const revealed = ref(false)
 
 onMounted(() => {
-  // カードが入ってきてから選択肢を表示するまでの遅延
-  setTimeout(() => { revealed.value = true }, 120)
+  revealed.value = true
 })
 
 function pick(choiceId: string) {
   if (selected.value) return
   selected.value = choiceId
-  setTimeout(() => emit('choose', choiceId), 480)
+  setTimeout(() => emit('choose', choiceId), 150)
 }
 </script>
 

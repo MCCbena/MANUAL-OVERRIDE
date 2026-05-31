@@ -118,6 +118,23 @@ watch(gameState.phase, (newPhase) => {
   }
 })
 
+// ─── ジャンル確定時の加速エフェクト ────
+let genreLockedBoostTimer: number | null = null
+watch(() => gameState.lockedGenre.value, (newGenre) => {
+  if (!newGenre || !scroller) return
+
+  // ジャンル確定時、スクロール速度を一時的にアップ（0.8秒間）
+  const originalSpeed = gameState.rules.scrollSpeed
+  gameState.rules.scrollSpeed = originalSpeed * 1.35  // 35%加速
+  scroller.updateRules(gameState.rules)
+
+  if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
+  genreLockedBoostTimer = window.setTimeout(() => {
+    gameState.rules.scrollSpeed = originalSpeed
+    scroller?.updateRules(gameState.rules)
+  }, 800)
+})
+
 onMounted(() => {
   window.addEventListener('resize', resizeCanvas)
 })
