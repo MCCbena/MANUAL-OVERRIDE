@@ -139,26 +139,29 @@ function handleDrop(e: DragEvent) {
 .gear-button {
   width: 48px;
   height: 48px;
-  border-radius: 50%;
-  background: #333;
-  color: #fff;
-  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: #33aa55;
+  border: 1px solid #33aa55;
   cursor: pointer;
   font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.2s;
+  box-shadow: 0 0 8px rgba(0,255,65,0.1);
 }
 
 .gear-button:hover {
-  background: #555;
+  background: rgba(0,255,65,0.1);
+  color: #00ff41;
+  border-color: #00ff41;
 }
 
 .plugin-modal {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.78);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -166,13 +169,14 @@ function handleDrop(e: DragEvent) {
 }
 
 .modal-content {
-  background: white;
-  border-radius: 8px;
+  background: #0d120d;
+  border-radius: 2px;
   width: 90%;
   max-width: 500px;
   max-height: 80vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 0 20px rgba(0,255,65,0.15);
+  border: 1px solid #33aa55;
 }
 
 .modal-header {
@@ -180,15 +184,17 @@ function handleDrop(e: DragEvent) {
   justify-content: space-between;
   align-items: center;
   padding: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   position: sticky;
   top: 0;
-  background: white;
+  background: #0d120d;
 }
 
 .modal-header h2 {
   margin: 0;
   font-size: 18px;
+  color: #00ff41;
+  font-family: 'Caveat', cursive;
 }
 
 .close-btn {
@@ -196,12 +202,12 @@ function handleDrop(e: DragEvent) {
   border: none;
   font-size: 24px;
   cursor: pointer;
-  color: #999;
+  color: #33aa55;
 }
 
 .section {
   padding: 16px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid rgba(0,255,65,0.2);
 }
 
 .section:last-child {
@@ -211,13 +217,15 @@ function handleDrop(e: DragEvent) {
 .section h3 {
   margin: 0 0 12px 0;
   font-size: 14px;
-  color: #333;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .empty-state {
-  color: #999;
+  color: rgba(184,255,184,0.35);
   font-size: 13px;
   padding: 8px;
+  font-family: 'Caveat', cursive;
 }
 
 .plugin-list {
@@ -231,8 +239,9 @@ function handleDrop(e: DragEvent) {
   justify-content: space-between;
   align-items: center;
   padding: 12px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  background: rgba(0,255,65,0.05);
+  border-radius: 2px;
+  border: 1px solid rgba(0,255,65,0.1);
 }
 
 .plugin-info {
@@ -242,69 +251,86 @@ function handleDrop(e: DragEvent) {
 .plugin-name {
   font-weight: 600;
   font-size: 13px;
+  color: #b8ffb8;
+  font-family: 'Caveat', cursive;
 }
 
 .plugin-type {
   font-size: 11px;
-  color: #999;
+  color: rgba(184,255,184,0.35);
   margin-top: 2px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .delete-btn {
-  background: #ff6b6b;
-  color: white;
-  border: none;
+  background: transparent;
+  color: #ff3333;
+  border: 1px solid #ff3333;
   padding: 4px 12px;
-  border-radius: 4px;
+  border-radius: 1px;
   cursor: pointer;
   font-size: 12px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .delete-btn:hover {
-  background: #ff5252;
+  background: rgba(255,51,51,0.1);
 }
 
 .error-message {
-  background: #ffe0e0;
-  color: #d32f2f;
+  background: rgba(255,51,51,0.1);
+  color: #ff3333;
   padding: 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   font-size: 12px;
   margin-bottom: 12px;
+  border: 1px solid rgba(255,51,51,0.3);
+  font-family: 'Caveat', cursive;
 }
 
 .json-input {
   width: 100%;
   height: 200px;
   padding: 8px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 2px;
+  font-family: 'Share Tech Mono', monospace;
   font-size: 12px;
   resize: vertical;
   box-sizing: border-box;
+  background: rgba(0,255,65,0.03);
+  color: #b8ffb8;
+}
+
+.json-input::placeholder {
+  color: rgba(184,255,184,0.25);
 }
 
 .install-btn {
   width: 100%;
   padding: 10px;
   margin-top: 12px;
-  background: #4caf50;
-  color: white;
-  border: none;
-  border-radius: 4px;
+  background: transparent;
+  color: #00ff41;
+  border: 1px solid #33aa55;
+  border-radius: 2px;
   cursor: pointer;
   font-size: 14px;
   font-weight: 600;
   transition: background 0.2s;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .install-btn:hover:not(:disabled) {
-  background: #45a049;
+  background: rgba(0,255,65,0.1);
+  border-color: #00ff41;
+  color: #00ff41;
 }
 
 .install-btn:disabled {
-  background: #ccc;
+  background: transparent;
+  border-color: rgba(0,255,65,0.1);
+  color: rgba(0,255,65,0.2);
   cursor: not-allowed;
 }
 </style>

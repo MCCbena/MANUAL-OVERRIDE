@@ -109,14 +109,14 @@ watch(() => props.survivedSec, v => {
 .hint-keys { display: flex; gap: 4px; }
 
 .hint-key {
-  background: rgba(255,255,255,0.12);
-  border: 1.5px solid rgba(255,255,255,0.35);
-  border-bottom: 3px solid rgba(255,255,255,0.35);
-  color: #fff;
+  background: rgba(0,255,65,0.1);
+  border: 1.5px solid rgba(0,255,65,0.3);
+  border-bottom: 3px solid rgba(0,255,65,0.3);
+  color: #00ff41;
   padding: 4px 8px;
-  border-radius: 4px;
+  border-radius: 2px;
   font-size: 12px;
-  font-family: 'Courier New', monospace;
+  font-family: 'Share Tech Mono', monospace;
   min-width: 28px;
   text-align: center;
 }
@@ -124,16 +124,16 @@ watch(() => props.survivedSec, v => {
 
 .hint-label {
   font-size: 11px;
-  color: rgba(255,255,255,0.55);
-  font-family: monospace;
+  color: rgba(184,255,184,0.45);
+  font-family: 'Share Tech Mono', monospace;
   letter-spacing: 1px;
 }
 
 .hint-step {
   font-size: 12px;
   font-weight: bold;
-  color: rgba(255,255,255,0.8);
-  font-family: monospace;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
   letter-spacing: 1px;
   margin-bottom: 4px;
 }
@@ -142,7 +142,7 @@ watch(() => props.survivedSec, v => {
 .hint-pulse {
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: rgba(255,255,255,0.5);
+  background: #00ff41;
   animation: pulseDot 1.2s ease-in-out infinite;
 }
 @keyframes pulseDot {
@@ -162,18 +162,18 @@ watch(() => props.survivedSec, v => {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.15);
+  background: rgba(0,255,65,0.08);
+  border: 1px solid rgba(0,255,65,0.2);
   padding: 5px 10px;
-  border-radius: 20px;
+  border-radius: 2px;
   font-size: 11px;
-  color: rgba(255,255,255,0.7);
-  font-family: monospace;
+  color: rgba(184,255,184,0.45);
+  font-family: 'Share Tech Mono', monospace;
 }
 .hint-manual-icon { font-size: 13px; }
 .hint-manual-arrow {
   font-size: 18px;
-  color: rgba(255,255,255,0.4);
+  color: rgba(0,255,65,0.35);
   animation: arrowBounce 1s ease-in-out infinite;
 }
 @keyframes arrowBounce {
@@ -190,22 +190,22 @@ watch(() => props.survivedSec, v => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0,0,0,0.45);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0,255,65,0.08);
+  border: 1px solid rgba(0,255,65,0.2);
   padding: 5px 14px;
-  border-radius: 20px;
+  border-radius: 2px;
   font-size: 11px;
-  font-family: monospace;
+  font-family: 'Share Tech Mono', monospace;
 }
 .color-dot {
   display: inline-block;
   width: 10px; height: 10px;
   border-radius: 50%;
 }
-.color-dot.danger { background: #e74c3c; box-shadow: 0 0 6px #e74c3c; }
-.color-dot.safe   { background: #3498db; box-shadow: 0 0 6px #3498db; }
-.color-label { color: rgba(255,255,255,0.7); }
-.color-sep   { color: rgba(255,255,255,0.25); }
+.color-dot.danger { background: #ff3333; box-shadow: 0 0 6px #ff3333; }
+.color-dot.safe   { background: #00ff41; box-shadow: 0 0 6px #00ff41; }
+.color-label { color: rgba(184,255,184,0.45); }
+.color-sep   { color: rgba(0,255,65,0.2); }
 
 /* ── トランジション ── */
 .hints-fade-leave-active { transition: opacity 0.8s ease; }

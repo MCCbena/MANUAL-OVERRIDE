@@ -238,49 +238,55 @@ function pick(choiceId: string) {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: #c9a876;
-  color: #fff;
+  background: transparent;
+  color: #33aa55;
   font-size: 11px;
   font-weight: 700;
-  border-radius: 5px;
+  border-radius: 1px;
   flex-shrink: 0;
   transition: background 0.2s, color 0.2s;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.12);
+  box-shadow: 0 0 4px rgba(0,255,65,0.1);
+  border: 1px solid #33aa55;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .choice-btn:hover .choice-index {
-  background: #b89a7d;
+  background: rgba(0,255,65,0.1);
+  color: #00ff41;
 }
 
 .choice-btn.selected .choice-index {
-  background: rgba(255,255,255,0.3);
+  background: rgba(0,255,65,0.2);
+  color: #00ff41;
 }
 
 .choice-label {
   flex: 1;
   font-size: 13px;
   font-weight: 500;
-  color: #3d2416;
+  color: #b8ffb8;
   line-height: 1.45;
   transition: color 0.2s;
+  font-family: 'Caveat', cursive;
 }
 
 .choice-arrow {
   font-size: 14px;
-  color: #c9a876;
+  color: #33aa55;
   transition: color 0.2s;
   margin-left: 4px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 /* フッター */
 .choice-footnote {
   font-size: 10px;
-  color: #a89a8a;
+  color: rgba(184,255,184,0.35);
   text-align: center;
   letter-spacing: 0.5px;
-  border-top: 1px solid #e8ddd0;
+  border-top: 1px solid rgba(0,255,65,0.2);
   padding-top: 12px;
   margin-top: 2px;
-  font-family: 'Noto Sans JP', sans-serif;
+  font-family: 'Caveat', cursive;
 }
 </style>

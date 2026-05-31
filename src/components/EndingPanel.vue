@@ -139,25 +139,19 @@ onMounted(() => {
 }
 
 .ending-card {
-  background: #fafaf5;
-  border: 2px solid #1a1a1a;
-  border-radius: 3px;
+  background: #0d120d;
+  border: 2px solid #33aa55;
+  border-radius: 2px;
   padding: 30px 38px 24px;
   max-width: 460px;
   width: 92%;
   box-shadow:
-    8px 8px 0 #1a1a1a,
+    0 0 20px rgba(0,255,65,0.15),
     0 0 60px rgba(0,0,0,0.6);
-  font-family: 'Courier New', Courier, monospace;
+  font-family: 'Caveat', cursive;
   text-align: center;
   animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
-
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent 0px, transparent 22px,
-    rgba(0,0,0,0.022) 22px, rgba(0,0,0,0.022) 23px
-  );
 }
 
 @keyframes cardIn {
@@ -168,26 +162,29 @@ onMounted(() => {
 /* ── ジャンルセクション ── */
 .ending-genre-section {
   margin-bottom: 22px;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid rgba(0,255,65,0.2);
   padding-bottom: 16px;
 }
 
 .ending-genre-label {
   font-size: 10px;
-  color: #aaa;
+  color: #33aa55;
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 6px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .ending-genre-name {
   font-size: 28px;
   font-weight: bold;
-  color: var(--accent, #cc2222);
+  color: #00ff41;
   letter-spacing: 1px;
   line-height: 1.2;
   margin-bottom: 6px;
   animation: genreReveal 0.6s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+  text-shadow: 0 0 12px rgba(0,255,65,0.3);
+  font-family: 'Caveat', cursive;
 }
 
 @keyframes genreReveal {
@@ -197,15 +194,16 @@ onMounted(() => {
 
 .ending-genre-sub {
   font-size: 11px;
-  color: #999;
+  color: rgba(184,255,184,0.35);
   letter-spacing: 0.5px;
+  font-family: 'Caveat', cursive;
 }
 
 /* ── スコアボックス ── */
 .ending-score-box {
-  background: rgba(0,0,0,0.03);
-  border: 1px solid #ddd;
-  border-radius: 2px;
+  background: transparent;
+  border: 1px solid rgba(0,255,65,0.2);
+  border-radius: 1px;
   padding: 14px 18px;
   margin-bottom: 16px;
   text-align: left;
@@ -217,48 +215,54 @@ onMounted(() => {
   align-items: baseline;
   padding: 3px 0;
   font-size: 13px;
-  color: #444;
+  color: #b8ffb8;
+  font-family: 'Caveat', cursive;
 }
 
 .score-label {
-  color: #888;
+  color: rgba(184,255,184,0.45);
   font-size: 11px;
   letter-spacing: 0.5px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .score-value {
   font-weight: bold;
   font-variant-numeric: tabular-nums;
   font-size: 15px;
-  color: #222;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .score-divider {
   height: 1px;
-  background: #ccc;
+  background: rgba(0,255,65,0.2);
   margin: 6px 0;
 }
 
 .score-row.total .score-label {
   font-size: 12px;
-  color: #555;
+  color: #33aa55;
   font-weight: bold;
   letter-spacing: 1px;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .score-row.total .score-value {
   font-size: 20px;
-  color: #111;
+  color: #00ff41;
+  font-family: 'Share Tech Mono', monospace;
 }
 
 /* ── グレード ── */
 .ending-grade {
   font-size: 72px;
   font-weight: bold;
-  color: var(--accent, #cc2222);
+  color: #00ff41;
   line-height: 1;
   margin: 0 0 16px;
-  text-shadow: 3px 3px 0 rgba(0,0,0,0.1);
+  text-shadow: 0 0 20px rgba(0,255,65,0.4);
+  font-family: 'Share Tech Mono', monospace;
 }
 
 .grade-stamp-enter-active {
@@ -274,7 +278,8 @@ onMounted(() => {
 .ending-alt {
   margin-bottom: 20px;
   font-size: 11px;
-  color: #888;
+  color: rgba(184,255,184,0.35);
+  font-family: 'Caveat', cursive;
 }
 .alt-label { margin-bottom: 8px; }
 .alt-routes {
@@ -285,14 +290,16 @@ onMounted(() => {
   margin-bottom: 8px;
 }
 .alt-chip {
-  background: #222;
-  color: #eee;
+  background: transparent;
+  color: #33aa55;
   padding: 2px 8px;
-  border-radius: 2px;
+  border-radius: 1px;
   font-size: 10.5px;
   letter-spacing: 0.3px;
+  border: 1px solid #33aa55;
+  font-family: 'Share Tech Mono', monospace;
 }
-.alt-hint { font-style: italic; color: #bbb; }
+.alt-hint { font-style: italic; color: rgba(184,255,184,0.25); }
 
 .fade-up-enter-active { animation: fadeUp 0.45s ease both; }
 @keyframes fadeUp {
@@ -302,18 +309,18 @@ onMounted(() => {
 
 /* ── リスタートボタン ── */
 .restart-btn {
-  background: #1a1a1a;
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: #00ff41;
+  border: 1px solid #33aa55;
   padding: 11px 36px;
-  font-family: inherit;
+  font-family: 'Share Tech Mono', monospace;
   font-size: 13px;
   cursor: pointer;
-  border-radius: 2px;
+  border-radius: 1px;
   letter-spacing: 1.5px;
   transition: background 0.15s, transform 0.1s;
-  box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+  box-shadow: 0 0 8px rgba(0,255,65,0.1);
 }
-.restart-btn:hover { background: #cc0000; }
-.restart-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,0.3); }
+.restart-btn:hover { background: rgba(0,255,65,0.1); box-shadow: 0 0 12px rgba(0,255,65,0.2); }
+.restart-btn:active { transform: translateY(2px); box-shadow: 0 0 6px rgba(0,255,65,0.1); }
 </style>
