@@ -6,6 +6,7 @@ import { buildRuntimeRules, type ChoiceRecord } from '../domain/ruleEngine'
 import { resolveGenre, accumulateParams } from '../domain/genreResolver'
 import { calcThrowScore, calcFinalScore } from '../domain/scoreCalc'
 import type { ThrowResult } from '../domain/types'
+import { soundManager } from '../plugins/SoundManager'
 
 // ゲームの全体状態を一元管理する composable
 export function useGameState() {
@@ -47,6 +48,8 @@ export function useGameState() {
     const choice = ver.choices.find(c => c.id === choiceId)
     if (!choice) return
 
+    soundManager.onChoiceSelect()
+
     choiceHistory.push({
       versionKey: currentVersionKey.value,
       choiceId,
@@ -66,6 +69,7 @@ export function useGameState() {
 
     if (nextVer.choices.length === 0 || resolved !== 'base') {
       lockedGenre.value = resolved !== 'base' ? resolved : _forceResolve(accumulated)
+      soundManager.onGenreLock(lockedGenre.value)
       _rebuildRules()
       phase.value = 'genreLocked'
     } else {
@@ -82,10 +86,12 @@ export function useGameState() {
 
   // ゲームオーバー or ギブアップ → 投擲フェーズへ
   function startThrowing(_playScoreRaw: number) {
+    soundManager.onThrowStart()
     phase.value = 'throwing'
   }
 
   function finalizeThrowing(throwResult: ThrowResult, playScoreRaw: number) {
+    soundManager.onThrowLand()
     const throwScore = calcThrowScore(throwResult)
     finalScore.value = calcFinalScore(playScoreRaw, throwScore)
     phase.value = 'ending'

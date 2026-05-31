@@ -11,6 +11,7 @@ import ThrowOverlay from './components/ThrowOverlay.vue'
 import EndingPanel from './components/EndingPanel.vue'
 import TutorialHints from './components/TutorialHints.vue'
 import DebugPanel from './components/DebugPanel.vue'
+import PluginLoader from './components/PluginLoader.vue'
 import { GENRES } from './data/genres'
 import type { ThrowResult } from './domain/types'
 
@@ -160,6 +161,9 @@ onUnmounted(() => {
         <!-- スキャンライン -->
         <div class="title-scanlines" />
 
+        <!-- グリッド背景 -->
+        <div class="title-grid-bg" />
+
         <div class="title-card">
           <!-- 書類風ヘッダー -->
           <div class="title-doc-header">
@@ -173,7 +177,7 @@ onUnmounted(() => {
 
           <div class="title-sub">
             説明書が更新されるたびにゲームが変わる。<br>
-            あなたはどんなゲームを作りますか？
+            あなたはどんなゲームを作りますか？<span class="title-cursor">|</span>
           </div>
 
           <button class="title-btn" @click="startGame">
@@ -246,14 +250,20 @@ onUnmounted(() => {
         </div>
       </Transition>
 
-      <!-- ジャンル確定バナー -->
-      <Transition name="genre-reveal">
-        <div v-if="gameState.phase.value === 'genreLocked'" class="genre-locked-banner">
-          <div class="genre-locked-text">
-            {{ gameState.lockedGenreDef()?.manualReveal }}
+      <!-- ジャンル確定演出 -->
+      <div v-if="gameState.phase.value === 'genreLocked'" class="genre-locked-effect">
+        <!-- インク滲みエフェクト -->
+        <div class="genre-ink-bleed" />
+
+        <!-- ジャンル確定バナー -->
+        <Transition name="genre-reveal">
+          <div class="genre-locked-banner">
+            <div class="genre-locked-text">
+              {{ gameState.lockedGenreDef()?.manualReveal }}
+            </div>
           </div>
-        </div>
-      </Transition>
+        </Transition>
+      </div>
     </template>
 
     <!-- ─── 2択選択 ─── -->
@@ -294,6 +304,9 @@ onUnmounted(() => {
       :locked-genre="gameState.lockedGenre.value"
       :phase="gameState.phase.value"
     />
+
+    <!-- ─── プラグインローダー ─── -->
+    <PluginLoader />
   </div>
 </template>
 
@@ -496,41 +509,99 @@ body { font-family: 'Noto Sans JP', 'Courier New', sans-serif; }
   100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
+/* ジャンル確定演出 */
+.genre-locked-effect {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  pointer-events: none;
+}
+
+/* インク滲みエフェクト */
+.genre-ink-bleed {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, transparent 70%);
+  animation: inkBleedPulse 0.8s ease-out forwards;
+}
+
+@keyframes inkBleedPulse {
+  0% { opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
 /* ジャンル確定バナー */
 .genre-locked-banner {
   position: absolute;
-  top: 68px;
+  top: 50%;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translate(-50%, -50%);
   background: rgba(0,0,0,0.88);
-  border: 1px solid rgba(255,255,255,0.22);
+  border: 2px solid rgba(255,255,255,0.3);
   color: #fff;
-  padding: 10px 28px;
-  font-family: 'Courier New', monospace;
-  font-size: 13px;
-  z-index: 20;
+  padding: 16px 40px;
+  font-family: 'Georgia', serif;
+  font-size: 18px;
+  z-index: 26;
   max-width: 520px;
   text-align: center;
   backdrop-filter: blur(6px);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-  letter-spacing: 0.3px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  letter-spacing: 0.5px;
+  font-weight: 500;
+  animation: genreNameReveal 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) 0.8s both;
 }
-.genre-locked-text { line-height: 1.6; }
+
+.genre-locked-text {
+  line-height: 1.8;
+  clip-path: inset(0 0 0 0);
+}
+
+@keyframes genreNameReveal {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.8);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
 
 /* トランジション */
 .fade-enter-active, .fade-leave-active { transition: opacity 0.3s; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 
 .genre-reveal-enter-active {
-  animation: revealBanner 0.5s ease;
+  /* Animation handled by .genre-locked-banner keyframes */
 }
 .genre-reveal-leave-active {
-  transition: opacity 1s 3s;
+  transition: opacity 0.5s;
 }
 .genre-reveal-leave-to { opacity: 0; }
 
-@keyframes revealBanner {
-  0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-  100% { opacity: 1; transform: translateX(-50%) translateY(0); }
+/* グリッド背景（説明書イメージ） */
+.title-grid-bg {
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+/* 点滅カーソル */
+.title-cursor {
+  display: inline-block;
+  animation: titleCursorBlink 1s steps(1, start) infinite;
+  color: #e8e8ee;
+}
+
+@keyframes titleCursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 </style>

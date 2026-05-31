@@ -5,6 +5,7 @@ import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBala
 import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '../data/tunables'
 import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
+import { soundManager } from '../plugins/SoundManager'
 // ジャンルプラグインとフィーチャーシステムを一括登録
 import '../genres/index'
 import '../game/systems/index'
@@ -388,6 +389,7 @@ export class SideScroller {
           this.stats.jumps++
           this.firstJumpDone = true
           this._spawnJumpParticles(p.x + p.w / 2, p.y + p.h)
+          soundManager.onJump()
           // Hook: onPlayerJump
           {
             const jw = this._getWorld()
@@ -416,6 +418,7 @@ export class SideScroller {
         if (wasInAir) {
           p.landSquash = 1.0
           this._spawnLandParticles(p.x + p.w / 2, gY)
+          soundManager.onLand()
           // Hook: onPlayerLand
           getGenre(r.genre).onPlayerLand?.(this._getWorld())
           if (this.jumpBufferTimer > 0) {
@@ -554,6 +557,7 @@ export class SideScroller {
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
     const world = this._getWorld()
+    soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {
       sys.onPlayerHit?.(world)
     }
@@ -568,6 +572,7 @@ export class SideScroller {
     this.dead = true
     this.shakeIntensity = VFX.deathShakeIntensity
     this._spawnDeathExplosion(p.x + p.w / 2, p.y + p.h / 2)
+    soundManager.onDeath()
     // Hook: onPlayerDeath
     const dw = this._getWorld()
     for (const sys of getActiveSystems(this.rules.features)) sys.onPlayerDeath?.(dw)

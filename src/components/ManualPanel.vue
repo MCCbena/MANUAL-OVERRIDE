@@ -228,9 +228,11 @@ function keyLabel(key: string): string {
   display: block;
   color: #cc2222;
   font-weight: 700;
-  animation: inkIn 0.5s ease both;
+  animation: inkIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
   position: relative;
   padding-left: 12px;
+  max-height: 100px;
+  overflow: hidden;
 }
 .line-added::before {
   content: '▶';
@@ -241,8 +243,8 @@ function keyLabel(key: string): string {
   color: #cc2222;
 }
 @keyframes inkIn {
-  0%   { opacity: 0; transform: translateX(-5px); filter: blur(2px); }
-  100% { opacity: 1; transform: translateX(0); filter: blur(0); }
+  0%   { opacity: 0; transform: translateX(-5px); max-height: 0; }
+  100% { opacity: 1; transform: translateX(0); max-height: 100px; }
 }
 
 /* ── 操作キー ── */
@@ -289,35 +291,45 @@ function keyLabel(key: string): string {
   background: #080818;
   color: #a8d8ff;
   border-color: #1a66ff;
-  box-shadow: 4px 4px 0 #1a66ff, 0 0 20px rgba(26,102,255,0.3);
+  border-width: 2px;
+  box-shadow: 4px 4px 0 #1a66ff, 0 0 20px rgba(26,102,255,0.3), inset 0 0 20px rgba(26,102,255,0.05);
   font-family: 'Courier New', monospace;
-  letter-spacing: 0.3px;
+  letter-spacing: 0.5px;
+  font-weight: 500;
 }
-.theme-stg .manual-header    { border-color: rgba(26,102,255,0.3); }
-.theme-stg .manual-ver-badge  { color: #a8d8ff; }
-.theme-stg .manual-ver-dot    { background: #1a66ff; box-shadow: 0 0 6px #1a66ff; }
-.theme-stg .history-btn       { color: #5588cc; border-color: #1a66ff; }
-.theme-stg .line-unchanged    { color: #a8d8ff; }
-.theme-stg .controls-title    { color: #446688; }
-.theme-stg .key-badge         { background: #1a66ff; border-color: #0033aa; }
+.theme-stg .manual-header    { border-color: rgba(26,102,255,0.4); }
+.theme-stg .manual-ver-badge  { color: #1a66ff; font-family: 'Courier New', monospace; }
+.theme-stg .manual-ver-dot    { background: #1a66ff; box-shadow: 0 0 8px #1a66ff; }
+.theme-stg .history-btn       { color: #5588cc; border-color: #1a66ff; background: rgba(26,102,255,0.1); }
+.theme-stg .line-unchanged    { color: #a8d8ff; font-family: 'Courier New', monospace; }
+.theme-stg .line-added        { color: #00ff88; }
+.theme-stg .controls-title    { color: #446688; font-family: 'Courier New', monospace; }
+.theme-stg .key-badge         { background: #1a66ff; border-color: #0033aa; font-family: 'Courier New', monospace; }
 .theme-stg .key-action        { color: #6699cc; }
-.theme-stg .manual-controls   { border-color: rgba(26,102,255,0.2); }
+.theme-stg .manual-controls   { border-color: rgba(26,102,255,0.3); }
 .theme-stg .manual-history    { border-color: rgba(26,102,255,0.2); }
 
 /* ──────────────────────────────────────
    テーマ: RPG
 ────────────────────────────────────── */
 .theme-rpg {
-  background: #f5edd0;
+  background: linear-gradient(135deg, #f5edd0 0%, #faf6e6 100%);
   color: #3a2200;
   border-color: #8b6100;
+  border-width: 3px;
   font-family: 'Georgia', 'Times New Roman', serif;
-  box-shadow: 5px 5px 0 #8b6100, 2px 2px 8px rgba(0,0,0,0.2);
+  box-shadow: 5px 5px 0 #8b6100, 2px 2px 12px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.8);
+  letter-spacing: 0.2px;
 }
-.theme-rpg .manual-ver-dot { background: #8b6100; }
-.theme-rpg .key-badge      { background: #8b6100; border-color: #5a3e00; }
-.theme-rpg .controls-title { color: #c4a020; }
-.theme-rpg .key-action     { color: #8b6100; }
+.theme-rpg .manual-header  { border-color: #d4b896; }
+.theme-rpg .manual-ver-dot { background: #8b6100; box-shadow: 0 0 4px rgba(139,97,0,0.3); }
+.theme-rpg .manual-ver-badge { font-family: 'Georgia', serif; }
+.theme-rpg .line-unchanged { color: #4a3a00; font-family: 'Georgia', serif; }
+.theme-rpg .line-added     { color: #a84000; }
+.theme-rpg .key-badge      { background: #8b6100; border-color: #5a3e00; font-family: 'Georgia', serif; color: #fff; }
+.theme-rpg .controls-title { color: #c4a020; font-family: 'Georgia', serif; }
+.theme-rpg .key-action     { color: #8b6100; font-family: 'Georgia', serif; }
+.theme-rpg .manual-controls { border-color: #d4b896; }
 
 /* ──────────────────────────────────────
    テーマ: PUZZLE
@@ -342,13 +354,23 @@ function keyLabel(key: string): string {
   background: #0f0020;
   color: #ee88ff;
   border-color: #9900ff;
-  box-shadow: 4px 4px 0 #9900ff, 0 0 24px rgba(153,0,255,0.4);
+  border-width: 2px;
+  box-shadow: 4px 4px 0 #9900ff, 0 0 24px rgba(153,0,255,0.5), inset 0 0 16px rgba(153,0,255,0.1);
   font-family: 'Courier New', monospace;
+  letter-spacing: 0.3px;
+  font-weight: 500;
 }
-.theme-rhythm .manual-header  { border-color: rgba(153,0,255,0.3); }
-.theme-rhythm .manual-ver-dot { background: #ff00ff; box-shadow: 0 0 8px #ff00ff; }
-.theme-rhythm .key-badge      { background: #9900ff; border-color: #6600cc; }
+.theme-rhythm .manual-header  { border-color: rgba(153,0,255,0.4); }
+.theme-rhythm .manual-ver-dot { background: #ff00ff; box-shadow: 0 0 12px #ff00ff; animation: rhythm-pulse 1s infinite; }
+.theme-rhythm .line-unchanged { color: #dd88ff; font-family: 'Courier New', monospace; }
+.theme-rhythm .line-added     { color: #00ffff; text-decoration: underline wavy #00ff88; }
+.theme-rhythm .key-badge      { background: #9900ff; border-color: #6600cc; font-family: 'Courier New', monospace; }
 .theme-rhythm .key-action     { color: #cc66ff; }
-.theme-rhythm .line-unchanged { color: #dd88ff; }
-.theme-rhythm .controls-title { color: #660088; }
+.theme-rhythm .controls-title { color: #bb44ff; font-family: 'Courier New', monospace; }
+.theme-rhythm .manual-controls { border-color: rgba(153,0,255,0.3); }
+
+@keyframes rhythm-pulse {
+  0%, 100% { box-shadow: 0 0 8px #ff00ff; }
+  50% { box-shadow: 0 0 12px #ff00ff; }
+}
 </style>
