@@ -38,18 +38,18 @@ export const PHYSICS = {
   playerHeight:  52,
 
   // ── ジャンプ ──────────────────────────────────────
-  /** 通常ジャンプの初速（負 = 上方向） */
-  jumpVelocity:        -680,
+  /** 通常ジャンプの初速（負 = 上方向）。少し高めでジャンプ感を強調 */
+  jumpVelocity:        -720,
   /** 二段ジャンプの初速（通常より少し弱め） */
-  doubleJumpVelocity:  -580,
-  /** 早離しで上昇速度をこの倍率に削る（可変ジャンプ高さ） */
-  jumpCutMultiplier:    0.42,
+  doubleJumpVelocity:  -610,
+  /** 早離しで上昇速度をこの倍率に削る（可変ジャンプ高さ）。高めで操作感向上 */
+  jumpCutMultiplier:    0.45,
 
   // ── 重力 ──────────────────────────────────────────
-  /** 通常重力 px/s² */
-  gravity:          1800,
+  /** 通常重力 px/s²。気持ちよい弧を描く落下 */
+  gravity:          1650,
   /** 落下中はこの倍率を重力に掛ける（重めの落下感） */
-  fallGravityMult:  1.75,
+  fallGravityMult:  1.65,
 
   // ── 横移動 ────────────────────────────────────────
   /** 通常走行速度 px/s */
@@ -98,10 +98,10 @@ export const SHOOT = {
   shotCooldown: 0.18,
 
   // ── コンボ ────────────────────────────────────────
-  /** コンボがリセットされるまでの秒数 */
-  comboResetTime: 2.5,
-  /** 1キルあたりのベーススコア（コンボ倍率をかける前） */
-  baseScorePerKill: 160,
+  /** コンボがリセットされるまでの秒数。少し長めでコンボ継続のプレッシャーを緩和 */
+  comboResetTime: 3.0,
+  /** 1キルあたりのベーススコア（コンボ倍率をかける前）。撃ち甲斐を強化 */
+  baseScorePerKill: 200,
 
   // ── 三方向弾 ──────────────────────────────────────
   /** 斜め弾のX速度倍率 */
@@ -142,8 +142,8 @@ export const THROW = {
 // ─────────────────────────────────────────────────────────────
 export const SPAWN = {
   // ── 初期スポーン距離 ──────────────────────────────
-  /** ゲーム開始時に最初のハザードが出る距離 px */
-  firstSpawnDist: 320,
+  /** ゲーム開始時に最初のハザードが出る距離 px。早めの出現で緊張感向上 */
+  firstSpawnDist: 280,
 
   // ── enemy_hp ──────────────────────────────────────
   /** enemy_hp feature が有効な時のハザードHP */
@@ -174,10 +174,10 @@ export const SPAWN = {
   spawnWeightMaxDist: 3000,
 
   // ── RPG アイテム ──────────────────────────────────
-  /** ハザード1体あたりのアイテムドロップ確率 0〜1 */
-  itemDropChance: 0.38,
-  /** アイテムが exp かどうかの確率（残りは hp） */
-  itemExpChance:  0.65,
+  /** ハザード1体あたりのアイテムドロップ確率 0〜1。もっと集める喜びを */
+  itemDropChance: 0.50,
+  /** アイテムが exp かどうかの確率（残りは hp）。成長実感を強化 */
+  itemExpChance:  0.70,
   /** ハザードからのアイテムX距離 px */
   itemOffsetX: 70,
   /** 地面からのアイテムY距離 px */
@@ -201,10 +201,10 @@ export const SPAWN = {
 // ─────────────────────────────────────────────────────────────
 export const VFX = {
   // ── 画面シェイク ──────────────────────────────────
-  /** 被弾時のシェイク強度 */
-  hitShakeIntensity:   10,
-  /** 死亡時のシェイク強度 */
-  deathShakeIntensity: 22,
+  /** 被弾時のシェイク強度。ダメージのインパクト向上 */
+  hitShakeIntensity:   14,
+  /** 死亡時のシェイク強度。ドラマチック */
+  deathShakeIntensity: 28,
   /** 通常フレームのシェイク減衰倍率 */
   shakeDecay:      0.82,
   /** 死亡演出フレームのシェイク減衰倍率 */
@@ -221,12 +221,12 @@ export const VFX = {
   deathSlowMoFactor: 0.4,
 
   // ── ジャンプパーティクル ──────────────────────────
-  jumpParticleCount:    5,
-  jumpParticleSpeedMin: 40,
-  jumpParticleSpeedMax: 100,
-  jumpParticleLife:     0.25,
-  /** 放射弧の半角 ラジアン（π ± spread) */
-  jumpParticleSpread:   1.2,
+  jumpParticleCount:    7,
+  jumpParticleSpeedMin: 50,
+  jumpParticleSpeedMax: 120,
+  jumpParticleLife:     0.35,
+  /** 放射弧の半角 ラジアン（π ± spread）。少し広めで迫力向上 */
+  jumpParticleSpread:   1.4,
   jumpParticleOffsetX:  16,
   jumpParticleColor:    'rgba(200,200,255,0.7)',
   jumpParticleSize:      3,
@@ -243,13 +243,13 @@ export const VFX = {
   landParticleSize:      2.5,
 
   // ── 被弾パーティクル ──────────────────────────────
-  hitParticleCount:    14,
-  hitParticleSpeedMin:  60,
-  hitParticleSpeedMax: 200,
-  /** 上方向に加える速度ブースト px/s */
-  hitParticleYBoost:   -60,
-  hitParticleLifeMin:   0.5,
-  hitParticleLifeRange: 0.3,
+  hitParticleCount:    18,
+  hitParticleSpeedMin:  70,
+  hitParticleSpeedMax: 240,
+  /** 上方向に加える速度ブースト px/s。ダメージ感を強調 */
+  hitParticleYBoost:   -80,
+  hitParticleLifeMin:   0.6,
+  hitParticleLifeRange: 0.4,
   hitParticleSizeBase:   3,
   hitParticleSizeRange:  3,
 
@@ -446,10 +446,10 @@ export const UI = {
 // SCORE — 距離スコア加算
 // ─────────────────────────────────────────────────────────────
 export const SCORE = {
-  /** scrollSpeed * dt * この値 が毎フレームのスコア加算量 */
-  distanceScoreRate: 0.22,
-  /** long_air: 空中1秒あたりのスコアボーナス */
-  longAirScoreRate: 1.2,
+  /** scrollSpeed * dt * この値 が毎フレームのスコア加算量。数字を目立たせる */
+  distanceScoreRate: 0.28,
+  /** long_air: 空中1秒あたりのスコアボーナス。長く飛べば報酬 */
+  longAirScoreRate: 1.6,
 } as const
 
 // ─────────────────────────────────────────────────────────────
@@ -472,11 +472,11 @@ export const DIFFICULTY = {
    * tempo 値ごとのスクロール速度ボーナス px/s
    * ⚠️ gameBalance.ts の TEMPO_SPEED_BONUS と同じ値を保つこと
    */
-  tempoSpeedBonus: 30,
+  tempoSpeedBonus: 28,
 
   // ── enemy 密度スケール ──────────────────────────────────────
-  /** enemy 値ごとのハザードスポーン間隔短縮率（0〜1、大きいほど高密度） */
-  enemyDensityRate: 0.06,
+  /** enemy 値ごとのハザードスポーン間隔短縮率（0〜1、大きいほど高密度）。敵密度の差別化 */
+  enemyDensityRate: 0.08,
 
   // ── ゲーム全体の難易度倍率 ────────────────────────────────
   /** 1.0 = 標準。> 1 で全体が厳しくなる（ハードモード等で使用） */

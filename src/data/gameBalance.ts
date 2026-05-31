@@ -24,26 +24,26 @@ export const THROW_SCORE_WEIGHTS = {
 } as const
 
 /** 基本スクロール速度。actualSpeed = BASE + tempo * TEMPO_SPEED_BONUS */
-export const BASE_SCROLL_SPEED = 270
+export const BASE_SCROLL_SPEED = 300
 
 /** tempo値の影響度。DIFFICULTY.tempoSpeedBonus と同値を保つ */
-export const TEMPO_SPEED_BONUS = 30
+export const TEMPO_SPEED_BONUS = 28
 
 /** ハザードスポーン曲線パラメータ。distance の指数関数で間隔を短縮 */
 export const HAZARD_SPAWN = {
-  baseInterval: 3000,  // 開始時の基本間隔（ms）
-  minInterval: 1000,   // 最小間隔（加速の上限）
-  decayRate: 0.00012,  // 減衰率。大きいほど加速が早い
+  baseInterval: 2400,  // 開始時の基本間隔（ms）→ より頻繁に出現
+  minInterval: 800,    // 最小間隔（加速の上限）→ 最大時の密度を上げる
+  decayRate: 0.00015,  // 減衰率。大きいほど加速が早い → 加速を少し早めに
 } as const
 
 /** プレイヤー物理パラメータ。tunables.ts の PHYSICS と同じ値 */
 export const PLAYER_PHYSICS = {
   width: 36,
   height: 52,
-  jumpVelocity: -680,        // ジャンプ初速
-  jumpCutMultiplier: 0.42,   // 早離し時の速度倍率
-  gravity: 1800,             // 通常重力
-  fallGravityMult: 1.75,     // 落下時の重力倍率
+  jumpVelocity: -720,        // ジャンプ初速（調整済）
+  jumpCutMultiplier: 0.45,   // 早離し時の速度倍率（調整済）
+  gravity: 1650,             // 通常重力（調整済）
+  fallGravityMult: 1.65,     // 落下時の重力倍率（調整済）
   groundY: 0,
   runSpeed: 240,
   coyoteFrames: 9,           // コヨーテタイム（フレーム数）
