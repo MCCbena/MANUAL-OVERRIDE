@@ -148,7 +148,7 @@ onMounted(() => {
   box-shadow:
     0 0 20px rgba(0,255,65,0.15),
     0 0 60px rgba(0,0,0,0.6);
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
   text-align: center;
   animation: cardIn 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   position: relative;
@@ -172,7 +172,7 @@ onMounted(() => {
   letter-spacing: 2px;
   text-transform: uppercase;
   margin-bottom: 6px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .ending-genre-name {
@@ -184,7 +184,7 @@ onMounted(() => {
   margin-bottom: 6px;
   animation: genreReveal 0.6s 0.1s cubic-bezier(0.22, 1, 0.36, 1) both;
   text-shadow: 0 0 12px rgba(0,255,65,0.3);
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 @keyframes genreReveal {
@@ -196,7 +196,7 @@ onMounted(() => {
   font-size: 11px;
   color: rgba(184,255,184,0.35);
   letter-spacing: 0.5px;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 /* ── スコアボックス ── */
@@ -216,14 +216,14 @@ onMounted(() => {
   padding: 3px 0;
   font-size: 13px;
   color: #b8ffb8;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .score-label {
   color: rgba(184,255,184,0.45);
   font-size: 11px;
   letter-spacing: 0.5px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .score-value {
@@ -231,7 +231,7 @@ onMounted(() => {
   font-variant-numeric: tabular-nums;
   font-size: 15px;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .score-divider {
@@ -245,13 +245,13 @@ onMounted(() => {
   color: #33aa55;
   font-weight: bold;
   letter-spacing: 1px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .score-row.total .score-value {
   font-size: 20px;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ── グレード ── */
@@ -262,7 +262,7 @@ onMounted(() => {
   line-height: 1;
   margin: 0 0 16px;
   text-shadow: 0 0 20px rgba(0,255,65,0.4);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .grade-stamp-enter-active {
@@ -279,7 +279,7 @@ onMounted(() => {
   margin-bottom: 20px;
   font-size: 11px;
   color: rgba(184,255,184,0.35);
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 .alt-label { margin-bottom: 8px; }
 .alt-routes {
@@ -297,7 +297,7 @@ onMounted(() => {
   font-size: 10.5px;
   letter-spacing: 0.3px;
   border: 1px solid #33aa55;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .alt-hint { font-style: italic; color: rgba(184,255,184,0.25); }
 
@@ -313,7 +313,7 @@ onMounted(() => {
   color: #00ff41;
   border: 1px solid #33aa55;
   padding: 11px 36px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   font-size: 13px;
   cursor: pointer;
   border-radius: 1px;

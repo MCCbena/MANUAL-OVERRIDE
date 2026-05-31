@@ -173,7 +173,7 @@ onUnmounted(() => {
 
           <div class="title-rule" />
 
-          <div class="title-main">取扱説明書を<br>読むゲーム</div>
+          <div class="title-main">MANUAL<br>OVERRIDE</div>
 
           <div class="title-sub">
             説明書が更新されるたびにゲームが変わる。<br>
@@ -311,7 +311,7 @@ onUnmounted(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Caveat:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1+Code&display=swap');
 
 /* グローバルCSS変数 */
 :root {
@@ -325,8 +325,8 @@ onUnmounted(() => {
   --text-dim:    rgba(184, 255, 184, 0.45);
   --danger:      #ff3333;
   --amber:       #ffbb00;
-  --font-mono:   'Share Tech Mono', 'Courier New', monospace;
-  --font-hand:   'Caveat', cursive;
+  --font-mono:   'M PLUS 1 Code', monospace;
+  --font-hand:   'M PLUS 1 Code', monospace;
   --scanline: repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 2px,

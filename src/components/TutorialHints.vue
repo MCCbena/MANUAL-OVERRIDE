@@ -116,7 +116,7 @@ watch(() => props.survivedSec, v => {
   padding: 4px 8px;
   border-radius: 2px;
   font-size: 12px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   min-width: 28px;
   text-align: center;
 }
@@ -125,7 +125,7 @@ watch(() => props.survivedSec, v => {
 .hint-label {
   font-size: 11px;
   color: rgba(184,255,184,0.45);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 1px;
 }
 
@@ -133,7 +133,7 @@ watch(() => props.survivedSec, v => {
   font-size: 12px;
   font-weight: bold;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 1px;
   margin-bottom: 4px;
 }
@@ -168,7 +168,7 @@ watch(() => props.survivedSec, v => {
   border-radius: 2px;
   font-size: 11px;
   color: rgba(184,255,184,0.45);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .hint-manual-icon { font-size: 13px; }
 .hint-manual-arrow {
@@ -195,7 +195,7 @@ watch(() => props.survivedSec, v => {
   padding: 5px 14px;
   border-radius: 2px;
   font-size: 11px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .color-dot {
   display: inline-block;

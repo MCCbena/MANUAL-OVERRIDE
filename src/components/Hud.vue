@@ -122,7 +122,7 @@ const comboColor = computed(() => {
   font-size: 30px;
   font-weight: 900;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 2px;
   text-shadow: 0 0 16px rgba(0,255,65,0.4), 0 2px 4px rgba(0,0,0,0.6);
   line-height: 1;
@@ -148,7 +148,7 @@ const comboColor = computed(() => {
 .hud-dist-text {
   font-size: 11px;
   color: rgba(184,255,184,0.45);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── ジャンルバッジ ─── */
@@ -163,7 +163,7 @@ const comboColor = computed(() => {
   font-size: 11px;
   padding: 3px 14px;
   border-radius: 2px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 2px;
   text-transform: uppercase;
 }
@@ -196,14 +196,14 @@ const comboColor = computed(() => {
 .hud-stat-label {
   font-size: 10px;
   color: rgba(184,255,184,0.45);
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   letter-spacing: 1px;
 }
 .hud-stat-val {
   font-size: 18px;
   font-weight: bold;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── コンボ ─── */
@@ -219,7 +219,7 @@ const comboColor = computed(() => {
   display: block;
   font-size: 42px;
   font-weight: 900;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   text-shadow: 0 0 20px currentColor;
   line-height: 1;
 }
@@ -228,7 +228,7 @@ const comboColor = computed(() => {
   font-size: 12px;
   letter-spacing: 4px;
   opacity: 0.8;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ─── トランジション ─── */

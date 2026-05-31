@@ -194,7 +194,7 @@ function handleDrop(e: DragEvent) {
   margin: 0;
   font-size: 18px;
   color: #00ff41;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .close-btn {
@@ -218,14 +218,14 @@ function handleDrop(e: DragEvent) {
   margin: 0 0 12px 0;
   font-size: 14px;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .empty-state {
   color: rgba(184,255,184,0.35);
   font-size: 13px;
   padding: 8px;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .plugin-list {
@@ -252,14 +252,14 @@ function handleDrop(e: DragEvent) {
   font-weight: 600;
   font-size: 13px;
   color: #b8ffb8;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .plugin-type {
   font-size: 11px;
   color: rgba(184,255,184,0.35);
   margin-top: 2px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .delete-btn {
@@ -270,7 +270,7 @@ function handleDrop(e: DragEvent) {
   border-radius: 1px;
   cursor: pointer;
   font-size: 12px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .delete-btn:hover {
@@ -285,7 +285,7 @@ function handleDrop(e: DragEvent) {
   font-size: 12px;
   margin-bottom: 12px;
   border: 1px solid rgba(255,51,51,0.3);
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .json-input {
@@ -294,7 +294,7 @@ function handleDrop(e: DragEvent) {
   padding: 8px;
   border: 1px solid rgba(0,255,65,0.2);
   border-radius: 2px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   font-size: 12px;
   resize: vertical;
   box-sizing: border-box;
@@ -318,7 +318,7 @@ function handleDrop(e: DragEvent) {
   font-size: 14px;
   font-weight: 600;
   transition: background 0.2s;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .install-btn:hover:not(:disabled) {

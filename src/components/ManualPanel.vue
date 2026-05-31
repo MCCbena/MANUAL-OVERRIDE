@@ -132,7 +132,7 @@ function keyLabel(key: string): string {
   border: 2px solid #33aa55;
   border-radius: 2px;
   padding: 16px 18px;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
   font-size: 13px;
   line-height: 1.8;
   color: #b8ffb8;
@@ -160,7 +160,7 @@ function keyLabel(key: string): string {
   font-weight: 700;
   letter-spacing: 0.5px;
   color: #00ff41;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .manual-ver-dot {
   display: inline-block;
@@ -177,7 +177,7 @@ function keyLabel(key: string): string {
   padding: 1px 6px;
   border-radius: 2px;
   color: #33aa55;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
   transition: all 0.15s;
 }
 .history-btn:hover { background: #001a00; border-color: #00ff41; color: #00ff41; }
@@ -194,8 +194,8 @@ function keyLabel(key: string): string {
 }
 .history-empty { font-style: italic; color: rgba(184,255,184,0.25); }
 .history-item { margin-bottom: 5px; }
-.history-ver { font-weight: bold; font-size: 9px; color: rgba(184,255,184,0.35); text-transform: uppercase; letter-spacing: 1px; font-family: 'Share Tech Mono', monospace; }
-.history-line { padding-left: 4px; color: rgba(184,255,184,0.35); font-family: 'Caveat', cursive; }
+.history-ver { font-weight: bold; font-size: 9px; color: rgba(184,255,184,0.35); text-transform: uppercase; letter-spacing: 1px; font-family: 'M PLUS 1 Code', monospace; }
+.history-line { padding-left: 4px; color: rgba(184,255,184,0.35); font-family: 'M PLUS 1 Code', cursive; }
 
 /* ── イラスト ── */
 .manual-image-wrap {
@@ -217,7 +217,7 @@ function keyLabel(key: string): string {
 .manual-body { margin-bottom: 8px; }
 .manual-line { display: block; padding: 1px 0; }
 
-.line-unchanged { color: #b8ffb8; font-weight: 500; font-family: 'Caveat', cursive; }
+.line-unchanged { color: #b8ffb8; font-weight: 500; font-family: 'M PLUS 1 Code', cursive; }
 .line-removed {
   display: block;
   text-decoration: line-through;
@@ -235,7 +235,7 @@ function keyLabel(key: string): string {
   padding-left: 12px;
   max-height: 100px;
   overflow: hidden;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 .line-added::before {
   content: '>';
@@ -244,7 +244,7 @@ function keyLabel(key: string): string {
   font-size: 12px;
   top: 0px;
   color: #00ff88;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 @keyframes inkIn {
   0%   { opacity: 0; transform: translateX(-5px); max-height: 0; }
@@ -263,7 +263,7 @@ function keyLabel(key: string): string {
   text-transform: uppercase;
   margin-bottom: 5px;
   font-weight: 600;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 .controls-grid {
   display: grid;
@@ -282,9 +282,9 @@ function keyLabel(key: string): string {
   letter-spacing: 0.5px;
   border: 1px solid #33aa55;
   font-weight: 600;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
-.key-action { font-size: 12px; color: #b8ffb8; font-weight: 500; font-family: 'Caveat', cursive; }
+.key-action { font-size: 12px; color: #b8ffb8; font-weight: 500; font-family: 'M PLUS 1 Code', cursive; }
 
 /* ── 履歴トランジション ── */
 .slide-enter-active, .slide-leave-active { transition: all 0.2s ease; max-height: 200px; }

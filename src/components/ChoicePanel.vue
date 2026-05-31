@@ -105,7 +105,7 @@ function pick(choiceId: string) {
     0 0 20px rgba(0,255,65,0.15),
     0 0 50px rgba(0,0,0,0.5),
     inset 0 1px 2px rgba(0,255,65,0.05);
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
   animation: cardEntrance 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -136,7 +136,7 @@ function pick(choiceId: string) {
   box-shadow: 0 0 8px rgba(0,255,65,0.15);
   border: 1px solid #00ff41;
   border-radius: 1px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .choice-ver {
@@ -144,7 +144,7 @@ function pick(choiceId: string) {
   color: #33aa55;
   letter-spacing: 1.5px;
   margin-bottom: 8px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .choice-prompt {
@@ -152,7 +152,7 @@ function pick(choiceId: string) {
   color: #b8ffb8;
   font-weight: 600;
   letter-spacing: 0.4px;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 /* 選択肢リスト */
@@ -172,7 +172,7 @@ function pick(choiceId: string) {
   padding: 14px 18px;
   text-align: left;
   cursor: pointer;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
   border-radius: 2px;
   transition: background 0.2s, border-color 0.2s, box-shadow 0.2s, transform 0.1s;
   position: relative;
@@ -247,7 +247,7 @@ function pick(choiceId: string) {
   transition: background 0.2s, color 0.2s;
   box-shadow: 0 0 4px rgba(0,255,65,0.1);
   border: 1px solid #33aa55;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 .choice-btn:hover .choice-index {
@@ -267,7 +267,7 @@ function pick(choiceId: string) {
   color: #b8ffb8;
   line-height: 1.45;
   transition: color 0.2s;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 
 .choice-arrow {
@@ -275,7 +275,7 @@ function pick(choiceId: string) {
   color: #33aa55;
   transition: color 0.2s;
   margin-left: 4px;
-  font-family: 'Share Tech Mono', monospace;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* フッター */
@@ -287,6 +287,6 @@ function pick(choiceId: string) {
   border-top: 1px solid rgba(0,255,65,0.2);
   padding-top: 12px;
   margin-top: 2px;
-  font-family: 'Caveat', cursive;
+  font-family: 'M PLUS 1 Code', cursive;
 }
 </style>
