@@ -182,6 +182,8 @@ export interface ManualVersion {
   tutorialHint?: string
   /** 選択後の演出テキスト（ManualPanel の差分アニメ前に表示） */
   narrative?: string
+  /** プレイヤー行動に基づいた自動ルール更新ルール（省略可） */
+  learningRules?: LearningRule[]
 }
 
 // ─────────────────────────────────────────────────────────────

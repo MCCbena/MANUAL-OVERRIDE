@@ -96,6 +96,18 @@ export interface MutableWorld {
   addBeatHit(): void
   /** beat_hazard の色反転フラグを更新（RhythmFeature が使用） */
   setBeatHazardInverted(v: boolean): void
+
+  // ─ ScoreVars 書き込み（FeatureSystem が scoreFormula 計算用に更新）
+  /** accuracy 計算用：敵撃破時のヒット数をインクリメント（ShootFeature が使用） */
+  addScoreVarsHit(): void
+  /** アイテム収集総数をインクリメント（RpgFeature が使用） */
+  addScoreVarsItemCollected(): void
+  /** ボス撃破数をインクリメント（特定 Feature が使用） */
+  addScoreVarsBossKill(): void
+  /** ステルス継続フレーム数を加算（StealthFeature が使用） */
+  addScoreVarsStealthBonus(amount: number): void
+  /** 安全色タッチ回数をインクリメント（color_touch Feature が使用） */
+  addScoreVarsColorTouch(): void
 }
 
 // ──────────────────────────────────────────────────────────────────────
