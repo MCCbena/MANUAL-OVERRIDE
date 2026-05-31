@@ -49,6 +49,7 @@ export class RpgFeature implements FeatureSystem {
       const iRect = { ...item.rect, x: item.rect.x - world.cameraX }
       if (!rectsOverlap(p.rect, iRect, 0)) continue
       item.alive = false
+      world.addScoreVarsItemCollected()
       if (item.type === 'exp') {
         p.exp += SPAWN.expItemExpGain
         world.addScore(SPAWN.expItemScore)

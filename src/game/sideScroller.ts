@@ -1,4 +1,4 @@
-import type { RuntimeRules, ActionStats } from '../domain/types'
+import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule } from '../domain/types'
 import type { MutableWorld, InputSnapshot, GameStats } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBalance'
@@ -6,6 +6,9 @@ import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '
 import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
 import { soundManager } from '../plugins/SoundManager'
+import { evalScoreFormula } from '../domain/scoreCalc'
+import { evaluateLearningRules } from '../domain/LearningSystem'
+import { GENRES } from '../data/genres'
 // ジャンルプラグインとフィーチャーシステムを一括登録
 import '../genres/index'
 import '../game/systems/index'
@@ -53,6 +56,13 @@ export class SideScroller {
   private paused = false
   private firstJumpDone = false
 
+  // ScoreVars 計算用フィールド
+  private scoreVarsHits = 0           // 敵撃破時のヒット数（accuracy 計算用）
+  private scoreVarsItemsCollected = 0 // アイテム収集総数
+  private scoreVarsBossKills = 0      // ボス撃破数
+  private scoreVarsStealthBonus = 0   // ステルス継続フレーム数の累積
+  private scoreVarsColorTouches = 0   // 安全色タッチ回数
+
   // カメラ
   private cameraX = 0
   // 縦スクロールモード用: 色踏みのミスカウント
@@ -98,6 +108,10 @@ export class SideScroller {
   private rafId = 0
   private lastTime = 0
 
+  // ─── LearningSystem ──────────────────────────────────────────────
+  private learningRules: LearningRule[] | null = null
+  private learningCheckTimer = 0         // 次のチェック予定時刻
+
   // イベントハンドラ（解除用に保持）
   private _onKeyDown: (e: KeyboardEvent) => void
   private _onKeyUp: (e: KeyboardEvent) => void
@@ -140,11 +154,18 @@ export class SideScroller {
     return e.key
   }
 
-  // ルール更新
-  updateRules(rules: RuntimeRules): void {
+  // ルール更新（ManualVersion があれば learningRules を同期）
+  updateRules(rules: RuntimeRules, manual?: ManualVersion): void {
     this.rules = rules
     if (rules.features.has('double_jump')) {
       this.player.jumpsLeft = Math.max(this.player.jumpsLeft, 2)
+    }
+    // ManualVersion から learningRules を取得
+    if (manual?.learningRules) {
+      this.learningRules = JSON.parse(JSON.stringify(manual.learningRules))
+      this.learningCheckTimer = 0.5  // 0.5秒後に最初のチェック
+    } else {
+      this.learningRules = null
     }
     // updateRules はループ外から呼ばれるため _frameWorld を使わず直接構築
     const world = this._buildWorld()
@@ -215,6 +236,37 @@ export class SideScroller {
 
   getStats(): ActionStats { return this.stats }
 
+  /**
+   * ScoreVars を構築し、ジャンル別 scoreFormula を使って playScore を再計算する。
+   * ゲーム終了時や最終スコア計算時に呼ぶ。
+   */
+  private _recalculatePlayScore(): void {
+    // accuracy: 命中率（shots > 0 なら hits/shots, 0 なら 0）
+    const accuracy = this.stats.shots > 0
+      ? this.scoreVarsHits / this.stats.shots
+      : 0
+
+    const vars: ScoreVars = {
+      distance: this.distance,
+      kills: this._gameStats.kills,
+      combo: this._gameStats.combo,
+      exp: this.player.exp,
+      beatHits: this._gameStats.beatHits,
+      survivedSec: this.survivedSec,
+      accuracy,
+      maxCombo: this._gameStats.maxCombo,
+      deaths: 0, // TODO: 実装検討（現在は常に 0）
+      itemsCollected: this.scoreVarsItemsCollected,
+      bossKills: this.scoreVarsBossKills,
+      stealthBonus: this.scoreVarsStealthBonus,
+      colorTouches: this.scoreVarsColorTouches,
+    }
+
+    const genre = GENRES.find(g => g.id === this.rules.genre)
+    const formula = genre?.scoreFormula ?? 'distance * 0.8'
+    this.playScore = Math.max(0, Math.round(evalScoreFormula(formula, vars)))
+  }
+
   // ─── メインループ ────────────────────────────────────────────────
   private _loop = (ts: number) => {
     const rawDt = Math.min((ts - this.lastTime) / 1000, 0.05)
@@ -259,6 +311,20 @@ export class SideScroller {
   private _update(dt: number): void {
     this.survivedSec += dt
     this.stats.ticks++
+
+    // ─── LearningSystem の評価（定期チェック） ────────────────────
+    if (this.learningRules) {
+      this.learningCheckTimer -= dt
+      if (this.learningCheckTimer <= 0) {
+        this.learningCheckTimer = 1.0  // 1秒ごとに評価
+        const effects = evaluateLearningRules(this.learningRules, this.stats)
+        if (effects.length > 0) {
+          console.log(`[LearningSystem] Triggered ${effects.length} effect(s):`, effects)
+          // TODO: 発動した effects を RuntimeRules に適用する仕組みを実装
+          // 例: disableAction → 特定キーを無視、forceFeature → フィーチャー有効化
+        }
+      }
+    }
 
     const r = this.rules
     const p = this.player
@@ -576,6 +642,8 @@ export class SideScroller {
     // Hook: onPlayerDeath
     const dw = this._getWorld()
     for (const sys of getActiveSystems(this.rules.features)) sys.onPlayerDeath?.(dw)
+    // ScoreVars に基づいて playScore を再計算
+    this._recalculatePlayScore()
   }
 
   // ─── 描画 ────────────────────────────────────────────────────────
@@ -1116,9 +1184,13 @@ export class SideScroller {
         if (p.hp <= 0) self._die(p)
       },
       resetCombo() { self._gameStats.combo = 0 },
-      setTimescale(scale, durationSec) {
-        self._timescaleScale = scale
-        self._timescaleRemaining = durationSec ?? -1
+      setTimescale(scale: number, durationSec?: number) {
+        self._timescaleScale = Math.max(0, Math.min(2, scale))  // 0〜2倍に制限
+        if (durationSec !== undefined && durationSec > 0) {
+          self._timescaleRemaining = durationSec
+        } else {
+          self._timescaleRemaining = -1  // 永続
+        }
       },
 
       getHazardScreenX(h) {
@@ -1135,6 +1207,12 @@ export class SideScroller {
       },
       addBeatHit()             { self._gameStats.beatHits++ },
       setBeatHazardInverted(v) { self._gameStats.beatHazardInverted = v },
+
+      addScoreVarsHit()        { self.scoreVarsHits++ },
+      addScoreVarsItemCollected() { self.scoreVarsItemsCollected++ },
+      addScoreVarsBossKill()   { self.scoreVarsBossKills++ },
+      addScoreVarsStealthBonus(amount: number) { self.scoreVarsStealthBonus += amount },
+      addScoreVarsColorTouch() { self.scoreVarsColorTouches++ },
     }
   }
 }

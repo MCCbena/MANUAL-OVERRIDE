@@ -61,6 +61,8 @@ export class ShootFeature implements FeatureSystem {
       const plugin = getGenre(world.rules.genre)
       for (const h of destroyedHazards) {
         plugin.onHazardDestroyed?.(world, h)
+        // ScoreVars: 敵撃破カウント（accuracy 計算用）
+        world.addScoreVarsHit()
       }
     }
 

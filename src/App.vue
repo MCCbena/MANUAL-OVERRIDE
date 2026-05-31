@@ -78,9 +78,10 @@ function onChoose(choiceId: string) {
   const idx = snapshot.value.shouldUpdate ?? 0
   gameState.choose(choiceId)
   // 新しい説明書を記録（差分演出）
-  manualCtl.recordUpdate(gameState.currentManual())
-  // ルールをゲームエンジンへ反映
-  scroller?.updateRules(gameState.rules)
+  const currentManual = gameState.currentManual()
+  manualCtl.recordUpdate(currentManual)
+  // ルールをゲームエンジンへ反映（ManualVersion も渡して learningRules を同期）
+  scroller?.updateRules(gameState.rules, currentManual)
   // 更新完了を scroller に通知
   scroller?.markUpdated(idx)
 }
@@ -130,12 +131,12 @@ watch(() => gameState.lockedGenre.value, (newGenre) => {
   // ジャンル確定時、スクロール速度を一時的にアップ（0.8秒間）
   const originalSpeed = gameState.rules.scrollSpeed
   gameState.rules.scrollSpeed = originalSpeed * 1.35  // 35%加速
-  scroller.updateRules(gameState.rules)
+  scroller.updateRules(gameState.rules, gameState.currentManual())
 
   if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
   genreLockedBoostTimer = window.setTimeout(() => {
     gameState.rules.scrollSpeed = originalSpeed
-    scroller?.updateRules(gameState.rules)
+    scroller?.updateRules(gameState.rules, gameState.currentManual())
   }, 800)
 })
 

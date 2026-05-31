@@ -22,6 +22,8 @@ export class SpecialFeature implements FeatureSystem {
     world.addScore(gain)
     world.removeHazardById(hazard)
     world.addScorePopup(screenX + hazard.w / 2, hazard.y, `TOUCH! +${gain}`, '#00ffcc')
+    // ScoreVars: 安全色タッチカウント
+    world.addScoreVarsColorTouch()
     const cx = screenX + hazard.w / 2
     const cy = hazard.y + hazard.h / 2
     for (let i = 0; i < 6; i++) {
