@@ -8,16 +8,19 @@ import { SCORE_RATIO, THROW_SCORE_WEIGHTS } from '../data/gameBalance'
 // ──────────────────────────────────────────────────────────────────────
 const SAFE_PATTERN = /^[\d\s+\-*/().a-z_]+$/i
 
+const DEFAULT_FORMULA = 'distance * 0.5 + kills * 100'
+
 export function evalScoreFormula(formula: string, vars: ScoreVars): number {
   if (!SAFE_PATTERN.test(formula)) {
-    console.warn('[scoreCalc] invalid formula:', formula)
-    return 0
+    console.warn('[scoreCalc] 不正なスコア式のためデフォルト式を使用:', formula)
+    try { return parseExpr(DEFAULT_FORMULA, vars) } catch { return 0 }
   }
   // Function ではなく手書きパーサで評価（eval 禁止）
   try {
     return parseExpr(formula.trim(), vars)
-  } catch {
-    return 0
+  } catch (e) {
+    console.warn('[scoreCalc] スコア式パースエラーのためデフォルト式を使用:', formula, e)
+    try { return parseExpr(DEFAULT_FORMULA, vars) } catch { return 0 }
   }
 }
 

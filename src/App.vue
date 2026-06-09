@@ -75,15 +75,19 @@ function beginSnapshotLoop() {
 
 // ─── 選択後の処理 ────────────────────────────────────────────────
 function onChoose(choiceId: string) {
+  if (!scroller) {
+    console.error('[onChoose] scroller が null のため選択を処理できません')
+    return
+  }
   const idx = snapshot.value.shouldUpdate ?? 0
   gameState.choose(choiceId)
   // 新しい説明書を記録（差分演出）
   const currentManual = gameState.currentManual()
   manualCtl.recordUpdate(currentManual)
   // ルールをゲームエンジンへ反映（ManualVersion も渡して learningRules を同期）
-  scroller?.updateRules(gameState.rules, currentManual)
+  scroller.updateRules(gameState.rules, currentManual)
   // 更新完了を scroller に通知
-  scroller?.markUpdated(idx)
+  scroller.markUpdated(idx)
 }
 
 // ─── ギブアップ ───────────────────────────────────────────────────

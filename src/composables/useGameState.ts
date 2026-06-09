@@ -48,6 +48,14 @@ export function useGameState() {
     const choice = ver.choices.find(c => c.id === choiceId)
     if (!choice) return
 
+    // 状態を変更する前に次バージョンの存在を確認
+    const nextVer = MANUAL_DECK[choice.next]
+    if (!nextVer) {
+      console.error(`[choose] invalid choice.next: ${choice.next} — ゲームを継続します`)
+      phase.value = 'playing'
+      return
+    }
+
     soundManager.onChoiceSelect()
 
     choiceHistory.push({
@@ -59,11 +67,6 @@ export function useGameState() {
     updateIndex.value++
 
     // ジャンル収束チェック
-    const nextVer = MANUAL_DECK[choice.next]
-    if (!nextVer) {
-      console.error(`[choose] invalid choice.next: ${choice.next}`)
-      return
-    }
     const accumulated = accumulateParams(choiceHistory.map(h => h.genreParams))
     const resolved = resolveGenre(accumulated, GENRES)
 
