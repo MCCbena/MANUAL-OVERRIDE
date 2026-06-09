@@ -35,7 +35,7 @@ export class JSONGenrePlugin implements PluginBase {
       safe: '#4ecdc4',
       safeGlow: '#80e8dd',
     }
-    this.spawnTable = []
+    this.spawnTable = this._getDelegate().spawnTable
   }
 
   private _getDelegate(): PluginBase {
