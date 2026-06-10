@@ -108,7 +108,7 @@ export function validateGameConfig(config: GameConfigMap): ConfigValidationResul
 
   // 必須フィールドの型チェック
   for (const [section, fields] of Object.entries(REQUIRED_NUMBER_FIELDS)) {
-    const sec = config[section as GameConfigSection] as any
+    const sec = config[section as GameConfigSection] as unknown as Record<string, unknown>
     if (!sec) continue
     for (const field of fields!) {
       if (typeof sec[field] !== 'number') {
@@ -119,9 +119,9 @@ export function validateGameConfig(config: GameConfigMap): ConfigValidationResul
 
   // 数値範囲チェック
   for (const { section, field, min, max } of RANGE_CHECKS) {
-    const sec = config[section] as any
+    const sec = config[section] as unknown as Record<string, unknown>
     if (!sec) continue
-    const val = sec[field]
+    const val: unknown = sec[field]
     if (typeof val !== 'number') continue
     if (min !== undefined && val < min) {
       errors.push(`config.${section}.${field} = ${val} は最小値 ${min} を下回っています`)

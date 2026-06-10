@@ -5,7 +5,7 @@
 
 ---
 
-## 📦 セットアップ（5分）
+## セットアップ（5分）
 
 ### 1. 環境の確認
 
@@ -38,7 +38,7 @@ npm run build
 
 ---
 
-## 🎮 ゲームの流れ（プレイヤー視点）
+## ゲームの流れ（プレイヤー視点）
 
 ### フェーズ 1: チュートリアル（説明書 ver 1.0）
 
@@ -78,7 +78,7 @@ npm run build
 
 ---
 
-## 📂 プロジェクト構成（全体像）
+## プロジェクト構成（全体像）
 
 ```
 src/
@@ -161,11 +161,11 @@ src/
 
 ---
 
-## 🚀 はじめてのコーディング
+## はじめてのコーディング
 
 ### パターン 1: 説明書ルート（テキスト内容）を追加する
 
-**難易度:** ⭐ 簡単 | **所要時間:** 5分 | **ファイル数:** 1個
+**難易度:** 簡単 | **所要時間:** 5分 | **ファイル数:** 1個
 
 説明書の新バージョン（例: ver 3.0）を追加します。
 
@@ -240,7 +240,7 @@ src/data/manuals/new-route.json
 
 ### パターン 2: ジャンルのビジュアルを変える
 
-**難易度:** ⭐⭐ 中程度 | **所要時間:** 15分 | **ファイル数:** 1個
+**難易度:** 中程度 | **所要時間:** 15分 | **ファイル数:** 1個
 
 例: STG（シューティング）の敵の見た目を変える
 
@@ -272,7 +272,7 @@ export class StgPlugin extends GenrePluginBase {
 
 ### パターン 3: 新しいゲーム機能を追加する
 
-**難易度:** ⭐⭐⭐ 難しい | **所要時間:** 30分 | **ファイル数:** 2個
+**難易度:** 難しい | **所要時間:** 30分 | **ファイル数:** 2個
 
 例: 「ジャンプ高度を表示する」機能
 
@@ -326,22 +326,23 @@ getRegistry().registerFeature(new JumpHeightFeature())
 
 ---
 
-## 📖 より詳しく学ぶ
+## より詳しく学ぶ
 
 | 知りたいこと | 読むファイル |
 |---|---|
-| **ゲーム全体像** | [docs/README.md](docs/README.md) |
-| **レイヤー構成** | [docs/architecture.md](docs/architecture.md) |
-| **コアシステム詳説** | [docs/core-systems.md](docs/core-systems.md) |
-| **新ジャンルの作り方** | [docs/genre-plugin.md](docs/genre-plugin.md) |
-| **新フィーチャーの作り方** | [docs/feature-system.md](docs/feature-system.md) |
-| **説明書 JSON 仕様** | [docs/manual-json.md](docs/manual-json.md) |
-| **全 FeatureId 一覧** | [docs/feature-ids.md](docs/feature-ids.md) |
-| **全ジャンル定義** | [docs/genre-system.md](docs/genre-system.md) |
+| **ゲーム全体像** | [README.md](README.md) |
+| **レイヤー構成** | [architecture.md](architecture.md) |
+| **コアシステム詳説** | [core-systems.md](core-systems.md) |
+| **新ジャンルの作り方** | [genre-plugin.md](genre-plugin.md) |
+| **新フィーチャーの作り方** | [feature-system.md](feature-system.md) |
+| **説明書 JSON 仕様** | [manual-json.md](manual-json.md) |
+| **全 FeatureId 一覧** | [feature-ids.md](feature-ids.md) |
+| **全ジャンル定義** | [genre-system.md](genre-system.md) |
+| **タスク一覧** | [TASKS.md](TASKS.md) |
 
 ---
 
-## 💬 よくある質問
+## よくある質問
 
 ### Q: ゲームがうまく起動しない
 
@@ -380,19 +381,11 @@ dist/
 
 ---
 
-## 🔍 今後の実装予定を知りたい
-
-[TASKS.md](TASKS.md) を読んでください。優先度順に並んでいます。
-
----
-
-## 🎯 次のステップ
+## 次のステップ
 
 1. **ゲームをプレイ** — `npm run dev`
 2. **説明書を追加** — パターン 1 を実行
 3. **ジャンルを改造** — パターン 2 を実行
 4. **機能を追加** — パターン 3 に挑戦
 
-質問があれば [docs](docs/) フォルダを参照するか、コードのコメントを読んでください。
-
-**楽しい開発を！** 🚀
+質問があれば、他のドキュメントを参照するか、コードのコメントを読んでください。
