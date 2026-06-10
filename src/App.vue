@@ -23,7 +23,7 @@ let scroller: SideScroller | null = null
 
 // ─── エラートースト ──────────────────────────────────────────────
 const toastMessage = ref<string | null>(null)
-let toastTimer: number | null = null
+let toastTimer: ReturnType<typeof setTimeout> | null = null
 function showToast(msg: string) {
   toastMessage.value = msg
   if (toastTimer !== null) clearTimeout(toastTimer)

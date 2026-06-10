@@ -326,7 +326,7 @@ onMounted(() => {
   border-left: 2px solid rgba(0,255,65,0.2);
   padding-left: 10px;
   text-align: left;
-  font-family: 'M PLUS 1 Code', cursive;
+  font-family: 'M PLUS 1 Code', monospace;
 }
 
 /* ── リスタートボタン ── */
