@@ -5,7 +5,7 @@ import type { GenrePlugin } from './PluginManager'
 import { getGenre } from '../engine/GameRegistry'
 
 export class JSONGenrePlugin implements PluginBase {
-  id: GenreId
+  readonly id: GenreId
   readonly skyColors: readonly [string, string]
   readonly groundColors: readonly [string, string]
   readonly farLayerColor: string
@@ -48,8 +48,8 @@ export class JSONGenrePlugin implements PluginBase {
       rhythm: 'rhythm',
       puzzle: 'puzzle',
     }
-    const genreId = templateMap[this._template] || 'base'
-    this._delegate = getGenre(genreId as any)
+    const genreId = (templateMap[this._template] || 'base') as GenreId
+    this._delegate = getGenre(genreId)
 
     return this._delegate
   }

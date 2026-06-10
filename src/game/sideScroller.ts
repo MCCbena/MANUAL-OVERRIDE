@@ -1,7 +1,7 @@
 import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule, LearningEffect } from '../domain/types'
 import type { MutableWorld, InputSnapshot, GameStats } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
-import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES } from '../data/gameBalance'
+import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES, DISTANCE_ACCEL } from '../data/gameBalance'
 import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '../data/tunables'
 import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
@@ -340,8 +340,7 @@ export class SideScroller {
     const isVertical = r.scrollAxis === 'y'
 
     // ─── 距離ベースの自動加速 ─────────────────────────────────────────
-    // 4000px で 20% 加速、8000px で 40% 加速 など段階的に難しくなる
-    const distanceAccelFactor = 1 + Math.min(this.distance / 20000, 0.5)
+    const distanceAccelFactor = 1 + Math.min(this.distance / DISTANCE_ACCEL.fullDist, DISTANCE_ACCEL.maxBonus)
     const effectiveScrollSpeed = r.scrollSpeed * distanceAccelFactor
 
     // ─── Pre-physics: 移動 Feature が vx をセット ────────────────────
@@ -1248,7 +1247,7 @@ export class SideScroller {
 
       case 'forceFeature': {
         // フィーチャーを有効化（rules.features に追加）
-        const featureId = effect.payload as any
+        const featureId = effect.payload as import('../domain/types').FeatureId
         if (!this.rules.features.has(featureId)) {
           this.rules.features.add(featureId)
           console.log(`[LearningSystem] Enabled feature "${featureId}"`)

@@ -289,6 +289,8 @@ export interface GameBalanceConfig {
   hazardSpawnBaseInterval: number
   hazardSpawnMinInterval: number
   hazardSpawnDecayRate: number
+  distanceAccelMaxBonus: number
+  distanceAccelFullDist: number
 }
 
 /** genres.json — ジャンル定義テーブル */

@@ -188,7 +188,7 @@ export class PluginManager {
       type: 'deck-extension',
       id: String(obj.id),
       entries: entries as Array<ManualVersion & { key: string }>,
-      inject: (obj.inject as any[]) || [],
+      inject: (obj.inject as DeckExtensionPlugin['inject']) || [],
     }
   }
 }

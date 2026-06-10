@@ -42,18 +42,18 @@ export function useGameState() {
     phase.value = 'updating'
   }
 
-  // プレイヤーが2択を選んだとき
-  function choose(choiceId: string) {
+  // プレイヤーが2択を選んだとき。エラーがあればエラーメッセージ文字列を返す（正常時は undefined）
+  function choose(choiceId: string): string | undefined {
     const ver = MANUAL_DECK[currentVersionKey.value]
     const choice = ver.choices.find(c => c.id === choiceId)
-    if (!choice) return
+    if (!choice) return undefined
 
     // 状態を変更する前に次バージョンの存在を確認
     const nextVer = MANUAL_DECK[choice.next]
     if (!nextVer) {
-      console.error(`[choose] invalid choice.next: ${choice.next} — ゲームを継続します`)
+      console.error(`[choose] invalid choice.next: ${choice.next}`)
       phase.value = 'playing'
-      return
+      return `選択肢データが見つかりません（${choice.next}）`
     }
 
     soundManager.onChoiceSelect()
@@ -79,6 +79,7 @@ export function useGameState() {
       _rebuildRules()
       phase.value = 'playing'
     }
+    return undefined
   }
 
   // choices が空の末端 or 3回目更新でジャンルを強制決定

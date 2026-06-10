@@ -11,6 +11,7 @@
  */
 
 import { registerGenre } from '../engine/GameRegistry'
+import type { GenrePlugin as EngineGenrePlugin } from '../engine/GenrePlugin'
 import { BasePlugin, RunnerPlugin }   from './BasePlugin'
 import { StgPlugin }                  from './StgPlugin'
 import { RpgPlugin }                  from './RpgPlugin'
@@ -38,6 +39,6 @@ registerGenre(new PlatformerPlugin())
 const installedPlugins = pluginManager.loadAll()
 for (const plugin of installedPlugins) {
   if (plugin.type === 'genre') {
-    registerGenre(new JSONGenrePlugin(plugin) as any)
+    registerGenre(new JSONGenrePlugin(plugin) as EngineGenrePlugin)
   }
 }
