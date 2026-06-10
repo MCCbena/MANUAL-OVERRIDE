@@ -34,6 +34,7 @@ const snapshot = ref<GameSnapshot>({
   distance: 0, playScore: 0, combo: 0, kills: 0, exp: 0,
   beatHits: 0, survivedSec: 0, hp: 3, maxHp: 3, dead: false, shouldUpdate: null,
   statJumps: 0, statMoveLeft: 0, statMoveRight: 0, firstJumpDone: false,
+  learningNotification: null, scoreFormulaError: null,
 })
 
 // ─── Canvas サイズをウィンドウに合わせる ───────────────────────────
@@ -75,6 +76,16 @@ function beginSnapshotLoop() {
     const p = gameState.phase.value
     if (snapshot.value.dead && p !== 'throwing' && p !== 'ending' && p !== 'updating') {
       gameState.startThrowing(snapshot.value.playScore)
+    }
+
+    // LearningSystem エフェクト通知
+    if (snapshot.value.learningNotification) {
+      showToast(`🎯 ${snapshot.value.learningNotification}`)
+    }
+
+    // スコア計算式エラー（開発時のみ）
+    if (import.meta.env.DEV && snapshot.value.scoreFormulaError) {
+      showToast(`⚠ スコア式エラー: ${snapshot.value.scoreFormulaError}`)
     }
 
     snapRaf = requestAnimationFrame(loop)
