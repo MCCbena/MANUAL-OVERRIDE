@@ -14,6 +14,8 @@ test('ゲームが開始できる', async ({ page }) => {
 test('説明書パネルが表示される', async ({ page }) => {
   await page.goto('/')
   await page.click('text=はじめる')
+  // チュートリアルイントロを通過してゲームプレイフェーズへ
+  await page.click('text=わかった、プレイする')
   // ManualPanel は右下に常時表示
   await expect(page.locator('[class*="manual"]').first()).toBeVisible({ timeout: 5000 })
 })
