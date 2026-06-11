@@ -155,10 +155,10 @@
 | `src/game/systems/SpecialFeature.ts:41` | `stealth_mode`, `time_bonus`, `tower`, `boss` |
 
 **タスク:**
-- [ ] 各フィーチャーについて「実装する」か「JSON から削除して使わない」かを決定する
-- [ ] 実装する場合: 各フィーチャーのロジックを実装し動作確認
-- [ ] 削除する場合: 対応する JSON エントリ・フィーチャー登録コードも合わせて削除
-- [ ] `boss` フィーチャー: 仕様上実装予定だが未着手。スコープを確定する
+- [x] 各フィーチャーについて「実装する」か「JSON から削除して使わない」かを決定する（commit f0112b3）
+- [x] 実装する場合: 各フィーチャーのロジックを実装し動作確認（dash/wall_jump/vertical_scroll/stealth_mode/tower/grid_stop/puzzle_solve/boss/time_bonus 全実装）
+- [x] `slide`/`gravity_flip` はどのジャンルからも使われないため未実装のまま（console.warn で通知）
+- [x] `boss` フィーチャー: HP バー・撃破スコア・爆発演出・スポーン制御を実装済み
 
 **推定作業時間:** 4～8 時間（実装する数による）  
 **対象ファイル:** `src/game/systems/ExtraMovementFeature.ts` 、`src/game/systems/PuzzleFeature.ts` 、`src/game/systems/SpecialFeature.ts` 、`src/data/manuals/*.json`
@@ -171,13 +171,10 @@
 **問題:** プレイヤー視点ではゲームが無応答になったり、スコアが 0 になったりするが理由がわからない
 
 **タスク:**
-- [ ] `src/composables/useGameState.ts:64` — 無効な `choice.next` 時にゲームが止まる問題を修正
-  - フォールバック処理（最初の選択肢に戻す等）または画面上へのエラー表示を追加
-- [ ] `src/domain/scoreCalc.ts:13-14` — スコア式エラー時に `return 0` で沈黙する問題を修正
-  - 開発中は警告パネルを、本番ではデフォルト式にフォールバック
-- [ ] `src/plugins/PluginManager.ts:44` — `localStorage` が使えない環境（プライベートブラウジング等）でのフォールバックを実装
-  - CLAUDE.md で「完全オフライン動作」を謳っているため必須
-- [ ] `src/App.vue:77-87` — `scroller` が `null` の場合の処理漏れを修正（`choose()` 内の null チェック）
+- [x] `src/composables/useGameState.ts` — 無効な `choice.next` 時にエラーメッセージを返してフェーズを `playing` に戻す処理を実装済み
+- [x] `src/domain/scoreCalc.ts` — スコア式エラー時にデフォルト式へフォールバック + `getLastFormulaError()` で呼び出し元が取得可能に実装済み
+- [x] `src/plugins/PluginManager.ts` — `localStorage` 不可時にインメモリストアへフォールバック実装済み
+- [x] `src/App.vue` — `scroller` が `null` の場合のトースト表示とアーリーリターンを実装済み
 
 **推定作業時間:** 2～3 時間  
 **対象ファイル:** `src/composables/useGameState.ts` 、`src/domain/scoreCalc.ts` 、`src/plugins/PluginManager.ts` 、`src/App.vue`
@@ -191,12 +188,12 @@
 **影響:** プレイヤー行動に応じてルールが変化するという体験が未実現
 
 **タスク:**
-- [ ] `ManualVersion.learningRules` を定義した JSON を最低 1 件追加してテスト実行
-  - 例: `"jumpRate > 0.4 → disable jump"` （ジャンプ率 40% 超でジャンプ禁止）
-- [ ] `sideScroller.ts` の `_applyLearningEffect()` で `disableAction` 処理が `duration` 後にリセットされるか確認
-- [ ] `changeKey` リマッピングが一時的に適用され、`duration` 後に元に戻るか確認
-- [ ] `ScoreVars.deaths` カウンタが常に `0` のままになっている問題を修正
-- [ ] `colorTouchMisses` 変数（`sideScroller.ts:69`）が更新されていない問題を修正または削除
+- [x] `ManualVersion.learningRules` を定義した JSON を追加 — `action-branch.json` の `3.0-a-fight` に jumpRate/invertHazard ルールを定義済み
+- [x] `sideScroller.ts` の `_applyLearningEffect()` で `disableAction` 処理が `duration` 後にリセットされることを確認済み
+- [x] `changeKey` リマッピングが `durationSec` 後に元のキーへ自動リセットされるよう修正済み（`_originalKeys` / `_changeKeyUntil` マップで管理）
+- [x] `invertHazard` が `durationSec` 後に自動解除されるよう修正済み（`_invertHazardUntil` で管理）
+- [x] `ScoreVars.deaths` カウンタ — `_die()` 内で `this.deaths++` が実装済み
+- [x] `colorTouchMisses` 変数 — 削除済み（デッドコード解消）
 
 **推定作業時間:** 3～4 時間  
 **対象ファイル:** `src/domain/LearningSystem.ts` 、`src/game/sideScroller.ts` 、`src/data/manuals/*.json`
@@ -327,9 +324,7 @@
 **現状:** CLAUDE.md 仕様と実装コードの間に説明のない乖離がある
 
 **タスク:**
-- [ ] `src/domain/scoreCalc.ts:96` — `result.airTime * 1000 * w.airTime` の `* 1000` の意図を確認
-  - 秒→ミリ秒変換なのかスケーリングなのかコメントまたは定数名で明示
-  - 仕様（`滞空時間 × 0.5`）と実装が一致するよう修正または仕様を更新
+- [x] `src/domain/scoreCalc.ts` — `* 1000` は秒→ミリ秒スケーリング（例: 2秒 → 2000 × 0.5 = 1000点）であることをコメントで明示済み
 - [ ] 投擲スコアの実際の最大値・最小値を計算してゲームバランス上妥当かプレイテストで確認
 - [ ] `scoreCalc.ts` の `parseExpr(formula)` を毎回呼ぶのでなく、ゲーム開始時にコンパイル済み関数をキャッシュする最適化
 
@@ -443,8 +438,8 @@
 **問題:** 日本語環境でのゲームプレイ中に IME が ON になると誤動作するリスク
 
 **タスク:**
-- [ ] `src/game/sideScroller.ts:151-155` — `e.key === 'Process'` または `e.isComposing === true` のときは入力を無視する処理を追加
-- [ ] `e.key` の大文字化処理が `ArrowLeft` 等に必要ないか確認（現在 `z`/`Z` だけ特別扱い）
+- [x] `src/game/sideScroller.ts` — `e.isComposing === true` または `e.key === 'Process'` のときは `null` を返して入力を無視するよう `_normalizeKey()` を修正済み。keydown/keyup ハンドラでも `null` チェックを追加
+- [x] `z`/`Z` の特別扱い以外は大文字化不要（`ArrowLeft` 等はそのまま一致）を確認済み
 - [ ] IME ON 状態でゲームが誤動作しないことを日本語環境で手動確認
 
 **推定作業時間:** 1 時間  
@@ -458,7 +453,7 @@
 **問題:** Canvas の `width`/`height` プロパティを変更するとコンテキストの全状態（変換行列・スタイル・クリッピング等）がリセットされ、ゲーム中に全画面切り替えや画面回転が起きると一瞬描画が消える
 
 **タスク:**
-- [ ] リサイズ時に Canvas を再初期化する処理を `sideScroller` 側に通知する仕組みを追加
+- [x] `SideScroller.onResize()` メソッドを追加し、`App.vue` の `resizeCanvas()` から呼ぶよう修正済み。リサイズ後に `lastTime` をリセットして dt 巨大値問題を防止
 - [ ] リサイズ後の最初のフレームで状態を正しく復元するか確認
 - [ ] デバイス回転（縦横切り替え）で Canvas が正しくリサイズされるかモバイル確認
 

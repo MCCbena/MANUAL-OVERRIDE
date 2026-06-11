@@ -44,6 +44,8 @@ function resizeCanvas() {
   if (!canvas) return
   canvas.width  = window.innerWidth
   canvas.height = window.innerHeight
+  // canvas.width 変更で ctx 全状態がリセットされるため scroller に通知
+  scroller?.onResize()
 }
 
 // ─── ゲームスタート ─────────────────────────────────────────────
