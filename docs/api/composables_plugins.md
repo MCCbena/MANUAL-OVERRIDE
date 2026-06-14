@@ -101,38 +101,12 @@
 
 ---
 
-## `src/plugins/JSONGenrePlugin.ts`
+## `src/plugins/validateConfigs.ts`
 
-JSON 定義から GenrePlugin を生成するアダプター。テンプレート（runner, space, dungeon, rhythm, puzzle）に基づいて既存の GenrePlugin へ描画処理を委譲。
-
-### クラス `JSONGenrePlugin`
-
-| プロパティ | 型 | 概要 |
-|---|---|---|
-| `id` | `GenreId` | ジャンルID |
-| `_template` | `'runner' \| 'space' \| 'dungeon' \| 'rhythm' \| 'puzzle'` | 視覚テンプレート |
-| `_delegate` | `PluginBase \| null` | 委譲先 GenrePlugin |
-
-| メソッド | 概要 |
-|---|---|
-| `drawFarLayer()` | 委譲先の遠景描画 |
-| `drawMidLayer()` | 委譲先の中景描画 |
-| `drawPlayer()` | 委譲先のプレイヤー描画 |
-| `drawHazard()` | 委譲先のハザード描画 |
-| `onPlayerJump()` | noop（デフォルト） |
-| `onPlayerLand()` | noop（デフォルト） |
-| `onHazardDestroyed()` | noop（デフォルト） |
-
----
-
-## `src/plugins/PluginManager.ts`
-
-GenrePlugin の管理・登録・取得を行うマネージャー。
+Vite プラグイン。開発時に MANUAL_DECK と GAME_CONFIG の整合性を自動検証。
 
 ### エクスポート関数
 
 | 関数 | 概要 |
 |---|---|
-| `registerPlugin(plugin: GenrePlugin): void` | プラグインを登録 |
-| `getPlugin(id: string): GenrePlugin \| null` | ID でプラグインを取得 |
-| `getAllPlugins(): GenrePlugin[]` | 全登録プラグインを返す |
+| `validateConfigs(): Plugin` | Vite プラグインファクトリ（dev モードでのみ `buildStart` で検証実行） |

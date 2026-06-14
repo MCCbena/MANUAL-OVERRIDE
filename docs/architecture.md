@@ -36,7 +36,7 @@
                    │
 ┌──────────────────▼──────────────────────────┐
 │  Data Layer (src/data/)                     │
-│  config/*.json  (genres, physics, score…)   │
+│  genres.ts  gameBalance.ts  tunables.ts     │
 │  manuals/*.json                             │
 └─────────────────────────────────────────────┘
 ```
@@ -113,32 +113,25 @@ src/
 │       └── rhythmSystem.ts    BPM・タイミング判定（純粋関数）
 │
 ├── genres/
-│   ├── index.ts                全 GenrePlugin を一括登録
-│   ├── BasePlugin.ts           base / runner
-│   ├── StgPlugin.ts            stg
-│   ├── RpgPlugin.ts            rpg
-│   ├── RhythmPlugin.ts         rhythm
-│   ├── PuzzlePlugin.ts         puzzle
-│   ├── AerialStgPlugin.ts      aerial_stg
-│   ├── SurvivalPlugin.ts       survival
-│   ├── BulletRunnerPlugin.ts   bullet_runner
-│   ├── PlatformerPlugin.ts     platformer
-│   ├── RacingPlugin.ts         racing
-│   ├── ArenaPlugin.ts          arena
-│   ├── AquaticPlugin.ts        aquatic
-│   ├── DungeonPlugin.ts        dungeon
-│   └── HackSlashPlugin.ts      hack_slash
+│   ├── index.ts           全 GenrePlugin を一括登録
+│   ├── BasePlugin.ts      base / runner
+│   ├── StgPlugin.ts       stg
+│   ├── RpgPlugin.ts       rpg
+│   ├── RhythmPlugin.ts    rhythm
+│   ├── PuzzlePlugin.ts    puzzle
+│   ├── AerialStgPlugin.ts aerial_stg
+│   ├── SurvivalPlugin.ts  survival
+│   ├── BulletRunnerPlugin.ts bullet_runner
+│   └── PlatformerPlugin.ts   platformer
 │
 ├── data/
-│   ├── config/                 設定 JSON（17ファイル）
-│   │   ├── genres.json         21 種の GenreDef
-│   │   ├── physics.json        物理定数
-│   │   ├── score.json          スコア重み
-│   │   └── *.json              spawn, vfx, camera, difficulty など
-│   ├── manualDeck.ts           JSON ファイルを import.meta.glob でロード
+│   ├── genres.ts          GENRES[] — 21 種の GenreDef
+│   ├── gameBalance.ts     物理定数・スポーン定数
+│   ├── tunables.ts        VFX・カメラ・スコアの調整値
+│   ├── manualDeck.ts      JSON ファイルを import.meta.glob でロード
 │   └── manuals/
-│       ├── base.json           ルート・チュートリアルデッキ
-│       └── *.json              ブランチ別デッキ
+│       ├── base.json      ルート・チュートリアルデッキ
+│       └── *.json         ブランチ別デッキ
 │
 └── framework/
     ├── types.ts           ManualDeckFile / ManualEntryJSON スキーマ
