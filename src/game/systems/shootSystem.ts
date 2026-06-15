@@ -101,7 +101,7 @@ export function updateShoot(
     if (!b.alive) continue
     for (const h of hazards) {
       if (h.isSafe) continue
-      if (rectsOverlap(b.rect, h.rect)) {
+      if (rectsOverlap(b.rect, h.rect, 0)) {
         b.alive = false
         if (rules.features.has('enemy_hp')) {
           h.hp--

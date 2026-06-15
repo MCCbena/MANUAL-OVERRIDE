@@ -67,13 +67,22 @@ export function useGameState() {
       versionKey: currentVersionKey.value,
       choiceId,
       genreParams: choice.genreParams,
+      genrePoints: choice.genrePoints,
     })
     currentVersionKey.value = choice.next
     updateIndex.value++
 
     // ジャンル収束チェック
     const accumulated = accumulateParams(choiceHistory.map(h => h.genreParams))
-    const resolved = resolveGenre(accumulated, GENRES)
+    const genrePointsAcc: Record<string, number> = {}
+    for (const h of choiceHistory) {
+      if (!h.genrePoints) continue
+      for (const [g, pts] of Object.entries(h.genrePoints)) {
+        genrePointsAcc[g] = (genrePointsAcc[g] ?? 0) + pts
+      }
+    }
+    const selectedIds = choiceHistory.map(h => h.choiceId)
+    const resolved = resolveGenre(accumulated, GENRES, genrePointsAcc, selectedIds)
 
     if (nextVer.choices.length === 0 || resolved !== 'base') {
       lockedGenre.value = resolved !== 'base' ? resolved : _forceResolve(accumulated)

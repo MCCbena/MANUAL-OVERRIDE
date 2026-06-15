@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed, toRaw } from 'vue'
 import { useGameState } from './composables/useGameState'
 import { useManual } from './composables/useManual'
 import { SideScroller } from './game/sideScroller'
@@ -53,7 +53,7 @@ function startGame() {
   gameState.startGame()
   const canvas = canvasRef.value!
   resizeCanvas()
-  scroller = new SideScroller(canvas, gameState.rules)
+  scroller = new SideScroller(canvas, toRaw(gameState.rules))
   // 初期説明書を履歴に登録
   manualCtl.recordUpdate(gameState.currentManual())
   scroller.start()
@@ -124,13 +124,14 @@ function onChoose(choiceId: string) {
   const currentManual = gameState.currentManual()
   manualCtl.recordUpdate(currentManual)
   // ルールをゲームエンジンへ反映（ManualVersion も渡して learningRules を同期）
-  scroller.updateRules(gameState.rules, currentManual)
+  scroller.updateRules(toRaw(gameState.rules), currentManual)
   // 更新完了を scroller に通知
   scroller.markUpdated(idx)
 }
 
 // ─── ギブアップ ───────────────────────────────────────────────────
 function giveUp() {
+  scroller?.recalcPlayScore()  // 死亡経路と同様に scoreFormula を適用して確定
   scroller?.setPaused(true)
   gameState.startThrowing(snapshot.value.playScore)
 }
@@ -185,14 +186,15 @@ watch(() => gameState.lockedGenre.value, (newGenre) => {
   if (!newGenre || !scroller) return
 
   // ジャンル確定時、スクロール速度を一時的にアップ（0.8秒間）
-  const originalSpeed = gameState.rules.scrollSpeed
-  gameState.rules.scrollSpeed = originalSpeed * 1.35  // 35%加速
-  scroller.updateRules(gameState.rules, gameState.currentManual())
+  const rawRules = toRaw(gameState.rules)
+  const originalSpeed = rawRules.scrollSpeed
+  rawRules.scrollSpeed = originalSpeed * 1.35  // 35%加速
+  scroller.updateRules(rawRules, gameState.currentManual())
 
   if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
   genreLockedBoostTimer = window.setTimeout(() => {
-    gameState.rules.scrollSpeed = originalSpeed
-    scroller?.updateRules(gameState.rules, gameState.currentManual())
+    rawRules.scrollSpeed = originalSpeed
+    scroller?.updateRules(rawRules, gameState.currentManual())
   }, 800)
 })
 

@@ -424,10 +424,9 @@ export class SideScroller {
       p.x += p.vx * dt
       p.x = Math.max(0, Math.min(W - p.w, p.x))
 
-      // 縦モードでは重力なし。プレイヤーは画面下に固定
-      p.y = H - BACKGROUND.groundHeight - p.h - 8
-      p.vy = 0
-      p.onGround = true
+      // 縦モード: 重力なし。moveUp/moveDown で自由移動（MovementFeature が p.vy をセット済み）
+      p.y = Math.max(0, Math.min(H - p.h, p.y + p.vy * dt))
+      p.onGround = false
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
 
       // スクロール距離（時間経過でカウント）
@@ -440,6 +439,11 @@ export class SideScroller {
         h.pulse += dt * VFX.hazardPulseRate
       }
       this.hazards = this.hazards.filter(h => h.y < H + 200)
+
+      // ─── アイテム降下（縦モード） ─────────────────────────
+      for (const item of this.items) {
+        item.y += effectiveScrollSpeed * dt
+      }
 
       // ─── スポーン（上端から） ─────────────────────────────
       if (this.distance >= this.nextSpawnDist) {
@@ -635,7 +639,9 @@ export class SideScroller {
 
     // ─── アイテムクリーンアップ ───────────────────────────────────
     // 収集・パルスアニメは RpgFeature.update() が担当。ここは dead / 画面外除去のみ。
-    this.items = this.items.filter(i => i.alive && i.x - this.cameraX > SPAWN.itemCullLeft)
+    this.items = this.items.filter(i =>
+      i.alive && (isVertical ? i.y < H + 100 : i.x - this.cameraX > SPAWN.itemCullLeft)
+    )
 
     // ─── パーティクル更新 ─────────────────────────────────────────
     for (const pt of this.particles) {
@@ -704,6 +710,12 @@ export class SideScroller {
     // ScoreVars に基づいて playScore を再計算
     this._recalculatePlayScore()
     this._pendingFormulaError = getLastFormulaError()
+  }
+
+  /** ギブアップ経路でも scoreFormula を適用してスコアを確定する */
+  recalcPlayScore(): number {
+    this._recalculatePlayScore()
+    return this.playScore
   }
 
   // ─── 描画 ────────────────────────────────────────────────────────
@@ -1131,6 +1143,11 @@ export class SideScroller {
       if (entry.isBoss) {
         const bw = this._getWorld()
         for (const sys of getActiveSystems(r.features)) sys.onBossSpawn?.(bw)
+      }
+      if (r.features.has('item_pickup') && Math.random() < SPAWN.itemDropChance) {
+        const itemType = Math.random() < SPAWN.itemExpChance ? 'exp' : 'hp'
+        const itemX = Math.random() * (W - 32) + 16
+        this.items.push(new Item(itemX, spawnY, itemType))
       }
     } else {
       // ─── 横スクロール: 画面右端からワールド座標で出現 ────────────

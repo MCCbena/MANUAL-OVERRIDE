@@ -1,5 +1,5 @@
 import type { ManualVersion, RuntimeRules, GenreParams, GenreParam, FeatureId, GenreId } from './types'
-import { accumulateParams, resolveGenre, resolveFeaturesForGenre } from './genreResolver'
+import { accumulateParams, accumulateGenrePoints, resolveGenre, resolveFeaturesForGenre } from './genreResolver'
 import { GENRES } from '../data/genres'
 import { BASE_SCROLL_SPEED, TEMPO_SPEED_BONUS } from '../data/gameBalance'
 
@@ -9,6 +9,8 @@ export interface ChoiceRecord {
   genreParams: GenreParams
   /** genreParams への乗数（デフォルト 1.0） */
   paramMultiplier?: number
+  /** ジャンルへの直接ポイント（新システム）。genrePoints ベースのジャンルで使用 */
+  genrePoints?: Record<string, number>
 }
 
 /**
@@ -27,9 +29,11 @@ export function buildRuntimeRules(
 ): RuntimeRules {
   // ── 1. ジャンルパラメータ累積（paramMultiplier を考慮） ──────────────
   const allParams = _accumulateWithMultiplier(history)
+  const allGenrePoints = accumulateGenrePoints(history)
+  const selectedChoiceIds = history.map(r => r.choiceId)
 
   // ── 2. ジャンル解決 ──────────────────────────────────────────────────
-  const genre = lockedGenre ?? resolveGenre(allParams, GENRES)
+  const genre = lockedGenre ?? resolveGenre(allParams, GENRES, allGenrePoints, selectedChoiceIds)
   const genreDef = GENRES.find(g => g.id === genre)
 
   // ── 3. feature セット ────────────────────────────────────────────────
