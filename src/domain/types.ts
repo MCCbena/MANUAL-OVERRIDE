@@ -23,32 +23,14 @@ export type GenreParam =
 export type GenreParams = Partial<Record<GenreParam, number>>
 
 // ─────────────────────────────────────────────────────────────
-// ジャンルID（20種 + base）
+// ジャンルID
+// 既存: 'base' | 'runner' | 'stg' | 'rpg' | 'puzzle' | 'rhythm' |
+//       'aerial_stg' | 'bullet_hell' | 'survival' | 'stealth_action' |
+//       'racing' | 'platformer' | 'dungeon' | 'tower_def' | 'sports' |
+//       'idle' | 'bullet_runner' | 'arena' | 'aquatic' | 'horror' | 'hack_slash'
+// 新規ジャンルは genres.json と Plugin ファイルを追加するだけで拡張可能。
 // ─────────────────────────────────────────────────────────────
-export type GenreId =
-  // ── コアジャンル（M3 で実装済み） ─────────────────────────
-  | 'base'           // チュートリアル・収束前のデフォルト
-  | 'runner'         // エンドレスランナー     { tempo: 5 }
-  | 'stg'            // 横スクロールSTG        { range: 4, enemy: 4 }
-  | 'rpg'            // RPG                   { growth: 4 }
-  | 'puzzle'         // パズル                { combo: 4 }
-  | 'rhythm'         // リズムゲーム          { tempo: 4, rhythm: 4 }
-  // ── 追加ジャンル（M5+ で順次実装） ────────────────────────
-  | 'aerial_stg'     // 縦スクロールSTG        { vertical: 3, range: 3, enemy: 3 }
-  | 'bullet_hell'    // 弾幕シューティング     { vertical: 3, enemy: 5 }
-  | 'survival'       // サバイバル            { survive: 4, growth: 3 }
-  | 'stealth_action' // ステルスアクション     { stealth: 4 }
-  | 'racing'         // レーシング            { speed: 4, tempo: 3 }
-  | 'platformer'     // プラットフォーマー     { aerial: 3, combo: 3 }
-  | 'dungeon'        // ダンジョン探索        { growth: 5, craft: 2 }
-  | 'tower_def'      // タワーディフェンス     { craft: 5, enemy: 3 }
-  | 'sports'         // スポーツゲーム        { speed: 3, rhythm: 3 }
-  | 'idle'           // 放置ゲーム            { craft: 4 }
-  | 'bullet_runner'  // 弾幕ランナー          { tempo: 5, enemy: 4 }
-  | 'arena'          // アリーナバトル        { enemy: 5, combo: 4 }
-  | 'aquatic'        // 水中アドベンチャー    { vertical: 2, aerial: 2, survive: 3 }
-  | 'horror'         // サバイバルホラー      { survive: 5, stealth: 3 }
-  | 'hack_slash'     // ハックアンドスラッシュ { enemy: 4, combo: 5 }
+export type GenreId = string
 
 export type Phase = 'title' | 'tutorialIntro' | 'tutorial' | 'updating' | 'playing' | 'genreLocked' | 'throwing' | 'ending'
 
@@ -79,46 +61,16 @@ export type EnvironmentId   =
 
 // ─────────────────────────────────────────────────────────────
 // Feature フラグ
+// 既存: shoot / three_way / charge_shot / spread_shot / bomb / enemy_hp / boss
+//       movement / auto_run / slow_precise / double_jump / long_air / dash /
+//       wall_jump / slide / gravity_flip / vertical_scroll
+//       hp / exp / item_pickup / shield
+//       grid_stop / puzzle_solve
+//       beat_hazard / just_input / beat_dash
+//       stealth_mode / time_bonus / tower / color_touch
+// 新規フィーチャーは FeatureSystem 実装 + systems/index.ts 登録で拡張可能。
 // ─────────────────────────────────────────────────────────────
-export type FeatureId =
-  // ── STG 系 ──────────────────────────────────────────────
-  | 'shoot'           // 前方弾発射（Z キーなど）
-  | 'three_way'       // 三方向弾（shoot の拡張）
-  | 'charge_shot'     // 長押しチャージショット
-  | 'spread_shot'     // 拡散弾（扇状5方向）
-  | 'bomb'            // 爆弾アイテム（画面全体攻撃）
-  | 'enemy_hp'        // 敵がHPを持ち複数ヒット必要
-  | 'boss'            // ボスエネミーが出現する
-  // ── 移動 系 ──────────────────────────────────────────────
-  | 'movement'        // 基本左右移動（常時有効・すべてのジャンルで使用）
-  | 'auto_run'        // 自動前進（プレイヤーは左右/ジャンプのみ）
-  | 'slow_precise'    // 低速精密移動（速度1/2 × 精密な足場避け）
-  | 'double_jump'     // 空中でもう一度ジャンプ可能
-  | 'long_air'        // 空中での水平速度を持続（滑空）
-  | 'dash'            // 短距離ダッシュ（Shift など）
-  | 'wall_jump'       // 壁に接触中に逆方向ジャンプ
-  | 'slide'           // しゃがみスライド（障害物くぐり）
-  | 'gravity_flip'    // 重力反転（天井を床として走る）
-  | 'vertical_scroll' // 縦スクロールモード（障害物が上下から来る）
-  // ── RPG / 育成 系 ────────────────────────────────────────
-  | 'hp'              // HP システム（複数回被弾を許容）
-  | 'exp'             // 経験値・レベルアップシステム
-  | 'item_pickup'     // フィールドアイテム収集
-  | 'shield'          // シールド（1回ガード）
-  // ── パズル 系 ────────────────────────────────────────────
-  | 'grid_stop'       // スクロール停止してグリッド配置モード
-  | 'puzzle_solve'    // 正解が存在するパズル入力
-  // ── リズム 系 ────────────────────────────────────────────
-  | 'beat_hazard'     // BPM 同期でハザードが色/種類を変える
-  | 'just_input'      // ジャスト入力で大幅ボーナス
-  | 'beat_dash'       // リズムに合わせたダッシュで加速
-  // ── ステルス / 特殊 系 ────────────────────────────────────
-  | 'stealth_mode'    // 透明化/隠密状態（一定時間ハザード無視）
-  | 'time_bonus'      // タイムアタック評価（早いほど高得点）
-  // ── タワー / クラフト 系 ──────────────────────────────────
-  | 'tower'           // タワー設置（停止して配置）
-  // ── 色接触 ────────────────────────────────────────────────
-  | 'color_touch'     // 安全色を踏むと得点（積極的に踏む）
+export type FeatureId = string
 
 // ─────────────────────────────────────────────────────────────
 // コントロール定義
@@ -127,8 +79,8 @@ export interface Controls {
   jump: string
   moveLeft: string
   moveRight: string
-  moveUp: string
-  moveDown: string
+  moveUp?: string    // 縦スクロール上移動
+  moveDown?: string  // 縦スクロール下移動
   shoot?: string
   dash?: string    // ダッシュキー（省略可）
   slide?: string   // スライドキー（省略可）
@@ -145,6 +97,13 @@ export interface Choice {
   genreParams: GenreParams
   /** genreParams への乗数。デフォルト 1.0。大きくするとこの選択の重みが増す */
   paramMultiplier?: number
+  /**
+   * ジャンルへの直接ポイント付与（軸パラメータの代替）。
+   * 例: { "stg": 3, "rpg": 1 } → この選択で STG に3点、RPG に1点加算。
+   * ジャンル側が `threshold` を持つ場合にこちらが評価される。
+   * `genreParams` と併用可（genreParams は軸ベース収束用に残しても良い）。
+   */
+  genrePoints?: Record<string, number>
 }
 
 /** 説明書バージョンが runtime に適用できる上書き設定 */
@@ -194,7 +153,23 @@ export interface ManualVersion {
 export interface GenreDef {
   id: GenreId
   label: string
+  /**
+   * 軸パラメータ型の閾値（旧システム）。
+   * `threshold` が指定されていない場合にこちらが使われる。
+   */
   thresholds: GenreParams
+  /**
+   * genrePoints 型の収束閾値（新システム）。
+   * この値以上の genrePoints が蓄積されるとジャンルが収束する。
+   * 指定した場合、`thresholds` の代わりにこちらが評価される。
+   */
+  threshold?: number
+  /**
+   * このジャンルに収束するために必要な選択肢 ID のリスト（任意）。
+   * 全 ID が選ばれていない限り収束しない。
+   * `threshold` と組み合わせて使用する。
+   */
+  requiredChoices?: string[]
   enableFeatures: FeatureId[]
   disableFeatures: FeatureId[]
   /** 安全パーサで評価するスコア式。変数は ScoreVars のキーを使用 */
@@ -268,10 +243,10 @@ export interface LearningEffect {
 }
 
 export interface LearningRule {
-  id: string
+  id?: string
   trigger: LearningTrigger
   effect: LearningEffect
-  triggered: boolean
+  triggered?: boolean
 }
 
 // ─────────────────────────────────────────────────────────────

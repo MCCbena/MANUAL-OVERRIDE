@@ -2,9 +2,10 @@
 
 export interface Rect { x: number; y: number; w: number; h: number }
 
-// 衝突判定（grace付き — 4px内側を使用してフェア判定）
+// 衝突判定（grace付き — 最大で辺の半分までクランプしてフェア判定）
 export function rectsOverlap(a: Rect, b: Rect, grace = 4): boolean {
-  const ag = { x: a.x + grace, y: a.y + grace, w: a.w - grace * 2, h: a.h - grace * 2 }
+  const g = Math.min(grace, Math.floor(Math.min(a.w, a.h) / 2))
+  const ag = { x: a.x + g, y: a.y + g, w: a.w - g * 2, h: a.h - g * 2 }
   return ag.x < b.x + b.w && ag.x + ag.w > b.x && ag.y < b.y + b.h && ag.y + ag.h > b.y
 }
 

@@ -165,6 +165,7 @@ function parseEntry(entry: ManualEntryJSON): ManualVersion {
     runtimeConfig,
     tutorialHint:  entry.tutorialHint,
     narrative:     entry.narrative,
+    learningRules: entry.learningRules,
   }
 }
 

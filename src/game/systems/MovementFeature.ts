@@ -33,10 +33,13 @@ export class MovementFeature implements FeatureSystem {
       : PLAYER_PHYSICS.runSpeed
 
     if (r.scrollAxis === 'y') {
-      // 縦スクロール: 左右移動のみ
+      // 縦スクロール: 左右 + 上下移動
       const movingLeft  = input.keys.has(leftKey)
       const movingRight = input.keys.has(rightKey)
+      const movingUp    = r.controls.moveUp   ? input.keys.has(r.controls.moveUp)   : false
+      const movingDown  = r.controls.moveDown ? input.keys.has(r.controls.moveDown) : false
       p.vx = movingRight ? runSpeed : movingLeft ? -runSpeed : 0
+      p.vy = movingUp ? -runSpeed : movingDown ? runSpeed : 0
     } else {
       // 横スクロール: auto_run は右方向を強制
       const isAutoRun   = r.features.has('auto_run')

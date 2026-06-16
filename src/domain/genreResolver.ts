@@ -14,20 +14,44 @@ export function accumulateParams(paramsList: GenreParams[]): GenreParams {
 }
 
 // ─────────────────────────────────────────────────────────────
+// 選択履歴から genrePoints を累積（新システム用）
+// ─────────────────────────────────────────────────────────────
+export function accumulateGenrePoints(
+  entries: { genrePoints?: Record<string, number> }[]
+): Record<string, number> {
+  const total: Record<string, number> = {}
+  for (const entry of entries) {
+    if (!entry.genrePoints) continue
+    for (const [genre, pts] of Object.entries(entry.genrePoints)) {
+      total[genre] = (total[genre] ?? 0) + pts
+    }
+  }
+  return total
+}
+
+// ─────────────────────────────────────────────────────────────
 // 累積パラメータからジャンルを決定する
 //
-// アルゴリズム:
-//   各ジャンルの thresholds を全て超えている候補のうち、
-//   超過量の合計が最大のものを選択する。
-//   超過量の合計が同一の場合は定義順（GENRES 配列の順序）で優先。
+// ジャンルの評価方式:
+//   - `threshold` が定義されている → genrePoints ベース（新システム）
+//   - `threshold` が未定義 → thresholds 軸ベース（旧システム・後方互換）
+//
+// どちらも「スコアが最大かつ正」のジャンルが収束先になる。
 // ─────────────────────────────────────────────────────────────
-export function resolveGenre(accumulated: GenreParams, genres: GenreDef[]): GenreId {
+export function resolveGenre(
+  accumulated: GenreParams,
+  genres: GenreDef[],
+  genrePoints?: Record<string, number>,
+  selectedChoiceIds?: string[],
+): GenreId {
   let bestGenre: GenreId = 'base'
   let bestScore = -1
 
   for (const genre of genres) {
     if (genre.id === 'base') continue
-    const score = _computeOverflowScore(accumulated, genre.thresholds)
+    const score = genre.threshold !== undefined
+      ? _computePointsScore(genre, genrePoints ?? {}, selectedChoiceIds ?? [])
+      : _computeOverflowScore(accumulated, genre.thresholds)
     if (score > bestScore) {
       bestScore = score
       bestGenre = genre.id
@@ -36,6 +60,28 @@ export function resolveGenre(accumulated: GenreParams, genres: GenreDef[]): Genr
 
   // score が 0 以下なら閾値未達 → base のまま
   return bestScore > 0 ? bestGenre : 'base'
+}
+
+/**
+ * genrePoints ベースのスコアを計算する（新システム）。
+ * 蓄積ポイントが threshold 以上 かつ requiredChoices を全て選択済みなら正スコアを返す。
+ */
+function _computePointsScore(
+  genre: GenreDef,
+  points: Record<string, number>,
+  selectedIds: string[],
+): number {
+  const pts = points[genre.id] ?? 0
+  if (pts < (genre.threshold ?? 0)) return -1
+
+  if (genre.requiredChoices && genre.requiredChoices.length > 0) {
+    for (const req of genre.requiredChoices) {
+      if (!selectedIds.includes(req)) return -1
+    }
+  }
+
+  // threshold を超えた分を正規化スコアとして返す（多く選んだほど優先）
+  return pts - (genre.threshold ?? 0) + 1
 }
 
 /**
@@ -72,22 +118,24 @@ export function resolveFeaturesForGenre(
 
 // ─────────────────────────────────────────────────────────────
 // ジャンル収束の「近さ」を 0〜1 で返す（UI 演出に使用）
-//
-// 各ジャンルの達成率（全閾値の充足率の最小値）を計算し、
-// 最も近いジャンルの達成率を返す。
-// 0.0 = まだ何も決まっていない
-// 1.0 = 少なくとも1つのジャンルが確定条件を満たしている
 // ─────────────────────────────────────────────────────────────
 export function resolveGenreProgress(
   accumulated: GenreParams,
   genres: GenreDef[],
+  genrePoints?: Record<string, number>,
 ): { closestGenre: GenreId; progress: number } {
   let bestGenre: GenreId = 'base'
   let bestProgress = 0
 
   for (const genre of genres) {
     if (genre.id === 'base') continue
-    const progress = _computeMinFulfillment(accumulated, genre.thresholds)
+    let progress: number
+    if (genre.threshold !== undefined) {
+      const pts = (genrePoints ?? {})[genre.id] ?? 0
+      progress = Math.min(1, pts / genre.threshold)
+    } else {
+      progress = _computeMinFulfillment(accumulated, genre.thresholds)
+    }
     if (progress > bestProgress) {
       bestProgress = progress
       bestGenre = genre.id
@@ -119,13 +167,19 @@ function _computeMinFulfillment(accumulated: GenreParams, thresholds: GenreParam
 // 収束済みの全ジャンルを返す（複数条件が同時に満たされる場合用）
 // ManualPanel の「あなたはこのゲームを◯◯にもできた」表示に使用
 // ─────────────────────────────────────────────────────────────
-export function resolveAllMetGenres(accumulated: GenreParams, genres: GenreDef[]): GenreId[] {
+export function resolveAllMetGenres(
+  accumulated: GenreParams,
+  genres: GenreDef[],
+  genrePoints?: Record<string, number>,
+  selectedChoiceIds?: string[],
+): GenreId[] {
   const result: GenreId[] = []
   for (const genre of genres) {
     if (genre.id === 'base') continue
-    if (_computeOverflowScore(accumulated, genre.thresholds) > 0) {
-      result.push(genre.id)
-    }
+    const score = genre.threshold !== undefined
+      ? _computePointsScore(genre, genrePoints ?? {}, selectedChoiceIds ?? [])
+      : _computeOverflowScore(accumulated, genre.thresholds)
+    if (score > 0) result.push(genre.id)
   }
   return result
 }

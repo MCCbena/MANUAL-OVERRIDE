@@ -116,6 +116,12 @@ export class SideScroller {
   private learningCheckTimer = 0         // 次のチェック予定時刻
   // disableAction エフェクト: action名 → 解除予定時刻(performance.now() ベース)
   private _disabledActions = new Map<string, number>()
+  // invertHazard 解除予定時刻（-Infinity = 永続/未設定）
+  private _invertHazardUntil = -Infinity
+  // changeKey 元キー保存: action名 → 元のキー文字列
+  private _originalKeys: Partial<Record<string, string>> = {}
+  // changeKey 解除予定時刻: action名 → 解除時刻
+  private _changeKeyUntil = new Map<string, number>()
   // 次の getSnapshot() で一度だけ返す通知メッセージ
   private _pendingLearningMsg: string | null = null
   private _pendingFormulaError: string | null = null
@@ -136,6 +142,7 @@ export class SideScroller {
     // イベントハンドラ登録（解除できるよう名前付き関数で保持）
     this._onKeyDown = (e: KeyboardEvent) => {
       const key = this._normalizeKey(e)
+      if (key === null) return
       this.keys.add(key)
       // ゲームで使うキーのみ preventDefault
       const c = this.rules.controls
@@ -152,14 +159,17 @@ export class SideScroller {
       }
     }
     this._onKeyUp = (e: KeyboardEvent) => {
-      this.keys.delete(this._normalizeKey(e))
+      const key = this._normalizeKey(e)
+      if (key !== null) this.keys.delete(key)
     }
     window.addEventListener('keydown', this._onKeyDown)
     window.addEventListener('keyup', this._onKeyUp)
   }
 
   // ─── キー正規化 ──────────────────────────────────────────────────
-  private _normalizeKey(e: KeyboardEvent): string {
+  private _normalizeKey(e: KeyboardEvent): string | null {
+    // IME変換中キーは無視（日本語環境での誤動作防止）
+    if (e.isComposing || e.key === 'Process') return null
     if (e.key === ' ') return 'Space'
     if (e.key === 'z' || e.key === 'Z') return 'z'
     return e.key
@@ -215,6 +225,13 @@ export class SideScroller {
   }
 
   setPaused(v: boolean): void { this.paused = v }
+
+  /** ウィンドウリサイズ時に呼ぶ。canvas.width/height の変更後に Canvas コンテキスト状態を復元する */
+  onResize(): void {
+    // canvas サイズ変更で ctx 状態はリセットされる。次フレームの描画が正しく動くよう
+    // lastTime をリセットして dt が巨大値にならないようにする
+    this.lastTime = performance.now()
+  }
 
   getSnapshot(): GameSnapshot {
     let pending = UPDATE_DISTANCES.findIndex(
@@ -355,6 +372,26 @@ export class SideScroller {
       }
     }
 
+    // ─── LearningEffect 期限切れの自動リセット ────────────────────
+    const now = performance.now()
+    if (this._invertHazardUntil !== -Infinity && now >= this._invertHazardUntil) {
+      this._gameStats.beatHazardInverted = false
+      this._invertHazardUntil = -Infinity
+    }
+    for (const [action, until] of this._changeKeyUntil) {
+      if (now >= until) {
+        const orig = this._originalKeys[action]
+        if (orig !== undefined) {
+          if (action === 'jump')  this.rules.controls.jump     = orig
+          if (action === 'left')  this.rules.controls.moveLeft = orig
+          if (action === 'right') this.rules.controls.moveRight = orig
+          if (action === 'shoot') this.rules.controls.shoot    = orig
+          delete this._originalKeys[action]
+        }
+        this._changeKeyUntil.delete(action)
+      }
+    }
+
     const r = this.rules
     const p = this.player
     const W = this.canvas.width
@@ -402,10 +439,9 @@ export class SideScroller {
       p.x += p.vx * dt
       p.x = Math.max(0, Math.min(W - p.w, p.x))
 
-      // 縦モードでは重力なし。プレイヤーは画面下に固定
-      p.y = H - BACKGROUND.groundHeight - p.h - 8
-      p.vy = 0
-      p.onGround = true
+      // 縦モード: 重力なし。moveUp/moveDown で自由移動（MovementFeature が p.vy をセット済み）
+      p.y = Math.max(0, Math.min(H - p.h, p.y + p.vy * dt))
+      p.onGround = false
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
 
       // スクロール距離（時間経過でカウント）
@@ -418,6 +454,11 @@ export class SideScroller {
         h.pulse += dt * VFX.hazardPulseRate
       }
       this.hazards = this.hazards.filter(h => h.y < H + 200)
+
+      // ─── アイテム降下（縦モード） ─────────────────────────
+      for (const item of this.items) {
+        item.y += effectiveScrollSpeed * dt
+      }
 
       // ─── スポーン（上端から） ─────────────────────────────
       if (this.distance >= this.nextSpawnDist) {
@@ -618,7 +659,9 @@ export class SideScroller {
 
     // ─── アイテムクリーンアップ ───────────────────────────────────
     // 収集・パルスアニメは RpgFeature.update() が担当。ここは dead / 画面外除去のみ。
-    this.items = this.items.filter(i => i.alive && i.x - this.cameraX > SPAWN.itemCullLeft)
+    this.items = this.items.filter(i =>
+      i.alive && (isVertical ? i.y < H + 100 : i.x - this.cameraX > SPAWN.itemCullLeft)
+    )
 
     // ─── パーティクル更新 ─────────────────────────────────────────
     for (const pt of this.particles) {
@@ -687,6 +730,12 @@ export class SideScroller {
     // ScoreVars に基づいて playScore を再計算
     this._recalculatePlayScore()
     this._pendingFormulaError = getLastFormulaError()
+  }
+
+  /** ギブアップ経路でも scoreFormula を適用してスコアを確定する */
+  recalcPlayScore(): number {
+    this._recalculatePlayScore()
+    return this.playScore
   }
 
   // ─── 描画 ────────────────────────────────────────────────────────
@@ -1115,6 +1164,11 @@ export class SideScroller {
         const bw = this._getWorld()
         for (const sys of getActiveSystems(r.features)) sys.onBossSpawn?.(bw)
       }
+      if (r.features.has('item_pickup') && Math.random() < SPAWN.itemDropChance) {
+        const itemType = Math.random() < SPAWN.itemExpChance ? 'exp' : 'hp'
+        const itemX = Math.random() * (W - 32) + 16
+        this.items.push(new Item(itemX, spawnY, itemType))
+      }
     } else {
       // ─── 横スクロール: 画面右端からワールド座標で出現 ────────────
       const worldX = this.cameraX + W + SPAWN.hazardSpawnOffsetX
@@ -1298,8 +1352,10 @@ export class SideScroller {
       }
 
       case 'invertHazard': {
-        // ハザード色反転を有効化（既存の beat_hazard 機能を利用）
         this._gameStats.beatHazardInverted = true
+        if (effect.durationSec != null) {
+          this._invertHazardUntil = performance.now() + effect.durationSec * 1000
+        }
         soundManager.onGenreLock('rhythm')  // リズム確定演出
         break
       }
@@ -1314,12 +1370,22 @@ export class SideScroller {
       }
 
       case 'changeKey': {
-        // キー再マッピング（payload = "jump:w" のような形式を想定）
+        // payload = "jump:w" のような形式（action:newKey）
         const [action, newKey] = effect.payload.split(':')
-        if (action === 'jump') this.rules.controls.jump = newKey
-        else if (action === 'left') this.rules.controls.moveLeft = newKey
-        else if (action === 'right') this.rules.controls.moveRight = newKey
-        else if (action === 'shoot') this.rules.controls.shoot = newKey
+        // 元のキーを保存（未保存の場合のみ。重複発動で上書きしない）
+        if (!(action in this._originalKeys)) {
+          if (action === 'jump')  this._originalKeys[action] = this.rules.controls.jump
+          if (action === 'left')  this._originalKeys[action] = this.rules.controls.moveLeft
+          if (action === 'right') this._originalKeys[action] = this.rules.controls.moveRight
+          if (action === 'shoot') this._originalKeys[action] = this.rules.controls.shoot
+        }
+        if (action === 'jump')  this.rules.controls.jump     = newKey
+        if (action === 'left')  this.rules.controls.moveLeft = newKey
+        if (action === 'right') this.rules.controls.moveRight = newKey
+        if (action === 'shoot') this.rules.controls.shoot    = newKey
+        if (effect.durationSec != null) {
+          this._changeKeyUntil.set(action, performance.now() + effect.durationSec * 1000)
+        }
         break
       }
     }

@@ -4,7 +4,7 @@
  * src/data/manuals/*.json はこの型に従って書く。
  */
 
-import type { GenreParams, GenreId, ScrollDirection, EnvironmentId, ManualRuntimeConfig } from '../domain/types'
+import type { GenreParams, GenreId, ScrollDirection, EnvironmentId, ManualRuntimeConfig, LearningRule } from '../domain/types'
 
 // ManualRuntimeConfig は domain/types.ts から再エクスポートして JSON 定義側でも使いやすくする
 export type { ManualRuntimeConfig }
@@ -202,6 +202,12 @@ export interface ManualEntryJSON {
    * 2択（空配列 or 省略 = 末端 → ジャンル収束）
    */
   choices?: ChoiceJSON[]
+
+  /**
+   * プレイヤー行動に基づいた自動ルール更新（省略可）。
+   * id と triggered は省略可（ローダが JSON から直接マッピングする）。
+   */
+  learningRules?: LearningRule[]
 }
 
 // ──────────────────────────────────────────────────────────────────────

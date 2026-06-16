@@ -112,6 +112,8 @@ function parseExpr(src: string, vars: ScoreVars): number {
 // ──────────────────────────────────────────────────────────────────────
 export function calcThrowScore(result: ThrowResult): number {
   const w = THROW_SCORE_WEIGHTS
+  // airTime は秒単位。× 1000 でミリ秒スケールに変換して weight を乗算
+  // 例: 2秒滞空 → 2000 × 0.5 = 1000点
   const airScore = result.airTime * 1000 * w.airTime
   const arcScore = result.arcHeight * w.arcHeight
   const speedPenalty = Math.max(0, result.speed - 800) * w.speedPenalty
