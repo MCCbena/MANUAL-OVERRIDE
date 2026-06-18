@@ -11,9 +11,11 @@ import ThrowOverlay from './components/ThrowOverlay.vue'
 import EndingPanel from './components/EndingPanel.vue'
 import TutorialHints from './components/TutorialHints.vue'
 import PluginLoader from './components/PluginLoader.vue'
+import GenreRevealOverlay from './components/GenreRevealOverlay.vue'
 import { GENRES } from './data/genres'
 import type { ThrowResult } from './domain/types'
 import { TUTORIAL_ENABLED, TutorialScreen } from './tutorial'
+import { soundManager } from './plugins/SoundManager'
 
 // ─── 状態 ─────────────────────────────────────────────────────────
 const gameState = useGameState()
@@ -81,7 +83,7 @@ function beginSnapshotLoop() {
 
     // 更新トリガー（tutorial, playing, genreLocked で発火する）
     // 最初のジャンプまで待つ
-    const activePlay = ['playing', 'tutorial'].includes(gameState.phase.value)
+    const activePlay = ['playing', 'tutorial', 'genreLocked'].includes(gameState.phase.value)
     if (snapshot.value.shouldUpdate !== null && snapshot.value.firstJumpDone && activePlay) {
       scroller.setPaused(true)
       gameState.triggerUpdate()
@@ -109,13 +111,13 @@ function beginSnapshotLoop() {
 }
 
 // ─── 選択後の処理 ────────────────────────────────────────────────
-function onChoose(choiceId: string) {
+function onChoose(cardId: string) {
   if (!scroller) {
     showToast('エラー: ゲームが初期化されていません')
     return
   }
   const idx = snapshot.value.shouldUpdate ?? 0
-  const chooseError = gameState.choose(choiceId)
+  const chooseError = gameState.choose(cardId)
   if (chooseError) {
     showToast(`エラー: ${chooseError}`)
     return
@@ -123,7 +125,7 @@ function onChoose(choiceId: string) {
   // 新しい説明書を記録（差分演出）
   const currentManual = gameState.currentManual()
   manualCtl.recordUpdate(currentManual)
-  // ルールをゲームエンジンへ反映（ManualVersion も渡して learningRules を同期）
+  // ルールをゲームエンジンへ反映
   scroller.updateRules(toRaw(gameState.rules), currentManual)
   // 更新完了を scroller に通知
   scroller.markUpdated(idx)
@@ -146,6 +148,8 @@ function restart() {
   cancelAnimationFrame(snapRaf)
   scroller?.stop()
   scroller = null
+  revealActive.value = false
+  soundManager.stopBgm(600)
   gameState.restart()
 }
 
@@ -180,21 +184,33 @@ watch(manualCtl.isCentered, (centered) => {
   }
 })
 
-// ─── ジャンル確定時の加速エフェクト ────
+// ─── ジャンル確定オーバーレイ ────
+const revealActive = ref(false)
+
+// ─── ジャンル確定時: 加速エフェクト + BGM + オーバーレイ ────
 let genreLockedBoostTimer: number | null = null
 watch(() => gameState.lockedGenre.value, (newGenre) => {
   if (!newGenre || !scroller) return
 
-  // ジャンル確定時、スクロール速度を一時的にアップ（0.8秒間）
+  // 演出オーバーレイ表示
+  revealActive.value = true
+
+  // BGM 起動
+  const genreDef = gameState.lockedGenreDef()
+  if (genreDef?.bgm) {
+    soundManager.playBgm(genreDef.bgm)
+  }
+
+  // スクロール速度を一時的にアップ（0.8秒間）
   const rawRules = toRaw(gameState.rules)
   const originalSpeed = rawRules.scrollSpeed
-  rawRules.scrollSpeed = originalSpeed * 1.35  // 35%加速
-  scroller.updateRules(rawRules, gameState.currentManual())
+  rawRules.scrollSpeed = originalSpeed * 1.35
+  scroller.updateRules(rawRules)
 
   if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
   genreLockedBoostTimer = window.setTimeout(() => {
     rawRules.scrollSpeed = originalSpeed
-    scroller?.updateRules(rawRules, gameState.currentManual())
+    scroller?.updateRules(rawRules)
   }, 800)
 })
 
@@ -209,7 +225,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="app-root">
+  <div class="app-root" :class="gameState.lockedGenre.value ? `genre-locked-root theme-global-${currentTheme}` : ''"  >
     <!-- ゲームキャンバス（常に背面） -->
     <canvas ref="canvasRef" class="game-canvas" />
 
@@ -324,27 +340,23 @@ onUnmounted(() => {
         </div>
       </Transition>
 
-      <!-- ジャンル確定演出 -->
-      <div v-if="gameState.phase.value === 'genreLocked'" class="genre-locked-effect">
-        <!-- インク滲みエフェクト -->
-        <div class="genre-ink-bleed" />
-
-        <!-- ジャンル確定バナー -->
-        <Transition name="genre-reveal">
-          <div class="genre-locked-banner">
-            <div class="genre-locked-text">
-              {{ gameState.lockedGenreDef()?.manualReveal }}
-            </div>
-          </div>
-        </Transition>
-      </div>
+      <!-- ジャンル確定オーバーレイ（2.8秒で自動退場） -->
+      <Transition name="fade">
+        <GenreRevealOverlay
+          v-if="revealActive"
+          :genre-label="gameState.lockedGenreDef()?.label ?? ''"
+          :manual-reveal="gameState.lockedGenreDef()?.manualReveal ?? ''"
+          :theme="currentTheme"
+          @dismissed="revealActive = false"
+        />
+      </Transition>
     </template>
 
     <!-- ─── 2択選択 ─── -->
     <Transition name="fade">
       <ChoicePanel
         v-if="gameState.phase.value === 'updating'"
-        :choices="gameState.currentManual().choices"
+        :choices="gameState.activeCards.value"
         :version="gameState.currentManual().version"
         @choose="onChoose"
       />
@@ -699,6 +711,17 @@ body { font-family: var(--font-mono); }
   pointer-events: none;
   opacity: 0.4;
 }
+
+/* ── ジャンル確定後: グローバルテーマクラス ── */
+.theme-global-stg .giveup-btn     { border-color: #1a66ff; color: #1a66ff; }
+.theme-global-stg .giveup-hint    { color: rgba(168, 216, 255, 0.5); }
+.theme-global-rpg .giveup-btn     { border-color: #8b6100; color: #c4960a; font-family: 'Georgia', serif; }
+.theme-global-rpg .giveup-hint    { color: rgba(196, 150, 10, 0.5); font-family: 'Georgia', serif; }
+.theme-global-puzzle .giveup-btn  { border-color: #444; color: #222; font-family: 'Courier New', monospace; }
+.theme-global-rhythm .giveup-btn  { border-color: #9900ff; color: #ee88ff; }
+.theme-global-rhythm .giveup-hint { color: rgba(204, 136, 255, 0.5); }
+.theme-global-horror .giveup-btn  { border-color: #880000; color: #cc4444; }
+.theme-global-aquatic .giveup-btn { border-color: #0088bb; color: #88ccff; }
 
 /* ── エラートースト ── */
 .error-toast {

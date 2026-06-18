@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
-import type { Choice } from '../domain/types'
 
 const props = defineProps<{
-  choices: Choice[]
+  choices: readonly { id: string; label: string }[]
   version: string
 }>()
 

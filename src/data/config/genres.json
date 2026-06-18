@@ -20,7 +20,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": ""
+      "endingFlavor": "",
+      "bgm": { "src": "bgm/base.ogg", "loop": true, "volume": 0.4, "fadeInMs": 800 }
     },
     {
       "id": "runner",
@@ -40,7 +41,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたはただ走り続けることを選んだ。説明書を読む必要などなかった。"
+      "endingFlavor": "あなたはただ走り続けることを選んだ。説明書を読む必要などなかった。",
+      "bgm": { "src": "bgm/runner.ogg", "loop": true, "volume": 0.55, "fadeInMs": 1200 }
     },
     {
       "id": "stg",
@@ -62,7 +64,8 @@
         "shoot": "z"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたはすべてを撃ち抜いた。説明書は弾除けにでも使えばよかった。"
+      "endingFlavor": "あなたはすべてを撃ち抜いた。説明書は弾除けにでも使えばよかった。",
+      "bgm": { "src": "bgm/stg.ogg", "loop": true, "volume": 0.6, "fadeInMs": 1500 }
     },
     {
       "id": "rpg",
@@ -83,7 +86,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは強くなった。説明書もいつしか経典になっていた。"
+      "endingFlavor": "あなたは強くなった。説明書もいつしか経典になっていた。",
+      "bgm": { "src": "bgm/rpg.ogg", "loop": true, "volume": 0.5, "fadeInMs": 2000 }
     },
     {
       "id": "puzzle",
@@ -103,7 +107,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたはすべての答えを見つけた。説明書に書いてあったことは間違いではなかった。"
+      "endingFlavor": "あなたはすべての答えを見つけた。説明書に書いてあったことは間違いではなかった。",
+      "bgm": { "src": "bgm/puzzle.ogg", "loop": true, "volume": 0.45, "fadeInMs": 1000 }
     },
     {
       "id": "rhythm",
@@ -123,7 +128,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたはリズムを刻んだ。説明書のページをめくる音さえも拍子になった。"
+      "endingFlavor": "あなたはリズムを刻んだ。説明書のページをめくる音さえも拍子になった。",
+      "bgm": { "src": "bgm/rhythm.ogg", "loop": true, "volume": 0.65, "fadeInMs": 800 }
     },
     {
       "id": "aerial_stg",
@@ -146,7 +152,8 @@
         "shoot": "z"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは空へと昇った。説明書は地上に落ちていった。"
+      "endingFlavor": "あなたは空へと昇った。説明書は地上に落ちていった。",
+      "bgm": { "src": "bgm/aerial_stg.ogg", "loop": true, "volume": 0.6, "fadeInMs": 1200 }
     },
     {
       "id": "bullet_hell",
@@ -169,7 +176,8 @@
         "shoot": "z"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは無数の弾を避け続けた。説明書の活字も弾丸に見えた。"
+      "endingFlavor": "あなたは無数の弾を避け続けた。説明書の活字も弾丸に見えた。",
+      "bgm": { "src": "bgm/bullet_hell.ogg", "loop": true, "volume": 0.6, "fadeInMs": 600 }
     },
     {
       "id": "survival",
@@ -190,7 +198,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは生き延びた。説明書は焚き火の燃料になっていた。"
+      "endingFlavor": "あなたは生き延びた。説明書は焚き火の燃料になっていた。",
+      "bgm": { "src": "bgm/survival.ogg", "loop": true, "volume": 0.45, "fadeInMs": 1800 }
     },
     {
       "id": "stealth_action",
@@ -211,7 +220,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは気配を消した。説明書も読まれなかった。"
+      "endingFlavor": "あなたは気配を消した。説明書も読まれなかった。",
+      "bgm": { "src": "bgm/stealth_action.ogg", "loop": true, "volume": 0.35, "fadeInMs": 2500 }
     },
     {
       "id": "racing",
@@ -232,7 +242,8 @@
         "dash": "Shift"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは誰よりも速かった。説明書を読む暇などなかった。"
+      "endingFlavor": "あなたは誰よりも速かった。説明書を読む暇などなかった。",
+      "bgm": { "src": "bgm/racing.ogg", "loop": true, "volume": 0.65, "fadeInMs": 600 }
     },
     {
       "id": "platformer",
@@ -253,7 +264,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは高みへ跳んだ。説明書の紙は踏み台になった。"
+      "endingFlavor": "あなたは高みへ跳んだ。説明書の紙は踏み台になった。",
+      "bgm": { "src": "bgm/platformer.ogg", "loop": true, "volume": 0.55, "fadeInMs": 1000 }
     },
     {
       "id": "dungeon",
@@ -274,7 +286,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは迷宮の奥底へたどり着いた。説明書は地図代わりになっていた。"
+      "endingFlavor": "あなたは迷宮の奥底へたどり着いた。説明書は地図代わりになっていた。",
+      "bgm": { "src": "bgm/dungeon.ogg", "loop": true, "volume": 0.45, "fadeInMs": 2000 }
     },
     {
       "id": "tower_def",
@@ -294,7 +307,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたの要塞は崩れなかった。説明書は防壁の一部になっていた。"
+      "endingFlavor": "あなたの要塞は崩れなかった。説明書は防壁の一部になっていた。",
+      "bgm": { "src": "bgm/tower_def.ogg", "loop": true, "volume": 0.5, "fadeInMs": 1500 }
     },
     {
       "id": "sports",
@@ -315,7 +329,8 @@
         "dash": "Shift"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは新記録を打ち立てた。説明書はルールブックになっていた。"
+      "endingFlavor": "あなたは新記録を打ち立てた。説明書はルールブックになっていた。",
+      "bgm": { "src": "bgm/sports.ogg", "loop": true, "volume": 0.6, "fadeInMs": 700 }
     },
     {
       "id": "idle",
@@ -335,7 +350,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは何もしなかった。それでも積み上がっていった。説明書はほこりをかぶった。"
+      "endingFlavor": "あなたは何もしなかった。それでも積み上がっていった。説明書はほこりをかぶった。",
+      "bgm": { "src": "bgm/idle.ogg", "loop": true, "volume": 0.3, "fadeInMs": 3000 }
     },
     {
       "id": "bullet_runner",
@@ -356,7 +372,8 @@
         "shoot": "z"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは走りながら撃ち続けた。説明書は読む間もなかった。"
+      "endingFlavor": "あなたは走りながら撃ち続けた。説明書は読む間もなかった。",
+      "bgm": { "src": "bgm/bullet_runner.ogg", "loop": true, "volume": 0.65, "fadeInMs": 800 }
     },
     {
       "id": "arena",
@@ -378,7 +395,8 @@
         "dash": "Shift"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは闘技場の覇者になった。説明書は戦利品として飾られた。"
+      "endingFlavor": "あなたは闘技場の覇者になった。説明書は戦利品として飾られた。",
+      "bgm": { "src": "bgm/arena.ogg", "loop": true, "volume": 0.7, "fadeInMs": 500 }
     },
     {
       "id": "aquatic",
@@ -400,7 +418,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは深淵へ到達した。説明書のインクは水に滲んで消えた。"
+      "endingFlavor": "あなたは深淵へ到達した。説明書のインクは水に滲んで消えた。",
+      "bgm": { "src": "bgm/aquatic.ogg", "loop": true, "volume": 0.5, "fadeInMs": 2000 }
     },
     {
       "id": "horror",
@@ -421,7 +440,8 @@
         "moveDown": "ArrowDown"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたは夜明けを迎えた。説明書には見てはいけないことが書いてあった。"
+      "endingFlavor": "あなたは夜明けを迎えた。説明書には見てはいけないことが書いてあった。",
+      "bgm": { "src": "bgm/horror.ogg", "loop": true, "volume": 0.4, "fadeInMs": 3000 }
     },
     {
       "id": "hack_slash",
@@ -443,7 +463,8 @@
         "dash": "Shift"
       },
       "gravity": 1600,
-      "endingFlavor": "あなたはコンボを途切れさせなかった。説明書は斬られて散った。"
+      "endingFlavor": "あなたはコンボを途切れさせなかった。説明書は斬られて散った。",
+      "bgm": { "src": "bgm/hack_slash.ogg", "loop": true, "volume": 0.65, "fadeInMs": 600 }
     }
   ]
 }
