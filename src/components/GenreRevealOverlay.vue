@@ -53,6 +53,7 @@ onUnmounted(() => clearTimeout(_dismissTimer))
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  pointer-events: none;
   animation: grRootIn 0.25s ease-out both, grRootOut 0.55s 2.25s ease-in both;
 }
 
