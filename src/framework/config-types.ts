@@ -316,8 +316,16 @@ export interface GenreDefJSON {
   controls?: Partial<Controls>
 }
 
+export interface ThemeColorDef {
+  accent: string
+  border: string
+  hint?: string
+  font?: string
+}
+
 export interface GenresConfig {
   genres: GenreDefJSON[]
+  themeColors?: Record<string, ThemeColorDef>
 }
 
 /** GameConfigMap: セクション名 → 設定オブジェクトのマッピング */
