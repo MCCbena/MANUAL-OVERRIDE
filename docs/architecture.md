@@ -58,6 +58,14 @@
       └─ runtimeConfig の上書き適用
   → RuntimeRules（イミュータブル）を生成
   → sideScroller.updateRules(rules) → FeatureSystem.onManualUpdated()
+
+  ── 次バージョンの説明書選択 ──────────────────────
+  → choose(choiceId)
+      ├─ selectNextManual(posteriors, updateIndex)
+      │   ├─ pool entry がある場合: genreAffinity × posterior でスコアリング
+      │   └─ 最高スコアの pool entry を選択（既に選択済みは除外）
+      ├─ pool entry がない場合: choice.next のチェーンを使用（フォールバック）
+      └─ shownPoolKeys に記録（重複防止）
 ```
 
 ### フレームループ
@@ -132,7 +140,8 @@ src/
 │   ├── manualDeck.ts      JSON ファイルを import.meta.glob でロード
 │   └── manuals/
 │       ├── base.json      ルート・チュートリアルデッキ
-│       └── *.json         ブランチ別デッキ
+│       ├── pool.json      再利用可能なプールエントリー（genreAffinity 付き）
+│       └── *.json         ブランチ別デッキ（choice.next チェーン）
 │
 └── framework/
     ├── types.ts           ManualDeckFile / ManualEntryJSON スキーマ

@@ -12,13 +12,14 @@ import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { createRhythmState, updateRhythm, evaluateTiming } from './rhythmSystem'
 import type { RhythmState } from './rhythmSystem'
+import { RHYTHM_TUNING, UI, BACKGROUND } from '../../data/tunables'
 
 export class RhythmFeature implements FeatureSystem {
   readonly handles = ['beat_hazard', 'just_input', 'beat_dash'] as const
 
   private state: RhythmState
 
-  constructor(bpm = 120) {
+  constructor(bpm = RHYTHM_TUNING.defaultBpm) {
     this.state = createRhythmState(bpm)
   }
 
@@ -39,14 +40,14 @@ export class RhythmFeature implements FeatureSystem {
     const shootKey = r.controls.shoot ?? 'z'
     if (input.justPressed.has(jumpKey) || input.justPressed.has(shootKey)) {
       const quality = evaluateTiming(this.state, performance.now())
-      if (quality > 0.5) {
-        const bonus = Math.round(150 * quality)
+      if (quality > RHYTHM_TUNING.justInputMinQuality) {
+        const bonus = Math.round(RHYTHM_TUNING.justInputScoreBase * quality)
         this.state.beatHits++
         world.addBeatHit()
         world.addScore(bonus)
         const p = world.player
-        world.addScorePopup(p.x + p.w, p.y - 30, `JUST! +${bonus}`, '#ff00ff')
-        world.addParticle(p.x + p.w / 2, p.y, 0, -80, 0.4, '#ff00ff', 4)
+        world.addScorePopup(p.x + p.w, p.y + RHYTHM_TUNING.justInputPopupOffsetY, `JUST! +${bonus}`, '#ff00ff')
+        world.addParticle(p.x + p.w / 2, p.y, 0, RHYTHM_TUNING.justInputParticleVy, RHYTHM_TUNING.justInputParticleLife, '#ff00ff', RHYTHM_TUNING.justInputParticleSize)
       }
     }
   }
@@ -55,15 +56,15 @@ export class RhythmFeature implements FeatureSystem {
     if (!world.rules.features.has('beat_hazard')) return
     if (this.state.beatMarkers.length === 0) return
 
-    const gY = world.canvas.height - 80
+    const gY = world.canvas.height - BACKGROUND.groundHeight
 
     ctx.save()
     for (const m of this.state.beatMarkers) {
-      const alpha = (m.t / 400) * 0.3
+      const alpha = (m.t / UI.beatMarkerAlphaDivisor) * UI.beatMarkerMaxAlpha
       ctx.globalAlpha = alpha
-      ctx.strokeStyle = '#ff00ff'
-      ctx.lineWidth = 2
-      ctx.setLineDash([6, 4])
+      ctx.strokeStyle = UI.beatMarkerColor
+      ctx.lineWidth = UI.beatMarkerLineW
+      ctx.setLineDash(UI.beatMarkerDash)
       ctx.beginPath()
       ctx.moveTo(m.x, 0)
       ctx.lineTo(m.x, gY)

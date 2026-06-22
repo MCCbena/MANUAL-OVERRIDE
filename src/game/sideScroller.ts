@@ -2,7 +2,7 @@ import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule,
 import type { MutableWorld, InputSnapshot, GameStats } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES, DISTANCE_ACCEL } from '../data/gameBalance'
-import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS } from '../data/tunables'
+import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS, DIFFICULTY } from '../data/tunables'
 import { getGenre, getActiveSystems } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
 import { soundManager } from '../plugins/SoundManager'
@@ -72,7 +72,7 @@ export class SideScroller {
   private cameraX = 0
 
   // スポーン
-  private nextSpawnDist = 480
+  private nextSpawnDist = SPAWN.firstSpawnDist
   private updateTriggeredFor = new Set<number>()
 
   // ─── 入力 ───────────────────────────────────────────────────────
@@ -136,7 +136,7 @@ export class SideScroller {
     this.rules = rules
 
     const gY = canvas.height - 80
-    this.player = new Player(140, gY)
+    this.player = new Player(PLAYER_PHYSICS.startX, gY)
     this.player.jumpsLeft = rules.features.has('double_jump') ? 2 : 1
 
     // イベントハンドラ登録（解除できるよう名前付き関数で保持）
@@ -241,7 +241,7 @@ export class SideScroller {
     // UPDATE_DISTANCES の範囲外でも無限に更新を続ける（1500px 間隔）
     if (pending < 0) {
       const lastDist = UPDATE_DISTANCES[UPDATE_DISTANCES.length - 1]
-      const infiniteInterval = 1500
+      const infiniteInterval = DIFFICULTY.infiniteUpdateInterval
       if (this.distance >= lastDist) {
         const extraIdx = UPDATE_DISTANCES.length + Math.floor((this.distance - lastDist) / infiniteInterval)
         if (!this.updateTriggeredFor.has(extraIdx)) {

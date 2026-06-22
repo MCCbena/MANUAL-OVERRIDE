@@ -60,11 +60,11 @@
                  │  getActiveSystems()   │
                  └────────┬──────────────┘
                  ┌────────▼──────────────┐
-                 │  Domain Layer         │
-                 │  domain/types.ts      │
-                 │  domain/ruleEngine    │
-                 │  domain/genreResolver │
-                 │  domain/scoreCalc     │
+                │  Domain Layer         │
+                  │  domain/types.ts      │
+                  │  domain/ruleEngine    │
+                  │  domain/genreResolver │ ← selectNextManual (プール選択)
+                  │  domain/scoreCalc     │
                  └────────┬──────────────┘
                  ┌────────▼──────────────┐
                  │  Data Layer           │
@@ -72,7 +72,8 @@
                  │  data/gameBalance.ts  │
                  │  data/tunables.ts     │
                  │  data/manuals/*.json  │
-                 └───────────────────────┘
+                  │  data/manuals/pool.json  ← プールエントリー（genreAffinity付き）│
+                  └───────────────────────┘
 ```
 
 ### レイヤー間の依存ルール
@@ -401,6 +402,7 @@ debugPrint(): void
 |---|---|---|
 | domain/ruleEngine.ts | buildRuntimeRules — 選択履歴 → RuntimeRules 合成 | ✅ |
 | domain/genreResolver.ts | resolveGenre — genreParams → ジャンル収束 | ✅ |
+| domain/genreResolver.ts | selectNextManual — 事後確率 × genreAffinity | ✅ |
 | domain/scoreCalc.ts | 最終スコア計算（play × 0.7 + throw × 0.3） | ✅ |
 | domain/learning.ts | 行動統計→ルール変更 | ❌ 未実装 |
 | framework/ | ManualLoader / ManualValidator | ❌ ディレクトリ自体が存在しない |

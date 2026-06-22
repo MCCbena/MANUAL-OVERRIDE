@@ -208,6 +208,19 @@ export interface ManualEntryJSON {
    * id と triggered は省略可（ローダが JSON から直接マッピングする）。
    */
   learningRules?: LearningRule[]
+
+  /**
+   * プール選択用: ジャンルごとの親和性（0〜1）。
+   * ベイズ事後確率と内積を取ってスコアリングする。
+   * 例: { "runner": 0.9, "bullet_runner": 0.4 }
+   */
+  genreAffinity?: Record<string, number>
+
+  /** プール選択用: 表示可能な最小 updateIndex（0-indexed）。省略可 */
+  minUpdateIndex?: number
+
+  /** プール選択用: 表示可能な最大 updateIndex（0-indexed）。省略可 */
+  maxUpdateIndex?: number
 }
 
 // ──────────────────────────────────────────────────────────────────────

@@ -1,19 +1,14 @@
-import type { GenreDef, GenreId, GenreParams, GenreParam, FeatureId, BayesianState, BayesConfig } from './types'
+import type { GenreDef, GenreId, GenreParams, GenreParam, FeatureId, BayesianState, BayesConfig, ManualVersion } from './types'
+import { BAYES } from '../data/tunables'
 
 // ─────────────────────────────────────────────────────────────
-// ベイズ収束のデフォルト設定
-//
-// convergenceThreshold: 21 ジャンル環境で「base が競合する」ことを考慮した閾値。
-//   base の尤度が baseDecay で減衰するため、累積が大きくなるとジャンルが収束しやすくなる。
-// decayRate: 各軸の偏差に対する尤度減衰率。
-// baseDecay: 累積パラメータの総和に対する base 減衰率。
-//   選択を重ねて累積値が大きくなるほど base の尤度が低下し、特定ジャンルが優勢になる。
+// ベイズ収束のデフォルト設定 (config/bayes.json からロード)
 // ─────────────────────────────────────────────────────────────
 export const DEFAULT_BAYES_CONFIG: BayesConfig = {
-  convergenceThreshold: 0.50,
-  decayRate: 0.4,
-  baseDecay: 0.3,
-  candidateThreshold: 0.1,
+  convergenceThreshold: BAYES.convergenceThreshold,
+  decayRate: BAYES.decayRate,
+  baseDecay: BAYES.baseDecay,
+  candidateThreshold: BAYES.candidateThreshold,
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -294,4 +289,53 @@ export function getGenreDistribution(
   bayesConfig?: BayesConfig,
 ): Record<GenreId, number> {
   return computeBayesianPosteriors(accumulated, genres, bayesConfig)
+}
+
+// ─────────────────────────────────────────────────────────────
+// プール選択: ベイズ事後確率に基づいて次の説明書エントリーを選択
+//
+// 各エントリーの genreAffinity と事後確率の内積をスコアリングする。
+// minUpdateIndex / maxUpdateIndex でフィルタリング。
+// 既に表示済みのキーは除外。
+// 条件に合致するエントリーがない場合は null を返す。
+// ─────────────────────────────────────────────────────────────
+export function selectNextManual(
+  deck: Record<string, ManualVersion>,
+  posteriors: Record<GenreId, number>,
+  updateIndex: number,
+  shownKeys: Set<string>,
+): string | null {
+  const candidates = Object.entries(deck)
+    .filter(([key, ver]) => {
+      if (!ver.genreAffinity) return false
+      if (ver.minUpdateIndex !== undefined && updateIndex < ver.minUpdateIndex) return false
+      if (ver.maxUpdateIndex !== undefined && updateIndex > ver.maxUpdateIndex) return false
+      if (shownKeys.has(key)) return false
+      return true
+    })
+
+  if (candidates.length === 0) return null
+
+  let bestKey: string | null = null
+  let bestScore = -1
+
+  for (const [key, ver] of candidates) {
+    const affinity = ver.genreAffinity!
+    let score = 0
+    let weightSum = 0
+    for (const [genreId, weight] of Object.entries(affinity)) {
+      const prob = posteriors[genreId as GenreId] ?? 0
+      score += prob * weight
+      weightSum += weight
+    }
+    if (weightSum > 0) {
+      score /= weightSum
+    }
+    if (score > bestScore) {
+      bestScore = score
+      bestKey = key
+    }
+  }
+
+  return bestKey
 }

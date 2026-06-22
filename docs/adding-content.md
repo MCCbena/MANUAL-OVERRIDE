@@ -8,11 +8,12 @@
 
 1. [全体の仕組みを3分で理解する](#全体の仕組みを3分で理解する)
 2. [選択肢（説明書の分岐）を追加する](#選択肢説明書の分岐を追加する)
-3. [新しいジャンルエンディングを追加する](#新しいジャンルエンディングを追加する)
-4. [ジャンルの見た目（GenrePlugin）を実装する](#ジャンルの見た目genrepluginを実装する)
-5. [パラメータ設計のコツ](#パラメータ設計のコツ)
-6. [バリデーションとデバッグ](#バリデーションとデバッグ)
-7. [チェックリスト](#チェックリスト)
+3. [プールエントリーを追加する（推奨）](#プールエントリーを追加する推奨)
+4. [新しいジャンルエンディングを追加する](#新しいジャンルエンディングを追加する)
+5. [ジャンルの見た目（GenrePlugin）を実装する](#ジャンルの見た目genrepluginを実装する)
+6. [パラメータ設計のコツ](#パラメータ設計のコツ)
+7. [バリデーションとデバッグ](#バリデーションとデバッグ)
+8. [チェックリスト](#チェックリスト)
 
 ---
 
@@ -139,13 +140,13 @@ cp src/data/manuals/TEMPLATE.json src/data/manuals/my-branch.json
 
 ### runtimeOverrides でゲームの挙動を変える
 
-選択肢によってゲームの物理パラメータも変えられます。
+runtimeOverrides でゲームの物理パラメータも変えられます。
 
 ```json
 {
   "key": "3.0-fast-route",
   "version": "3.0",
-  "manualText": ["スピードが上がりました。"],
+  "manualText": ["スピードが上がってきました。"],
   "runtimeOverrides": {
     "scrollSpeed": 6.0,
     "gravity": 1400,
@@ -166,6 +167,80 @@ cp src/data/manuals/TEMPLATE.json src/data/manuals/my-branch.json
 | `playerMaxHp` | 1 | HP 制（2以上でRPG的被弾許容） |
 | `timescale` | 1.0 | ゲーム全体の時間倍率 |
 | `environment` | `"ground"` | `"sky"` / `"space"` / `"ocean"` など |
+
+---
+
+## プールエントリーを追加する（推奨）
+
+従来の `choice.next` チェーン方式に加え、**プールエントリー**を追加することで、ベイズ事後確率に基づいて動的に説明書を選択できます。プールエントリーは `src/data/manuals/pool.json` に登録します。
+
+### プールエントリーのメリット
+
+- **再利用可能**: 1つのエントリーが複数のルートで使い回せる
+- **ベイズ連動**: ジャンル収束の進行状況に応じて自然な説明書が表示される
+- **保守性**: チェーン構造への依存が減り、分岐管理が容易になる
+
+### 追加方法
+
+`src/data/manuals/pool.json` の `entries` 配列に追記します:
+
+```json
+{
+  "key": "pool-rpg-mid",
+  "version": "4.0",
+  "genreAffinity": { "rpg": 0.9, "dungeon": 0.4, "survival": 0.2 },
+  "minUpdateIndex": 3,
+  "maxUpdateIndex": 6,
+  "manualText": [
+    "主人公が経験値を得られるようになりました。",
+    "敵を倒すと成長します。"
+  ],
+  "runtimeOverrides": {
+    "playerMaxHp": 5
+  },
+  "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+  "choices": []
+}
+```
+
+### genreAffinity の設計
+
+`genreAffinity` は各ジャンルへの親和性を 0〜1 で表現します。事後確率が高いジャンルほど、対応する affinity 値が高いエントリーが優先的に選択されます:
+
+```json
+{
+  "genreAffinity": {
+    "runner": 0.9,
+    "bullet_runner": 0.3
+  }
+}
+```
+
+このエントリーは `runner` の事後確率が高い状態で優先的に選択され、`bullet_runner` が優勢な場合も一定確率で選択されます。
+
+### updateIndex の範囲指定
+
+`minUpdateIndex` / `maxUpdateIndex` で「どのタイミングで表示するか」を制御できます:
+
+- `minUpdateIndex: 2` → 3回目の更新以降に表示可能（0-indexed）
+- `maxUpdateIndex: 4` → 5回目の更新までに表示可能
+- 両方省略 → いつでも表示可能
+
+**推奨**: 序盤（index 0-1）は既存のチェーン方式を使い、中盤以降（index 2+）でプール選択が有効になるように設計しています。
+
+### スコアリングの仕組み
+
+各エントリーのスコアは、`genreAffinity` と事後確率の内積を正規化した値です:
+
+```
+score = Σ(posterior[genreId] × affinity[genreId]) / Σ(affinity[genreId])
+```
+
+スコアが最も高いエントリーが選択されます。既に選択済みのエントリーは除外されます。
+
+### チェーンとの併用
+
+プールエントリーは従来のチェーン方式と併用できます。`pool.json` に合致するエントリーがない場合、従来の `choice.next` チェーンがフォールバックとして動作します。これにより既存のブランチ構造を壊さずにプール方式を導入できます。
 
 ---
 

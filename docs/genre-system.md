@@ -4,6 +4,8 @@
 
 プレイヤーが説明書の2択を選ぶたびに **GenreParams** が蓄積し、ベイズ事後確率でジャンルへ収束する。ジャンルはゲームの外見・スポーンテーブル・有効フィーチャー・スコア式をすべて切り替える。
 
+説明書の選択は **ベイズ事後確率 × genreAffinity** によるプール選択で決定される。従来の `choice.next` チェーンはフォールバックとして残っている。
+
 ---
 
 ## GenreParam（12 軸）
@@ -98,6 +100,59 @@ for (const [id, prob] of Object.entries(posteriors)) {
 { "genreParams": { "tempo": 2 }, "paramMultiplier": 1.5 }
 // → 実際の加算値: tempo += 2 * 1.5 = 3
 ```
+
+---
+
+## 説明書プール選択システム
+
+従来の `choice.next` チェーンに加え、ベイズ事後確率に基づいて動的に説明書を選択するプール方式を実装しています。
+
+### 仕組み
+
+```
+choice → genreParams 加算 → ベイズ更新 → selectNextManual(posteriors, updateIndex)
+  → pool entry がある場合: そのキーを使用（genreAffinity × posterior でスコアリング）
+  → pool entry がない場合: choice.next のチェーンを使用（フォールバック）
+```
+
+### プールエントリーの構造
+
+プール用エントリーは `genreAffinity` フィールドを持つことで、通常のチェーンエントリーと区別されます:
+
+```json
+{
+  "key": "pool-runner-early",
+  "version": "3.0",
+  "genreAffinity": { "runner": 0.9, "bullet_runner": 0.3 },
+  "minUpdateIndex": 2,
+  "maxUpdateIndex": 4,
+  "manualText": ["速度がさらに上がってきました。"],
+  "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+  "choices": []
+}
+```
+
+| フィールド | 説明 |
+|---|---|
+| `genreAffinity` | ジャンルごとの親和性（0〜1）。事後確率と内積でスコアリング |
+| `minUpdateIndex` | 表示可能な最小 updateIndex（0-indexed）。省略可 |
+| `maxUpdateIndex` | 表示可能な最大 updateIndex（0-indexed）。省略可 |
+
+### スコアリング
+
+各エントリーのスコアは、`genreAffinity` と事後確率の内積を正規化した値:
+
+```typescript
+score = Σ(posterior[genreId] × affinity[genreId]) / Σ(affinity[genreId])
+```
+
+スコアが最も高いエントリーが選択されます。既に選択済みのエントリーは除外されます。
+
+### 従来のチェーンとの関係
+
+- `pool.json` のプールエントリーが `minUpdateIndex` に合致する場合、プール選択が優先される
+- プールに合致するエントリーがない場合、従来の `choice.next` チェーンがフォールバックとして動作する
+- 既存の `action-branch.json` / `flow-branch.json` / `advanced-branch.json` はそのまま有効
 
 ---
 

@@ -4,7 +4,7 @@ import { BAYES_DEBUG_TOP_N } from '../domain/types'
 import { MANUAL_DECK } from '../data/manualDeck'
 import { GENRES } from '../data/genres'
 import { buildRuntimeRules, type ChoiceRecord } from '../domain/ruleEngine'
-import { resolveGenre, resolveHighestProbGenre, accumulateParams, initBayesianState, updateBayesianState, DEFAULT_BAYES_CONFIG } from '../domain/genreResolver'
+import { resolveGenre, resolveHighestProbGenre, accumulateParams, initBayesianState, updateBayesianState, DEFAULT_BAYES_CONFIG, selectNextManual } from '../domain/genreResolver'
 import { calcThrowScore, calcFinalScore } from '../domain/scoreCalc'
 import type { ThrowResult } from '../domain/types'
 import { soundManager } from '../plugins/SoundManager'
@@ -20,6 +20,9 @@ export function useGameState() {
 
   // ベイズ状態（事後確率分布を追跡）
   const bayesState = reactive<BayesianState>(initBayesianState(GENRES))
+
+  // プール選択で既に表示済みのエントリーキーを追跡
+  const shownPoolKeys = reactive(new Set<string>())
 
   // 現在有効なルール（ゲームループが参照）
   const rules = reactive<RuntimeRules>(
@@ -58,14 +61,6 @@ export function useGameState() {
     const choice = ver.choices.find(c => c.id === choiceId)
     if (!choice) return undefined
 
-    // 状態を変更する前に次バージョンの存在を確認
-    const nextVer = MANUAL_DECK[choice.next]
-    if (!nextVer) {
-      console.error(`[choose] invalid choice.next: ${choice.next}`)
-      phase.value = 'playing'
-      return `選択肢データが見つかりません（${choice.next}）`
-    }
-
     soundManager.onChoiceSelect()
 
     choiceHistory.push({
@@ -74,7 +69,6 @@ export function useGameState() {
       genreParams: choice.genreParams,
       genrePoints: choice.genrePoints,
     })
-    currentVersionKey.value = choice.next
     updateIndex.value++
 
     // 累積パラメータを計算
@@ -97,6 +91,25 @@ export function useGameState() {
     console.log(`[BAYES] Top${BAYES_DEBUG_TOP_N} genres:\n${sorted}`)
     console.log(`[BAYES] converged=${newState.converged} | convergedGenre=${newState.convergedGenre ?? '—'} | threshold=${thresholdStr}`)
     // ─────────────────────────────────────────────────────────────
+
+    // 次のバージョンキーを決定: プール選択 → チェーンフォールバック
+    const poolKey = selectNextManual(MANUAL_DECK, newState.posteriors, updateIndex.value, shownPoolKeys)
+    if (poolKey && MANUAL_DECK[poolKey]) {
+      currentVersionKey.value = poolKey
+      shownPoolKeys.add(poolKey)
+      console.log(`[POOL] selected ${poolKey}`)
+    } else {
+      const chainKey = choice.next
+      const chainVer = MANUAL_DECK[chainKey]
+      if (!chainVer) {
+        console.error(`[choose] invalid choice.next: ${chainKey}`)
+        phase.value = 'playing'
+        return `選択肢データが見つかりません（${chainKey}）`
+      }
+      currentVersionKey.value = chainKey
+    }
+
+    const nextVer = MANUAL_DECK[currentVersionKey.value]
 
     // ジャンル収束チェック（ベイズ事後確率が閾値を超えたら確定）
     if (newState.converged || nextVer.choices.length === 0) {
@@ -137,6 +150,7 @@ export function useGameState() {
     updateIndex.value = 0
     finalScore.value = null
     Object.assign(bayesState, initBayesianState(GENRES))
+    shownPoolKeys.clear()
     _rebuildRules()
   }
 

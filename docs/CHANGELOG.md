@@ -4,6 +4,75 @@
 
 ---
 
+## ハードコード排除（2026-06-20）
+
+### 新規 config JSON ファイル
+
+| ファイル | セクション | 内容 |
+|---|---|---|
+| `config/bayes.json` | `bayes` | ベイズ収束パラメータ（convergenceThreshold, decayRate, baseDecay, candidateThreshold） |
+| `config/special.json` | `special` | タワー・ボス撃破・タイムボーナス（fireInterval, range, scores） |
+| `config/puzzle.json` | `puzzle` | グリッドサイズ・フェーズ時間・ソルブスコア |
+| `config/extra_movement.json` | `extra_movement` | 縦スクロールドリフト・ダッシュ・ウォールジャンプパーティクル |
+
+### 既存 config の拡張
+
+| ファイル | 追加フィールド |
+|---|---|
+| `config/rhythm_tuning.json` | `defaultBpm`, `justInputMinQuality`, `justInputScoreBase`, `justInputPopupOffsetY`, `justInputParticleVy/Life/Size` |
+| `config/difficulty.json` | `infiniteUpdateInterval` |
+| `config/physics.json` | `playerStartX` |
+| `config/spawn.json` | `firstSpawnDist` を 280→480（実際の動作値に合わせ） |
+
+### コード側の対応
+
+| ファイル | 変更 |
+|---|---|
+| `genreResolver.ts` | `DEFAULT_BAYES_CONFIG` → `BAYES` から読み込み |
+| `SpecialFeature.ts` | 6つのハードコード定数 → `SPECIAL` |
+| `PuzzleFeature.ts` | 4つのハードコード定数 → `PUZZLE` |
+| `ExtraMovementFeature.ts` | ドリフト・ダッシュ・ウォールジャンプのパーティクル全パラメータ → `EXTRA_MOVEMENT` |
+| `RhythmFeature.ts` | コンストラクタデフォルトBPM・ジャスト入力スコア・ビートマーカー描画 → `RHYTHM_TUNING` / `UI` / `BACKGROUND` |
+| `sideScroller.ts` | `nextSpawnDist` → `SPAWN.firstSpawnDist`、プレイヤー開始X → `PLAYER_PHYSICS.startX`、無限更新間隔 → `DIFFICULTY.infiniteUpdateInterval` |
+
+### 型定義・エクスポート
+
+- `config-types.ts`: 新インターフェース `BayesConfig`, `SpecialConfig`, `PuzzleConfig`, `ExtraMovementConfig` を追加
+- `config-types.ts`: `RhythmTuningConfig` / `DifficultyConfig` / `PhysicsConfig` を拡張
+- `config-types.ts`: `GameConfigMap` に新セクションを追加
+- `tunables.ts`: `BAYES`, `SPECIAL`, `PUZZLE`, `EXTRA_MOVEMENT` をエクスポート
+- `gameBalance.ts`: `PLAYER_PHYSICS.startX` を追加
+
+---
+
+## 説明書プール選択システム実装（2026-06-20）
+
+### プール選択方式の実装
+
+**概要**: ベイズ事後確率に基づいて動的に説明書を選択するプール方式を実装。従来の `choice.next` チェーンはフォールバックとして維持。
+
+**変更ファイル**:
+- `src/domain/types.ts`: `ManualVersion` に `genreAffinity`, `minUpdateIndex`, `maxUpdateIndex` を追加
+- `src/framework/types.ts`: `ManualEntryJSON` にプールメタデータフィールドを追加
+- `src/framework/ManualLoader.ts`: `genreAffinity` / `minUpdateIndex` / `maxUpdateIndex` のパースを追加
+- `src/domain/genreResolver.ts`: `selectNextManual()` を実装（事後確率 × genreAffinity によるスコアリング）
+- `src/data/manuals/pool.json`: 22件のプールエントリー（7ジャンル方向）を新規追加
+- `src/composables/useGameState.ts`: `choose()` を書き直し（プール選択優先、`shownPoolKeys` 追跡）
+
+**動作フロー**:
+```
+choice → genreParams 加算 → ベイズ更新 → selectNextManual(posteriors, updateIndex)
+  → pool entry がある場合: そのキーを使用（genreAffinity × posterior でスコアリング）
+  → pool entry がない場合: choice.next のチェーンを使用（フォールバック）
+```
+
+**テスト結果**:
+- ✅ TypeScript コンパイル OK
+- ✅ ユニットテスト 40/40 成功
+- ✅ E2E テスト 16/18 成功（2件は既存のタイミング問題）
+
+---
+
 ## 永遠システム・フレームワーク統合セッション（2026-05-31）
 
 ### 1. 無限選択肢システム実装

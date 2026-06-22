@@ -14,6 +14,7 @@ import type { GenreId, FeatureId, ManualTheme, EnvironmentId, ScrollDirection, C
 export interface PhysicsConfig {
   playerWidth: number
   playerHeight: number
+  playerStartX: number
   jumpVelocity: number
   doubleJumpVelocity: number
   jumpCutMultiplier: number
@@ -233,6 +234,7 @@ export interface DifficultyConfig {
   tempoSpeedBonus: number
   enemyDensityRate: number
   globalDifficultyMult: number
+  infiniteUpdateInterval: number
 }
 
 /** boss.json — ボス */
@@ -253,6 +255,7 @@ export interface BossConfig {
 export interface RhythmTuningConfig {
   minBpm: number
   maxBpm: number
+  defaultBpm: number
   justWindowSec: number
   justMultiplier: number
   goodWindowMult: number
@@ -261,6 +264,12 @@ export interface RhythmTuningConfig {
   beatSpawnBurstRate: number
   beatDashMult: number
   beatDashFrames: number
+  justInputMinQuality: number
+  justInputScoreBase: number
+  justInputPopupOffsetY: number
+  justInputParticleVy: number
+  justInputParticleLife: number
+  justInputParticleSize: number
 }
 
 /** stealth.json — ステルス */
@@ -270,6 +279,60 @@ export interface StealthConfig {
   stealthCooldownSec: number
   stealthSafeBonus: number
   detectionRange: number
+}
+
+/** bayes.json — ベイズ収束 */
+export interface BayesConfig {
+  convergenceThreshold: number
+  decayRate: number
+  baseDecay: number
+  candidateThreshold: number
+}
+
+/** special.json — 特殊フィーチャー (タワー / ボス撃破 / タイムボーナス) */
+export interface SpecialConfig {
+  towerFireIntervalSec: number
+  towerRangePx: number
+  towerKillScore: number
+  bossKillScore: number
+  timeBonusIntervalSec: number
+  timeBonusScore: number
+}
+
+/** puzzle.json — パズルフィーチャー */
+export interface PuzzleConfig {
+  gridSize: number
+  movePhaseSec: number
+  solvePhaseSec: number
+  solveScore: number
+}
+
+/** extra_movement.json — 拡張移動フィーチャー */
+export interface ExtraMovementConfig {
+  verticalDriftFreq: number
+  verticalDriftAmp: number
+  wallJumpParticleCount: number
+  wallJumpParticleAngleSpread: number
+  wallJumpParticleSpeedMin: number
+  wallJumpParticleSpeedRange: number
+  wallJumpParticleVyBoost: number
+  wallJumpParticleLife: number
+  wallJumpParticleColor: string
+  wallJumpParticleSize: number
+  dashParticleCount: number
+  dashParticleSpeedMin: number
+  dashParticleSpeedRange: number
+  dashParticleSpreadX: number
+  dashParticleSpreadY: number
+  dashParticleLife: number
+  dashParticleColor: string
+  dashParticleSize: number
+  dashTrailParticleVy: number
+  dashTrailParticleSpreadY: number
+  dashTrailParticleLife: number
+  dashTrailParticleColor: string
+  dashTrailParticleSize: number
+  dashTrailAlphaMax: number
 }
 
 /** genre_params.json — ジャンルパラメータ設計支援 */
@@ -339,6 +402,10 @@ export interface GameConfigMap {
   genre_params: GenreParamsConfig
   game_balance: GameBalanceConfig
   genres: GenresConfig
+  bayes: BayesConfig
+  special: SpecialConfig
+  puzzle: PuzzleConfig
+  extra_movement: ExtraMovementConfig
 }
 
 export type GameConfigSection = keyof GameConfigMap

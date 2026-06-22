@@ -69,6 +69,59 @@
 
 ---
 
+## プール選択用フィールド
+
+説明書エントリーを「再利用可能なプール」に登録するためのフィールドです。これらのフィールドを持つエントリーは、ベイズ事後確率に基づいて動的に選択されます。
+
+| フィールド | 必須 | 型 | 説明 |
+|---|---|---|---|
+| `genreAffinity` | ✅（プール用） | Record<string, number> | ジャンルごとの親和性（0〜1）。事後確率と内積でスコアリング |
+| `minUpdateIndex` | ─ | number | 表示可能な最小 updateIndex（0-indexed）。省略可 |
+| `maxUpdateIndex` | ─ | number | 表示可能な最大 updateIndex（0-indexed）。省略可 |
+
+### プールエントリーの例
+
+```json
+{
+  "key": "pool-runner-early",
+  "version": "3.0",
+  "genreAffinity": { "runner": 0.9, "bullet_runner": 0.3 },
+  "minUpdateIndex": 2,
+  "maxUpdateIndex": 4,
+  "manualText": [
+    "速度がさらに上がってきました。",
+    "直感で動いてください。"
+  ],
+  "hazards": { "colors": ["red"], "safeColors": ["blue"] },
+  "choices": []
+}
+```
+
+### genreAffinity の設計
+
+`genreAffinity` は各ジャンルへの親和性を 0〜1 で表現します。値が高いほど、そのジャンルが優勢な状態で選択されやすくなります。
+
+```json
+{
+  "genreAffinity": {
+    "runner": 0.9,
+    "bullet_runner": 0.3
+  }
+}
+```
+
+このエントリーは `runner` の事後確率が高い状態で優先的に選択され、`bullet_runner` が優勢な場合も一定確率で選択されます。
+
+### updateIndex の範囲指定
+
+`minUpdateIndex` / `maxUpdateIndex` で「どのタイミングで表示するか」を制御できます:
+
+- `minUpdateIndex: 2` → 3回目の更新以降に表示可能
+- `maxUpdateIndex: 4` → 5回目の更新までに表示可能
+- 両方省略 → いつでも表示可能
+
+---
+
 ## ChoiceJSON（選択肢）
 
 ```json
@@ -90,7 +143,7 @@
 | フィールド | 必須 | 型 | 説明 |
 |---|---|---|---|
 | `label` | ✅ | string | プレイヤーに見せるラベル |
-| `next` | ✅ | string | 選択後の遷移先バージョンキー |
+| `next` | ✅ | string | 選択後の遷移先バージョンキー（プール選択時のフォールバック） |
 | `genreParams` | ✅ | GenreParams | ジャンルパラメータへの加算値 |
 | `id` | ─ | string | 内部ID（省略時は自動生成） |
 | `hint` | ─ | string | 開発者メモ（プレイヤーには非表示） |
@@ -203,6 +256,8 @@
 
 ## ブランチ構造の例
 
+従来のチェーン方式:
+
 ```
 base.json
   "1.0" → choices:
@@ -214,12 +269,19 @@ stg-branch.json
     A → next: "3.0-stg-a"
     B → next: "3.0-stg-b"
   "3.0-stg-a" → choices: []  ← 収束（ジャンル確定）
-
-runner-branch.json
-  "2.0-runner" → ...
 ```
 
-各ブランチは別ファイルに分けられる。`ManualLoader.ts` が `import.meta.glob` で全ファイルを自動収集し、`key` をマップキーとして統合する。
+プール方式:
+
+```
+pool.json
+  "pool-runner-early"   → genreAffinity: { runner: 0.9 }, minUpdateIndex: 2
+  "pool-runner-mid"     → genreAffinity: { runner: 0.95 }, minUpdateIndex: 4
+  "pool-stg-early"      → genreAffinity: { stg: 0.9 }, minUpdateIndex: 2
+  "pool-stg-mid"        → genreAffinity: { stg: 0.95 }, minUpdateIndex: 4
+```
+
+両方式是存し、プール選択が優先され、プールに合致するエントリーがない場合はチェーンがフォールバックとして動作します。
 
 ---
 

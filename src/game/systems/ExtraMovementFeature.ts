@@ -15,10 +15,7 @@
 import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { PLAYER_PHYSICS } from '../../data/gameBalance'
-
-/** 縦スクロール時のハザードドリフト設定 */
-const VERTICAL_DRIFT_FREQ = 1.6   // rad/s
-const VERTICAL_DRIFT_AMP  = 90    // px/s（振幅速度）
+import { EXTRA_MOVEMENT } from '../../data/tunables'
 
 /** MovementFeature が担当する Feature（これらがどれも active でない場合、基本移動をここで担う） */
 const MOVEMENT_FEATURE_HANDLES = ['auto_run', 'slow_precise', 'double_jump', 'long_air'] as const
@@ -56,13 +53,13 @@ export class ExtraMovementFeature implements FeatureSystem {
       if ((atLeftWall || atRightWall) && input.justPressed.has(r.controls.jump)) {
         p.jumpsLeft = 1
         p.vx = (atLeftWall ? 1 : -1) * PLAYER_PHYSICS.wallJumpPushSpeed
-        for (let i = 0; i < 5; i++) {
-          const angle = (atLeftWall ? 0 : Math.PI) + (Math.random() - 0.5) * 1.2
-          const speed = 80 + Math.random() * 80
+        for (let i = 0; i < EXTRA_MOVEMENT.wallJumpParticleCount; i++) {
+          const angle = (atLeftWall ? 0 : Math.PI) + (Math.random() - 0.5) * EXTRA_MOVEMENT.wallJumpParticleAngleSpread
+          const speed = EXTRA_MOVEMENT.wallJumpParticleSpeedMin + Math.random() * EXTRA_MOVEMENT.wallJumpParticleSpeedRange
           world.addParticle(
             p.x + (atLeftWall ? 0 : p.w), p.y + p.h * 0.5,
-            Math.cos(angle) * speed, Math.sin(angle) * speed - 40,
-            0.35, '#aaddff', 3,
+            Math.cos(angle) * speed, Math.sin(angle) * speed + EXTRA_MOVEMENT.wallJumpParticleVyBoost,
+            EXTRA_MOVEMENT.wallJumpParticleLife, EXTRA_MOVEMENT.wallJumpParticleColor, EXTRA_MOVEMENT.wallJumpParticleSize,
           )
         }
       }
@@ -93,7 +90,7 @@ export class ExtraMovementFeature implements FeatureSystem {
     this.driftTime += dt
     const W = world.canvas.width
     for (const h of world.hazards) {
-      const drift = Math.sin(this.driftTime * VERTICAL_DRIFT_FREQ + h.y * 0.01) * VERTICAL_DRIFT_AMP * dt
+      const drift = Math.sin(this.driftTime * EXTRA_MOVEMENT.verticalDriftFreq + h.y * 0.01) * EXTRA_MOVEMENT.verticalDriftAmp * dt
       h.x = Math.max(0, Math.min(W - h.w, h.x + drift))
     }
   }
@@ -102,10 +99,10 @@ export class ExtraMovementFeature implements FeatureSystem {
     if (!world.rules.features.has('dash') || this.dash.timer <= 0) return
 
     const p     = world.player
-    const alpha = (this.dash.timer / PLAYER_PHYSICS.dashDurationSec) * 0.45
+    const alpha = (this.dash.timer / PLAYER_PHYSICS.dashDurationSec) * EXTRA_MOVEMENT.dashTrailAlphaMax
     ctx.save()
     ctx.globalAlpha = alpha
-    ctx.fillStyle = '#ffcc00'
+    ctx.fillStyle = EXTRA_MOVEMENT.dashTrailParticleColor
     for (let i = 1; i <= 3; i++) {
       ctx.fillRect(p.x - i * 10, p.y + 6, p.w * 0.8, p.h - 12)
     }
@@ -131,13 +128,13 @@ export class ExtraMovementFeature implements FeatureSystem {
       this.dash.dir = (p.vx < 0 ? -1 : 1)
       p.invincible = Math.max(p.invincible, PLAYER_PHYSICS.dashIframesSec)
 
-      for (let i = 0; i < 8; i++) {
-        const speed = 60 + Math.random() * 100
+      for (let i = 0; i < EXTRA_MOVEMENT.dashParticleCount; i++) {
+        const speed = EXTRA_MOVEMENT.dashParticleSpeedMin + Math.random() * EXTRA_MOVEMENT.dashParticleSpeedRange
         world.addParticle(
           p.x + (this.dash.dir > 0 ? 0 : p.w), p.y + p.h * 0.5,
-          -this.dash.dir * speed + (Math.random() - 0.5) * 40,
-          (Math.random() - 0.5) * 60,
-          0.3, '#ffffff', 3,
+          -this.dash.dir * speed + (Math.random() - 0.5) * EXTRA_MOVEMENT.dashParticleSpreadX,
+          (Math.random() - 0.5) * EXTRA_MOVEMENT.dashParticleSpreadY,
+          EXTRA_MOVEMENT.dashParticleLife, EXTRA_MOVEMENT.dashParticleColor, EXTRA_MOVEMENT.dashParticleSize,
         )
       }
     }
@@ -146,8 +143,8 @@ export class ExtraMovementFeature implements FeatureSystem {
       p.vx = this.dash.dir * PLAYER_PHYSICS.dashSpeed
       world.addParticle(
         p.x + p.w * 0.5, p.y + p.h * 0.5,
-        -this.dash.dir * 30, (Math.random() - 0.5) * 20,
-        0.2, 'rgba(255,255,255,0.5)', 4,
+        -this.dash.dir * EXTRA_MOVEMENT.dashTrailParticleVy, (Math.random() - 0.5) * EXTRA_MOVEMENT.dashTrailParticleSpreadY,
+        EXTRA_MOVEMENT.dashTrailParticleLife, EXTRA_MOVEMENT.dashTrailParticleColor, EXTRA_MOVEMENT.dashTrailParticleSize,
       )
     }
   }

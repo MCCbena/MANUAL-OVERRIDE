@@ -145,6 +145,15 @@ export interface ManualVersion {
   narrative?: string
   /** プレイヤー行動に基づいた自動ルール更新ルール（省略可） */
   learningRules?: LearningRule[]
+  /**
+   * プール選択用: ジャンルごとの親和性（0〜1）。
+   * ベイズ事後確率と内積を取ってスコアリングする。
+   */
+  genreAffinity?: Record<string, number>
+  /** プール選択用: 表示可能な最小 updateIndex（0-indexed）。省略可 */
+  minUpdateIndex?: number
+  /** プール選択用: 表示可能な最大 updateIndex（0-indexed）。省略可 */
+  maxUpdateIndex?: number
 }
 
 // ─────────────────────────────────────────────────────────────

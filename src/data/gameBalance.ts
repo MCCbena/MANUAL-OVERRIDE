@@ -76,6 +76,7 @@ export const HAZARD_SPAWN = {
 export const PLAYER_PHYSICS = {
   width:              _p.playerWidth,
   height:             _p.playerHeight,
+  startX:             _p.playerStartX,
   jumpVelocity:       _p.jumpVelocity,
   doubleJumpVelocity: _p.doubleJumpVelocity,
   jumpCutMultiplier:  _p.jumpCutMultiplier,
