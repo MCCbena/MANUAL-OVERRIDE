@@ -296,6 +296,7 @@ export interface GameBalanceConfig {
   hazardSpawnDecayRate: number
   distanceAccelMaxBonus: number
   distanceAccelFullDist: number
+  maxRounds: number
 }
 
 /** genres.json — ジャンル定義テーブル */
@@ -316,8 +317,18 @@ export interface GenreDefJSON {
   controls?: Partial<Controls>
 }
 
+export interface ThemeColorDef {
+  accent: string
+  border: string
+  hint?: string
+  font?: string
+  bg?: string
+  glow?: string
+}
+
 export interface GenresConfig {
   genres: GenreDefJSON[]
+  themeColors?: Record<string, ThemeColorDef>
 }
 
 /** GameConfigMap: セクション名 → 設定オブジェクトのマッピング */
