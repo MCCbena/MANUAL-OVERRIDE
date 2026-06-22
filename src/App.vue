@@ -168,7 +168,9 @@ const giveupThemeStyle = computed(() => {
     '--genre-btn-accent': colors.accent,
     '--genre-btn-border': colors.border,
     '--genre-hint-color': colors.hint ?? 'var(--text-dim)',
-    '--genre-btn-font': colors.font ?? 'var(--font-mono)',
+    '--genre-btn-font':   colors.font  ?? 'var(--font-mono)',
+    '--genre-btn-bg':     colors.bg    ?? 'var(--green-dark)',
+    '--genre-btn-glow':   colors.glow  ?? 'var(--green-glow)',
   }
 })
 
@@ -618,10 +620,10 @@ body { font-family: var(--font-mono); }
   white-space: nowrap;
 }
 .giveup-btn:hover {
-  background: var(--green-dark);
+  background: var(--genre-btn-bg, var(--green-dark));
   border-color: var(--genre-btn-accent, var(--green));
   color: var(--genre-btn-accent, var(--green));
-  box-shadow: 0 0 12px var(--green-glow);
+  box-shadow: 0 0 12px var(--genre-btn-glow, var(--green-glow));
 }
 .giveup-hint {
   font-size: 10px;

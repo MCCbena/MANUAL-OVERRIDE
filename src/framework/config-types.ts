@@ -321,6 +321,8 @@ export interface ThemeColorDef {
   border: string
   hint?: string
   font?: string
+  bg?: string
+  glow?: string
 }
 
 export interface GenresConfig {
