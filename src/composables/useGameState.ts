@@ -1,30 +1,56 @@
 import { reactive, ref, readonly } from 'vue'
-import type { Phase, GenreId, RuntimeRules, FinalScore } from '../domain/types'
+import type { Phase, GenreId, RuntimeRules, FinalScore, ManualVersion, ManualCard, GenreParam } from '../domain/types'
 import { MANUAL_DECK } from '../data/manualDeck'
 import { GENRES } from '../data/genres'
 import { buildRuntimeRules, type ChoiceRecord } from '../domain/ruleEngine'
-import { resolveGenre, accumulateParams } from '../domain/genreResolver'
+import { resolveGenre, accumulateParams, resolveAllGenreProgress } from '../domain/genreResolver'
 import { calcThrowScore, calcFinalScore } from '../domain/scoreCalc'
 import type { ThrowResult } from '../domain/types'
 import { soundManager } from '../plugins/SoundManager'
+import { sampleCards, CARD_POOL } from '../data/cardPool'
+import { MAX_ROUNDS } from '../data/gameBalance'
 
-// ゲームの全体状態を一元管理する composable
 export function useGameState() {
   const phase = ref<Phase>('title')
-  const currentVersionKey = ref('1.0')
-  const choiceHistory = reactive<ChoiceRecord[]>([])
   const lockedGenre = ref<GenreId | null>(null)
-  const updateIndex = ref(0)          // 何回目の更新か（0-indexed）
   const finalScore = ref<FinalScore | null>(null)
+
+  // カードラウンド管理
+  const roundCount = ref(0)
+  const activeCards = ref<ManualCard[]>([])
+  const lastShownCardIds = ref(new Set<string>())
+
+  // 選択履歴（genreResolver に渡す）
+  const choiceHistory = reactive<ChoiceRecord[]>([])
+
+  // 説明書本文（選択のたびに追記される）
+  const accumulatedManualText = ref<string[]>([...MANUAL_DECK['1.0'].manualText])
+
+  // 現在の障害物設定（カードで上書き可能）
+  const currentHazards = ref({ ...MANUAL_DECK['1.0'].hazards })
+
+  // 最後に選んだカードの runtimeConfig（buildRuntimeRules に渡す）
+  const lastRuntimeConfig = ref<ManualVersion['runtimeConfig']>(undefined)
 
   // 現在有効なルール（ゲームループが参照）
   const rules = reactive<RuntimeRules>(
     buildRuntimeRules(MANUAL_DECK['1.0'], [], null)
   )
 
+  function _buildFakeManual(): ManualVersion {
+    return {
+      version: `${roundCount.value}/${MAX_ROUNDS}`,
+      manualText: accumulatedManualText.value,
+      choices: [],
+      hazards: currentHazards.value,
+      runtimeConfig: lastRuntimeConfig.value,
+      learningRules: MANUAL_DECK['1.0'].learningRules,
+    }
+  }
+
   function _rebuildRules() {
     const next = buildRuntimeRules(
-      MANUAL_DECK[currentVersionKey.value],
+      _buildFakeManual(),
       choiceHistory,
       lockedGenre.value,
     )
@@ -37,42 +63,94 @@ export function useGameState() {
     _rebuildRules()
   }
 
-  // チュートリアル画面からゲームプレイへ移行
   function startTutorial() {
     phase.value = 'tutorial'
   }
 
-  // 説明書更新が来たとき（sideScroller の snapshot.shouldUpdate が非 null）
+  // 選択履歴から各ジャンルの収束進捗(0〜1)を計算してカード重みかけに使う
+  function _computeGenreWeights(): Record<string, number> {
+    if (choiceHistory.length === 0) return {}
+    const accumulated = accumulateParams(choiceHistory.map(h => h.genreParams))
+    const genrePointsAcc: Record<string, number> = {}
+    for (const h of choiceHistory) {
+      if (!h.genrePoints) continue
+      for (const [g, pts] of Object.entries(h.genrePoints)) {
+        genrePointsAcc[g] = (genrePointsAcc[g] ?? 0) + pts
+      }
+    }
+    return resolveAllGenreProgress(accumulated, GENRES, genrePointsAcc)
+  }
+
+  // 説明書更新トリガー: カードをランダムサンプリングして updating フェーズへ
   function triggerUpdate() {
+    activeCards.value = sampleCards(2, lastShownCardIds.value, _computeGenreWeights())
+    lastShownCardIds.value = new Set(activeCards.value.map(c => c.id))
     phase.value = 'updating'
   }
 
-  // プレイヤーが2択を選んだとき。エラーがあればエラーメッセージ文字列を返す（正常時は undefined）
-  function choose(choiceId: string): string | undefined {
-    const ver = MANUAL_DECK[currentVersionKey.value]
-    const choice = ver.choices.find(c => c.id === choiceId)
-    if (!choice) return undefined
-
-    // 状態を変更する前に次バージョンの存在を確認
-    const nextVer = MANUAL_DECK[choice.next]
-    if (!nextVer) {
-      console.error(`[choose] invalid choice.next: ${choice.next}`)
-      phase.value = 'playing'
-      return `選択肢データが見つかりません（${choice.next}）`
-    }
+  // プレイヤーがカードを選んだとき
+  function choose(cardId: string): string | undefined {
+    const card = activeCards.value.find(c => c.id === cardId)
+    if (!card) return 'カードが見つかりません'
 
     soundManager.onChoiceSelect()
 
-    choiceHistory.push({
-      versionKey: currentVersionKey.value,
-      choiceId,
-      genreParams: choice.genreParams,
-      genrePoints: choice.genrePoints,
-    })
-    currentVersionKey.value = choice.next
-    updateIndex.value++
+    // B6: パラメータにじみ ±20%（genreParams の値にランダムブレを加える）
+    const jitter = 1 + (Math.random() - 0.5) * 0.4
+    const jitteredParams: Partial<Record<GenreParam, number>> = {}
+    for (const [k, v] of Object.entries(card.genreParams ?? {}) as [GenreParam, number][]) {
+      jitteredParams[k] = v * jitter
+    }
 
-    // ジャンル収束チェック
+    // 選択履歴に積む
+    choiceHistory.push({
+      choiceId: cardId,
+      genreParams: jitteredParams,
+      paramMultiplier: card.paramMultiplier,
+      genrePoints: card.genrePoints,
+    })
+
+    // B5: 矛盾カード処理 — 過去に選んだカードと矛盾する場合、その行を取り消し線にする
+    if (card.conflictsWith?.length) {
+      for (const conflictId of card.conflictsWith) {
+        const wasSelected = choiceHistory.some(h => h.choiceId === conflictId)
+        if (!wasSelected) continue
+        const conflictedCard = CARD_POOL.find(c => c.id === conflictId)
+        if (!conflictedCard) continue
+        for (const line of conflictedCard.manualText) {
+          const idx = accumulatedManualText.value.indexOf(line)
+          if (idx >= 0) accumulatedManualText.value[idx] = `~~${line}~~`
+        }
+      }
+    }
+
+    // 説明書本文に追記
+    for (const line of card.manualText) {
+      if (!accumulatedManualText.value.includes(line) && !accumulatedManualText.value.includes(`~~${line}~~`)) {
+        accumulatedManualText.value.push(line)
+      }
+    }
+
+    // 障害物設定を上書き（カードが持つ場合のみ）
+    if (card.hazards) {
+      currentHazards.value = { ...card.hazards }
+    }
+
+    // runtimeConfig を更新
+    if (card.runtimeConfig) {
+      lastRuntimeConfig.value = card.runtimeConfig
+    }
+
+    roundCount.value++
+
+    // すでにジャンル確定済みなら説明書更新のみ（ジャンルは変えない）
+    if (lockedGenre.value !== null) {
+      _rebuildRules()
+      phase.value = 'genreLocked'
+      return undefined
+    }
+
+    // 初回ジャンル収束チェック（最終ラウンド以降は強制確定）
     const accumulated = accumulateParams(choiceHistory.map(h => h.genreParams))
     const genrePointsAcc: Record<string, number> = {}
     for (const h of choiceHistory) {
@@ -84,12 +162,13 @@ export function useGameState() {
     const selectedIds = choiceHistory.map(h => h.choiceId)
     const resolved = resolveGenre(accumulated, GENRES, genrePointsAcc, selectedIds)
 
-    if (lockedGenre.value !== null) {
-      // ジャンル確定済み — ロック演出は再生せず選択肢だけ更新し続ける
-      _rebuildRules()
-      phase.value = 'genreLocked'
-    } else if (nextVer.choices.length === 0 || resolved !== 'base') {
+    if (roundCount.value >= MAX_ROUNDS || resolved !== 'base') {
       lockedGenre.value = resolved !== 'base' ? resolved : _forceResolve(accumulated)
+      // ジャンル確定文を説明書本文に追記
+      const genreDef = GENRES.find(g => g.id === lockedGenre.value)
+      if (genreDef?.manualReveal) {
+        accumulatedManualText.value.push('', genreDef.manualReveal)
+      }
       soundManager.onGenreLock(lockedGenre.value)
       _rebuildRules()
       phase.value = 'genreLocked'
@@ -100,13 +179,11 @@ export function useGameState() {
     return undefined
   }
 
-  // choices が空の末端 or 3回目更新でジャンルを強制決定
   function _forceResolve(accumulated: ReturnType<typeof accumulateParams>): GenreId {
     const resolved = resolveGenre(accumulated, GENRES)
-    return resolved !== 'base' ? resolved : 'runner'  // どこにも収束しなければランナー
+    return resolved !== 'base' ? resolved : 'runner'
   }
 
-  // ゲームオーバー or ギブアップ → 投擲フェーズへ
   function startThrowing(_playScoreRaw: number) {
     soundManager.onThrowStart()
     phase.value = 'throwing'
@@ -121,27 +198,32 @@ export function useGameState() {
 
   function restart() {
     phase.value = 'title'
-    currentVersionKey.value = '1.0'
+    roundCount.value = 0
+    activeCards.value = []
+    lastShownCardIds.value = new Set()
     choiceHistory.splice(0)
     lockedGenre.value = null
-    updateIndex.value = 0
     finalScore.value = null
+    accumulatedManualText.value = [...MANUAL_DECK['1.0'].manualText]
+    currentHazards.value = { ...MANUAL_DECK['1.0'].hazards }
+    lastRuntimeConfig.value = undefined
     _rebuildRules()
   }
 
-  // 現在バージョンの ManualVersion を返す
-  const currentManual = () => MANUAL_DECK[currentVersionKey.value]
+  // ManualPanel / ThrowOverlay に渡す表示用オブジェクト
+  const currentManual = () => _buildFakeManual()
 
-  // 確定ジャンルの定義
   const lockedGenreDef = () => GENRES.find(g => g.id === lockedGenre.value) ?? null
 
   return {
     phase: readonly(phase),
     rules: readonly(rules) as RuntimeRules,
-    currentVersionKey: readonly(currentVersionKey),
     choiceHistory: readonly(choiceHistory),
     lockedGenre: readonly(lockedGenre),
     finalScore: readonly(finalScore),
+    activeCards: readonly(activeCards),
+    roundCount: readonly(roundCount),
+    maxRounds: MAX_ROUNDS,
     currentManual,
     lockedGenreDef,
     startGame,

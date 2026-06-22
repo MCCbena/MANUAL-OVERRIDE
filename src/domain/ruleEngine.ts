@@ -4,7 +4,7 @@ import { GENRES } from '../data/genres'
 import { BASE_SCROLL_SPEED, TEMPO_SPEED_BONUS } from '../data/gameBalance'
 import { DEFAULT_CONTROLS } from './defaults'
 export interface ChoiceRecord {
-  versionKey: string
+  versionKey?: string
   choiceId: string
   genreParams: GenreParams
   /** genreParams への乗数（デフォルト 1.0） */
