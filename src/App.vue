@@ -717,17 +717,6 @@ body { font-family: var(--font-mono); }
   opacity: 0.4;
 }
 
-/* ── ジャンル確定後: グローバルテーマクラス ── */
-.theme-global-stg .giveup-btn     { border-color: #1a66ff; color: #1a66ff; }
-.theme-global-stg .giveup-hint    { color: rgba(168, 216, 255, 0.5); }
-.theme-global-rpg .giveup-btn     { border-color: #8b6100; color: #c4960a; font-family: 'Georgia', serif; }
-.theme-global-rpg .giveup-hint    { color: rgba(196, 150, 10, 0.5); font-family: 'Georgia', serif; }
-.theme-global-puzzle .giveup-btn  { border-color: #444; color: #222; font-family: 'Courier New', monospace; }
-.theme-global-rhythm .giveup-btn  { border-color: #9900ff; color: #ee88ff; }
-.theme-global-rhythm .giveup-hint { color: rgba(204, 136, 255, 0.5); }
-.theme-global-horror .giveup-btn  { border-color: #880000; color: #cc4444; }
-.theme-global-aquatic .giveup-btn { border-color: #0088bb; color: #88ccff; }
-
 /* ── エラートースト ── */
 .error-toast {
   position: absolute;
