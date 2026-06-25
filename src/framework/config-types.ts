@@ -12,6 +12,8 @@ import type { GenreId, FeatureId, ManualTheme, EnvironmentId, ScrollDirection, C
 
 /** physics.json — プレイヤー物理（旧 PHYSICS + PLAYER_PHYSICS 統合） */
 export interface PhysicsConfig {
+  defaultGravity: number
+  defaultPlayerMaxHp: number
   playerWidth: number
   playerHeight: number
   jumpVelocity: number
@@ -221,6 +223,7 @@ export interface UiConfig {
 
 /** score.json — スコア */
 export interface ScoreConfig {
+  defaultColorTouchScore: number
   distanceScoreRate: number
   longAirScoreRate: number
 }
@@ -252,6 +255,8 @@ export interface BossConfig {
 
 /** rhythm_tuning.json — リズムゲーム */
 export interface RhythmTuningConfig {
+  defaultBpm: number
+  bpmTempoBonus: number
   minBpm: number
   maxBpm: number
   justWindowSec: number
@@ -298,6 +303,9 @@ export interface GameBalanceConfig {
   distanceAccelMaxBonus: number
   distanceAccelFullDist: number
   maxRounds: number
+  genreLockedBoostMult: number
+  genreLockedBoostDurationMs: number
+  defaultFallbackGenre: string
 }
 
 /**

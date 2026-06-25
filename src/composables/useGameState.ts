@@ -8,7 +8,7 @@ import { calcThrowScore, calcFinalScore } from '../domain/scoreCalc'
 import type { ThrowResult } from '../domain/types'
 import { soundManager } from '../plugins/SoundManager'
 import { sampleCards, CARD_POOL } from '../data/cardPool'
-import { MAX_ROUNDS } from '../data/gameBalance'
+import { MAX_ROUNDS, DEFAULT_FALLBACK_GENRE } from '../data/gameBalance'
 
 // genreParams のジッター幅（±20%）
 const PARAM_JITTER_RANGE = 0.4
@@ -174,7 +174,7 @@ export function useGameState() {
 
   function _forceResolve(accumulated: ReturnType<typeof accumulateParams>): GenreId {
     const resolved = resolveGenre(accumulated, GENRES)
-    return resolved !== 'base' ? resolved : 'runner'
+    return resolved !== 'base' ? resolved : DEFAULT_FALLBACK_GENRE as typeof resolved
   }
 
   function startThrowing(_playScoreRaw: number) {

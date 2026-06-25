@@ -13,6 +13,7 @@ import TutorialHints from './components/TutorialHints.vue'
 import PluginLoader from './components/PluginLoader.vue'
 import GenreRevealOverlay from './components/GenreRevealOverlay.vue'
 import { GENRES, GENRE_THEME_COLORS } from './data/genres'
+import { GENRE_LOCKED_BOOST } from './data/gameBalance'
 import type { ThrowResult } from './domain/types'
 import { TUTORIAL_ENABLED, TutorialScreen } from './tutorial'
 import { soundManager } from './plugins/SoundManager'
@@ -81,7 +82,8 @@ function beginSnapshotLoop() {
     if (!scroller) return
     snapshot.value = scroller.getSnapshot()
 
-    // 更新トリガー（tutorial, playing のみ発火 — genreLocked 後は MAX_ROUNDS 到達済みで止める）
+    // 更新トリガー（tutorial / playing / genreLocked で発火）
+    // genreLocked 後もカード選択は続く（ジャンルは固定のまま説明書テキストだけ追記）
     // 最初のジャンプまで待つ
     const activePlay = ['playing', 'tutorial', 'genreLocked'].includes(gameState.phase.value)
     if (snapshot.value.shouldUpdate !== null && snapshot.value.firstJumpDone && activePlay) {
@@ -223,17 +225,13 @@ watch(() => gameState.lockedGenre.value, (newGenre) => {
     soundManager.playBgm(genreDef.bgm)
   }
 
-  // スクロール速度を一時的にアップ（0.8秒間）
-  const rawRules = toRaw(gameState.rules)
-  const originalSpeed = rawRules.scrollSpeed
-  rawRules.scrollSpeed = originalSpeed * 1.35
-  scroller.updateRules(rawRules)
+  const currentRules = toRaw(gameState.rules)
+  scroller.updateRules({ ...currentRules, scrollSpeed: currentRules.scrollSpeed * GENRE_LOCKED_BOOST.mult })
 
   if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
   genreLockedBoostTimer = window.setTimeout(() => {
-    rawRules.scrollSpeed = originalSpeed
-    scroller?.updateRules(rawRules)
-  }, 800)
+    scroller?.updateRules(toRaw(gameState.rules))
+  }, GENRE_LOCKED_BOOST.durationMs)
 })
 
 onMounted(() => {

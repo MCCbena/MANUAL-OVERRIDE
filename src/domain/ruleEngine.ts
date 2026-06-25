@@ -1,15 +1,8 @@
 import type { ManualVersion, RuntimeRules, GenreParams, GenreParam, FeatureId, GenreId } from './types'
 import { accumulateParams, accumulateGenrePoints, resolveGenre, resolveFeaturesForGenre } from './genreResolver'
 import { GENRES } from '../data/genres'
-import { BASE_SCROLL_SPEED, TEMPO_SPEED_BONUS } from '../data/gameBalance'
+import { BASE_SCROLL_SPEED, TEMPO_SPEED_BONUS, RULE_DEFAULTS } from '../data/gameBalance'
 import { DEFAULT_CONTROLS } from './defaults'
-
-// ジャンル未決定時のフォールバック値
-const DEFAULT_BPM = 120
-const BPM_TEMPO_BONUS = 10
-const DEFAULT_GRAVITY = 1600
-const DEFAULT_PLAYER_MAX_HP = 3
-const DEFAULT_COLOR_TOUCH_SCORE = 200
 
 export interface ChoiceRecord {
   versionKey?: string
@@ -52,7 +45,7 @@ export function buildRuntimeRules(
   // ── 4. ジャンルデフォルト値 ──────────────────────────────────────────
   const tempo = allParams.tempo ?? 0
   const baseScrollSpeed = BASE_SCROLL_SPEED + tempo * TEMPO_SPEED_BONUS
-  const baseBpm         = DEFAULT_BPM + tempo * BPM_TEMPO_BONUS
+  const baseBpm         = RULE_DEFAULTS.bpm + tempo * RULE_DEFAULTS.bpmTempoBonus
   const baseScrollDir   = genreDef?.scrollDirection ?? 'horizontal'
   const baseEnvironment = genreDef?.environment     ?? 'ground'
 
@@ -81,13 +74,13 @@ export function buildRuntimeRules(
     genre:           resolvedGenre,
     scrollSpeed:     rc?.scrollSpeed     ?? baseScrollSpeed,
     bpm:             rc?.bpm             ?? baseBpm,
-    gravity:         rc?.gravity         ?? genreDef?.gravity ?? DEFAULT_GRAVITY,
+    gravity:         rc?.gravity         ?? genreDef?.gravity ?? RULE_DEFAULTS.gravity,
     scrollDirection: resolvedScrollDir,
     environment:     rc?.environment     ?? baseEnvironment,
-    playerMaxHp:     rc?.playerMaxHp     ?? DEFAULT_PLAYER_MAX_HP,
+    playerMaxHp:     rc?.playerMaxHp     ?? RULE_DEFAULTS.playerMaxHp,
     timescale:       rc?.timescale       ?? 1.0,
     scrollAxis:      resolvedScrollDir === 'vertical' ? 'y' : 'x',
-    colorTouchScore: rc?.colorTouchScore ?? DEFAULT_COLOR_TOUCH_SCORE,
+    colorTouchScore: rc?.colorTouchScore ?? RULE_DEFAULTS.colorTouchScore,
   }
 }
 

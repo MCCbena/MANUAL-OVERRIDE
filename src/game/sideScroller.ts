@@ -706,19 +706,19 @@ export class SideScroller {
 
     // ─── 死亡オーバーレイ ─────────────────────────────────────────
     if (this.dead) {
-      const fadeIn = Math.min(1, this.deathTimer * 2.5)
-      ctx.fillStyle = `rgba(0,0,0,${fadeIn * 0.7})`
+      const fadeIn = Math.min(1, this.deathTimer * UI.deathFadeSpeed)
+      ctx.fillStyle = `rgba(0,0,0,${fadeIn * UI.deathOverlayAlpha})`
       ctx.fillRect(0, 0, W, H)
 
-      if (this.deathTimer > 0.4) {
-        const alpha = Math.min(1, (this.deathTimer - 0.4) * 3)
+      if (this.deathTimer > UI.deathTextDelayS) {
+        const alpha = Math.min(1, (this.deathTimer - UI.deathTextDelayS) * UI.deathTextFadeSpeed)
         ctx.globalAlpha = alpha
         ctx.fillStyle = '#ffffff'
-        ctx.font = 'bold 36px "Courier New", monospace'
+        ctx.font = UI.deathTitleFont
         ctx.textAlign = 'center'
         ctx.fillText('GAME OVER', W / 2, H / 2 - 10)
-        ctx.font = '16px "Courier New", monospace'
-        ctx.fillStyle = 'rgba(255,255,255,0.65)'
+        ctx.font = UI.deathSubFont
+        ctx.fillStyle = `rgba(255,255,255,${UI.deathSubTextAlpha})`
         ctx.fillText('説明書を投げてください', W / 2, H / 2 + 28)
         ctx.textAlign = 'left'
         ctx.globalAlpha = 1

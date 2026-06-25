@@ -1,6 +1,12 @@
 import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import type { BeatMarker } from '../entities'
+import { RHYTHM_TUNING } from '../../data/tunables'
+
+// JUST 判定の最低 quality 閾値（これを下回るとボーナスなし）
+const JUST_QUALITY_THRESHOLD = 0.5
+// JUST ボーナスの基準スコア（quality=1.0 時の最大値）
+const JUST_BASE_SCORE = 150
 
 interface RhythmState {
   beatInterval: number
@@ -23,7 +29,15 @@ export class RhythmFeature implements FeatureSystem {
 
   private _fresh(bpm: number): RhythmState {
     const beatInterval = (60 / bpm) * 1000
-    return { beatInterval, nextBeat: beatInterval, beatCount: 0, beatMarkers: [], beatHazardInverted: false, beatHits: 0, justWindowMs: 80 }
+    return {
+      beatInterval,
+      nextBeat: beatInterval,
+      beatCount: 0,
+      beatMarkers: [],
+      beatHazardInverted: false,
+      beatHits: 0,
+      justWindowMs: RHYTHM_TUNING.justWindowSec * 1000,
+    }
   }
 
   onInit(world: MutableWorld): void { this.state = this._fresh(world.rules.bpm) }
@@ -34,18 +48,26 @@ export class RhythmFeature implements FeatureSystem {
     const s = this.state
     const dtMs = dt * 1000
 
-    if (r.features.has('beat_hazard')) {
-      s.nextBeat -= dtMs
-      s.beatMarkers.forEach(m => { m.t -= dtMs })
-      s.beatMarkers = s.beatMarkers.filter(m => m.t > 0)
+    const hasAnyRhythm = r.features.has('beat_hazard') || r.features.has('just_input') || r.features.has('beat_dash')
+    if (!hasAnyRhythm) return
 
-      if (s.nextBeat <= 0) {
-        s.nextBeat += s.beatInterval
-        s.beatCount++
+    // ビートクロックはリズム系フィーチャーが1つでも有効なら常に進める。
+    // beat_hazard が無効でも just_input がビートクロックを参照できるようにするため。
+    s.nextBeat -= dtMs
+    s.beatMarkers.forEach(m => { m.t -= dtMs })
+    s.beatMarkers = s.beatMarkers.filter(m => m.t > 0)
+
+    if (s.nextBeat <= 0) {
+      s.nextBeat += s.beatInterval
+      s.beatCount++
+
+      if (r.features.has('beat_hazard')) {
         s.beatHazardInverted = s.beatCount % 2 === 0
         s.beatMarkers.push({ t: 400, x: Math.random() * 600 + 100, strength: 1 })
       }
+    }
 
+    if (r.features.has('beat_hazard')) {
       world.setBeatHazardInverted(s.beatHazardInverted)
     }
 
@@ -57,8 +79,8 @@ export class RhythmFeature implements FeatureSystem {
       const phase = (s.beatInterval - s.nextBeat) % s.beatInterval
       const dist  = Math.min(phase, s.beatInterval - phase)
       const quality = dist <= s.justWindowMs ? 1 - dist / s.justWindowMs : 0
-      if (quality > 0.5) {
-        const bonus = Math.round(150 * quality)
+      if (quality > JUST_QUALITY_THRESHOLD) {
+        const bonus = Math.round(JUST_BASE_SCORE * quality)
         s.beatHits++
         world.addBeatHit()
         world.addScore(bonus)
