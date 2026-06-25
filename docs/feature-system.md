@@ -53,6 +53,7 @@ registerFeature(new MyFeature())
 | `ctx` | `CanvasRenderingContext2D` | 描画コンテキスト |
 | `cameraX` | `number` | 横スクロール時のカメラX（ワールド→スクリーン変換に使用） |
 | `gameStats` | `Readonly<GameStats>` | kills / combo / maxCombo / beatHits / beatHazardInverted |
+| `scrollMode` | `'x' \| 'y'` | スクロールモード（'x'=横 / 'y'=縦） |
 
 ### GameStats の読み方
 
@@ -84,6 +85,23 @@ world.removeHazardById(hazard)  // ハザードを除去
 world.modifyPlayerHp(delta)          // HP を増減（0になると死亡）
 world.resetCombo()                   // コンボリセット
 world.setTimescale(scale, duration?) // 時間スケール変更（スロー演出など）
+```
+
+### 座標系ヘルパー（scrollMode 非依存）
+
+```typescript
+world.getHazardScreenX(hazard)  // ハザードのスクリーンX（モード非依存）
+world.getPlayerWorldX()         // プレイヤーのワールドX（モード非依存）
+```
+
+### ScoreVars 書き込み（scoreFormula 計算用）
+
+```typescript
+world.addScoreVarsHit()              // 敵撃破ヒット数 +1（accuracy 計算用）
+world.addScoreVarsItemCollected()    // アイテム収集総数 +1
+world.addScoreVarsBossKill()         // ボス撃破数 +1
+world.addScoreVarsStealthBonus(n)    // ステルス継続フレーム数 +n
+world.addScoreVarsColorTouch()       // 安全色タッチ回数 +1
 ```
 
 ### 統計書き込みメソッド（FeatureSystem 専用）
@@ -118,6 +136,8 @@ if (input.keys.has('z')) { /* Z を長押し */ }
 
 | フック | 引数 | タイミング | 主な用途 |
 |---|---|---|---|
+| `preUpdate(world, input, dt)` | world, input, dt | 物理計算**前** | 入力→速度変換、dash/wall_jump |
+| `update(world, input, dt)` | world, input, dt | 物理計算**後** | ゲームロジック・状態更新 |
 | `render(ctx, world)` | ctx, world | フレーム描画時 | カスタム描画（弾・HUD） |
 | `onInit(world)` | world | ジャンル確定時に1回 | 内部状態のリセット |
 | `onPlayerHit(world)` | world | プレイヤー被弾時 | 被弾演出・状態変化 |
@@ -125,8 +145,9 @@ if (input.keys.has('z')) { /* Z を長押し */ }
 | `onManualUpdated(world, key)` | world, versionKey | 説明書更新時 | BPMリセット・難度調整 |
 | `onComboChange(world, combo)` | world, number | コンボ変化時 | コンボエフェクト・倍率表示 |
 | `onItemPickup(world, itemType)` | world, string | アイテム取得時 | アイテム別演出 |
-| `onBossSpawn(world)` | world | ボススポーン時 | 警告演出 |
+| `onBossSpawn(world)` | world | ボススポーン時 | 警告演出・ボス強化 |
 | `onPlayerJump(world)` | world | ジャンプの瞬間 | ジャンプ連動エフェクト |
+| `onSafeHazardTouch(world, hazard, screenX)` | world, hazard, x | 安全色接触時 | color_touch 得点・消滅 |
 
 ---
 

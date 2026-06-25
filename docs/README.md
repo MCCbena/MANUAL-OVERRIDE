@@ -282,8 +282,8 @@ MutableWorld.cameraX を使い、座標変換を統一：
 ### コア実装
 
 -  Canvas 物理エンジン（衝突・描画・パーティクル・シェイク）
--  GenrePlugin × 12+ 種（STG, Aerial STG, Bullet Hell, Arena, Hack & Slash, Aquatic, Survival, RPG, Dungeon, Tower Defense, Idle, Horror 等）
--  FeatureSystem × 8+ 種（Movement, Shoot, Enemy, Rhythm, RPG, Item, Extra Movement, Puzzle 等）
+-  GenrePlugin × 15 種（Base, Runner, STG, RPG, Rhythm, Puzzle, Aerial STG, Survival, Bullet Runner, Platformer, Racing, Arena, Aquatic, Dungeon, Hack & Slash）+ JSON プラグイン対応
+-  FeatureSystem × 7 種（Shoot, Rhythm, Movement, RPG, Extra Movement, Puzzle, Special）
 -  すべてのイベントフック完装備
 -  ManualLoader / Builder / Validator / genreResolver 完全実装
 

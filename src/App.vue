@@ -236,6 +236,7 @@ const shouldPause = computed(() => {
   return false
 })
 
+
 watch(shouldPause, (paused) => {
   scroller?.setPaused(paused)
 })
