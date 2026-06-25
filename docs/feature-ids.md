@@ -15,7 +15,7 @@
 | `spread_shot` | 扇状5方向散弾 | ShootFeature |
 | `bomb` | 爆弾アイテム（画面全体攻撃） | ShootFeature |
 | `enemy_hp` | 敵が HP を持ち複数ヒット必要 | ShootFeature |
-| `boss` | ボスエネミー出現 | SpecialFeature (⚠️スタブ) |
+| `boss` | ボスエネミー出現（強化HP・HPバー描画・撃破演出） | SpecialFeature ✅ |
 
 ---
 
@@ -27,11 +27,11 @@
 | `slow_precise` | 低速精密移動（速度 × slowPreciseRatio） | MovementFeature ✅ |
 | `double_jump` | 空中でもう一度ジャンプ可能 | MovementFeature ✅ |
 | `long_air` | 空中でスコアボーナス（0.8pt/sec） | MovementFeature ✅ |
-| `dash` | 短距離ダッシュ（Shift など） | ExtraMovementFeature (⚠️スタブ) |
-| `wall_jump` | 壁接触中に逆方向ジャンプ | ExtraMovementFeature (⚠️スタブ) |
-| `slide` | しゃがみスライド（障害物くぐり） | ExtraMovementFeature (⚠️スタブ) |
-| `gravity_flip` | 重力反転（天井を床として走る） | ExtraMovementFeature (⚠️スタブ) |
-| `vertical_scroll` | 縦スクロールモード | ExtraMovementFeature (⚠️スタブ) |
+| `dash` | 短距離ダッシュ（Shift など）+ 無敵フレーム + トレイル演出 | ExtraMovementFeature ✅ |
+| `wall_jump` | 画面端（壁扱い）到達時にジャンプ権回復 + 逆方向押し出し | ExtraMovementFeature ✅ |
+| `slide` | しゃがみスライド（障害物くぐり） | ExtraMovementFeature (⚠️未実装・console.warn) |
+| `gravity_flip` | 重力反転（天井を床として走る） | ExtraMovementFeature (⚠️未実装・console.warn) |
+| `vertical_scroll` | 縦スクロールモード + ハザード蛇行ドリフト演出 | ExtraMovementFeature ✅ |
 
 ---
 
@@ -50,8 +50,8 @@
 
 | FeatureId | 説明 | 対応 FeatureSystem |
 |---|---|---|
-| `grid_stop` | スクロール停止してグリッド配置モード | PuzzleFeature (⚠️スタブ) |
-| `puzzle_solve` | 正解が存在するパズル入力 | PuzzleFeature (⚠️スタブ) |
+| `grid_stop` | move/solveフェーズ交互切替。solve中はscrollSpeed=0で停止 | PuzzleFeature ✅ |
+| `puzzle_solve` | solve→move切替時にターゲットセル判定。正解でコンボ+スコア、不正解でリセット | PuzzleFeature ✅ |
 
 ---
 
@@ -69,17 +69,11 @@
 
 | FeatureId | 説明 | 対応 FeatureSystem |
 |---|---|---|
-| `stealth_mode` | 透明化・一定時間ハザード無視 | SpecialFeature (⚠️スタブ) |
-| `time_bonus` | タイムアタック評価（早いほど高得点） | SpecialFeature (⚠️スタブ) |
-| `color_touch` | 安全色を踏むと得点 | SpecialFeature ✅（onSafeHazardTouch で得点・消滅・エフェクト） |
-
----
-
-## タワー / クラフト系
-
-| FeatureId | 説明 | 対応 FeatureSystem |
-|---|---|---|
-| `tower` | タワー設置（停止して配置） | SpecialFeature (⚠️スタブ) |
+| `stealth_mode` | 静止継続で「隠れ」状態に。無敵 + ステルスボーナス + 半透明演出 | SpecialFeature ✅ |
+| `time_bonus` | 一定時間ごと（5秒）にスコア加算（+50pt） | SpecialFeature ✅ |
+| `color_touch` | 安全色を踏むと得点・消滅・エフェクト | SpecialFeature ✅ |
+| `tower` | 一定間隔で最も近いハザードを自動撃破（描画+動作+パーティクル） | SpecialFeature ✅ |
+| `boss` | isBossスポーンを強化HP化。HPバー描画・撃破演出・スコア加算 | SpecialFeature ✅ |
 
 ---
 
@@ -88,7 +82,7 @@
 | ステータス | 意味 |
 |---|---|
 | ✅ 完全実装 | preUpdate / update / render まで実装済み |
-| ⚠️ スタブ登録済み | FeatureSystem として登録済みだがロジック未移管 |
+| ⚠️ 未実装 | FeatureId は定義済みだがロジック未実装（console.warn 出力） |
 | ─ sideScroller 直接処理 | FeatureSystem を経由せず sideScroller が処理（移管課題） |
 
 | FeatureSystem | 対象 FeatureId | ステータス |
@@ -97,15 +91,16 @@
 | RhythmFeature | beat_hazard / just_input / beat_dash | ✅ |
 | MovementFeature | auto_run / slow_precise / double_jump / long_air | ✅ |
 | RpgFeature | hp / exp / item_pickup / shield | ✅（hp: onPlayerHit、item_pickup: update。shield は未実装） |
-| ExtraMovementFeature | dash / wall_jump / slide / gravity_flip / vertical_scroll | ⚠️ スタブ |
-| PuzzleFeature | grid_stop / puzzle_solve | ⚠️ スタブ |
-| SpecialFeature | stealth_mode / time_bonus / tower / color_touch / boss | ✅ color_touch: onSafeHazardTouch。他は未実装スタブ |
+| ExtraMovementFeature | dash / wall_jump / vertical_scroll | ✅（slide / gravity_flip は ⚠️ 未実装） |
+| PuzzleFeature | grid_stop / puzzle_solve | ✅ |
+| SpecialFeature | stealth_mode / time_bonus / tower / color_touch / boss | ✅ |
 
 ---
 
 ## FeatureId を新規追加するには
 
-1. `src/domain/types.ts` の `FeatureId` union に文字列リテラルを追加
-2. `src/data/genres.ts` の該当ジャンルの `enableFeatures` に追加
-3. `src/game/systems/` に `XxxFeature.ts` を作成（[feature-system.md](feature-system.md) 参照）
-4. `src/game/systems/index.ts` に `registerFeature(new XxxFeature())` を追加
+1. `src/data/config/genres.json` の該当ジャンルの `enableFeatures` に追加
+2. `src/game/systems/` に `XxxFeature.ts` を作成（[feature-system.md](feature-system.md) 参照）
+3. `src/game/systems/index.ts` に `registerFeature(new XxxFeature())` を追加
+
+> **注:** `FeatureId` は `string` 型（union 型ではない）のため、型定義の修正は不要です。

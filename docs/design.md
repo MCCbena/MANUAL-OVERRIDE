@@ -71,10 +71,29 @@ src/
 
   data/
     manualDeck.ts             # 説明書バージョン・2択・操作・危険色・派生パラメータ
-    genres.ts                 # 各ジャンル定義（閾値・有効機能・スコア式）
-    gameBalance.ts            # 距離/スコア比率/投擲重み/難易度カーブ
-    tunables.ts               # VFX・カメラ・スコアの調整値
-    config/                   # JSON設定ファイル群（17個）
+    gameBalance.ts            # 距離/スコア比率/投擲重み/難易度カーブ（config から再エクスポート）
+    tunables.ts               # VFX・カメラ・スコアの調整値（config から再エクスポート）
+    config.ts                 # GAME_CONFIG エントリポイント
+    config/                   # JSON設定ファイル群（19個）
+      genres.json             # 各ジャンル定義（閾値・有効機能・スコア式・21種+base）
+      game_balance.json       # スコア比率/投擲重み/基本速度
+      difficulty.json         # 難易度カーブ/アップデート距離
+      physics.json            # プレイヤー物理定数
+      vfx.json                # パーティクル・エフェクト調整値
+      spawn.json              # ハザードスポーン設定
+      shoot.json              # 射撃設定
+      rhythm_tuning.json      # リズム調整値
+      stealth.json            # ステルス設定
+      boss.json               # ボス設定
+      camera.json             # カメラ設定
+      throw.json              # 投擲設定
+      ui.json                 # UI設定
+      hazard_vfx.json         # ハザードエフェクト
+      extra_movement.json     # 拡張移動設定
+      genre_params.json       # ジャンルパラメータ
+      background.json         # 背景設定
+      bayes.json              # ベイズ学習設定
+      + others
 
   domain/
     types.ts                  # 全型定義
@@ -91,7 +110,9 @@ src/
       RhythmFeature.ts
       MovementFeature.ts
       RpgFeature.ts
+      ExtraMovementFeature.ts
       PuzzleFeature.ts
+      SpecialFeature.ts
     throwEngine.ts            # 投擲フェーズの物理 + 投擲スコア
 
   composables/
@@ -106,7 +127,7 @@ src/
     EndingPanel.vue           # ジャンル別エンディング
     TutorialHints.vue         # 初心者向けヒント
 
-  genres/                     # ジャンルプラグイン（12+ 種）
+  genres/                     # ジャンルプラグイン（15種 + JSONプラグイン対応）
     BasePlugin.ts
     StgPlugin.ts
     RpgPlugin.ts
@@ -153,28 +174,30 @@ src/
 
 ### 3.2 ジャンル一覧（21種 + base）
 
+> 閾値は `src/data/config/genres.json` に定義。変更時はこのファイルと同期すること。
+
 | ID | ラベル | 閾値 |
 |---|---|---|
-| `runner` | エンドレスランナー | tempo:5 |
-| `stg` | 横スクロールSTG | range:4 + enemy:4 |
-| `rpg` | RPG | growth:4 |
-| `puzzle` | パズル | combo:4 |
-| `rhythm` | リズム | tempo:4 + rhythm:4 |
-| `aerial_stg` | 縦スクロールSTG | vertical:3 + range:3 + enemy:3 |
-| `bullet_hell` | 弾幕シューティング | vertical:3 + enemy:5 |
-| `survival` | サバイバル | survive:4 + growth:3 |
-| `stealth_action` | ステルスアクション | stealth:4 |
-| `racing` | レーシング | speed:4 + tempo:3 |
-| `platformer` | プラットフォーマー | aerial:3 + combo:3 |
-| `dungeon` | ダンジョン探索 | growth:5 + craft:2 |
-| `tower_def` | タワーディフェンス | craft:5 + enemy:3 |
-| `sports` | スポーツ | speed:3 + rhythm:3 |
-| `idle` | 放置ゲーム | craft:4 |
-| `bullet_runner` | 弾幕ランナー | tempo:5 + enemy:4 |
-| `arena` | アリーナバトル | enemy:5 + combo:4 |
-| `aquatic` | 水中アドベンチャー | vertical:2 + aerial:2 + survive:3 |
-| `horror` | サバイバルホラー | survive:5 + stealth:3 |
-| `hack_slash` | ハックアンドスラッシュ | enemy:4 + combo:5 |
+| `runner` | エンドレスランナー | tempo:7 |
+| `stg` | 横スクロールSTG | range:5 + enemy:5 |
+| `rpg` | RPG | growth:6 |
+| `puzzle` | パズル | combo:5 |
+| `rhythm` | リズム | tempo:5 + rhythm:5 |
+| `aerial_stg` | 縦スクロールSTG | vertical:4 + range:4 + enemy:4 |
+| `bullet_hell` | 弾幕シューティング | vertical:4 + enemy:6 |
+| `survival` | サバイバル | survive:5 + growth:4 |
+| `stealth_action` | ステルスアクション | stealth:5 |
+| `racing` | レーシング | speed:5 + tempo:4 |
+| `platformer` | プラットフォーマー | aerial:4 + combo:4 |
+| `dungeon` | ダンジョン探索 | growth:6 + craft:3 |
+| `tower_def` | タワーディフェンス | craft:6 + enemy:4 |
+| `sports` | スポーツ | speed:4 + rhythm:4 |
+| `idle` | 放置ゲーム | craft:6 |
+| `bullet_runner` | 弾幕ランナー | tempo:6 + enemy:5 |
+| `arena` | アリーナバトル | enemy:6 + combo:5 |
+| `aquatic` | 水中アドベンチャー | vertical:3 + aerial:3 + survive:4 |
+| `horror` | サバイバルホラー | survive:6 + stealth:4 |
+| `hack_slash` | ハックアンドスラッシュ | enemy:5 + combo:6 |
 
 ### 3.3 主要型のリファレンス
 
@@ -183,21 +206,19 @@ src/
 export type GenreParam = 'tempo' | 'range' | 'enemy' | 'combo' | 'growth' | 'rhythm'
   | 'stealth' | 'vertical' | 'aerial' | 'survive' | 'craft' | 'speed'
 
-export type GenreId = 'base' | 'runner' | 'stg' | 'rpg' | 'puzzle' | 'rhythm'
-  | 'aerial_stg' | 'bullet_hell' | 'survival' | 'stealth_action' | 'racing'
-  | 'platformer' | 'dungeon' | 'tower_def' | 'sports' | 'idle'
-  | 'bullet_runner' | 'arena' | 'aquatic' | 'horror' | 'hack_slash'
+export type GenreId = string
 
-export type Phase = 'title' | 'tutorial' | 'updating' | 'playing' | 'genreLocked' | 'throwing' | 'ending';
+export type Phase = 'title' | 'tutorialIntro' | 'tutorial' | 'updating' | 'playing' | 'genreLocked' | 'throwing' | 'ending';
 
 // 機能フラグ（ジャンルが有効/無効化する挙動の単位）
-export type FeatureId =
-  | 'shoot' | 'three_way' | 'enemy_hp'
-  | 'auto_run' | 'slow_precise' | 'double_jump' | 'long_air'
-  | 'hp' | 'exp' | 'item_pickup'
-  | 'grid_stop' | 'puzzle_solve'
-  | 'beat_hazard' | 'just_input' | 'beat_dash'
-  | 'tower';
+// 実際は string 型（union 型ではない）。定義は config/genres.json の enableFeatures に記載。
+export type FeatureId = string
+// 既知の FeatureId: shoot / three_way / charge_shot / spread_shot / bomb / enemy_hp / boss
+//   auto_run / slow_precise / double_jump / long_air / dash / wall_jump / slide / gravity_flip / vertical_scroll
+//   hp / exp / item_pickup / shield
+//   grid_stop / puzzle_solve
+//   beat_hazard / just_input / beat_dash
+//   stealth_mode / time_bonus / tower / color_touch
 
 export interface ManualVersion {
   version: string;                 // "1.0" 等
@@ -251,7 +272,7 @@ export interface FinalScore { play: number; throw: number; total: number; }
 - 各 `Choice.genreParams` が分岐の核。プレイヤーには方向性を見せない。
 - 末端バージョン（`choices` が空）に到達 → Phase C 収束判定へ。
 
-### 4.2 ジャンル定義（`data/genres.ts`）
+### 4.2 ジャンル定義（`data/config/genres.json`）
 - 21ジャンル + base を定義。
 - `runner` / `stg` が完全実装、他は段階的に有効化。
 
@@ -280,6 +301,9 @@ throwScoreWeights: { airTime: 0.5, arcHeight: 0.4, speedPenalty: 0.1 }
 ## 5. ゲーム進行フロー（状態機械）
 
 ```
+[tutorialIntro] ← タイトル画面から遷移。チュートリアル説明書の表示
+   │ 「スタート」で本編へ
+   ▼
 [tutorial]
    │ ver1.0 を素のまま遊ぶ。一定距離到達
    ▼
@@ -344,7 +368,9 @@ featuresFor(genreId, genres): { enable: Set, disable: Set }
 | MovementFeature | auto_run, slow_precise | 自動前進 / 低速精密 |
 | RhythmFeature | beat_hazard, just_input, beat_dash | BPM同期の危険色反転・ジャスト入力加点 |
 | RpgFeature | hp, exp, item_pickup | HP・経験値・アイテム収集 |
+| ExtraMovementFeature | dash, wall_jump, vertical_scroll | ダッシュ・壁ジャンプ・縦スクロール |
 | PuzzleFeature | grid_stop, puzzle_solve | スクロール停止・配置パズル |
+| SpecialFeature | color_touch, stealth_mode, time_bonus, tower, boss | 安全色接触・ステルス・時間ボーナス・タワー・ボス |
 
 ### 6.5 `game/throwEngine.ts`
 - 入力：ドラッグ方向（角度）+ パワーゲージ（リリース時の値）。
@@ -388,7 +414,7 @@ featuresFor(genreId, genres): { enable: Set, disable: Set }
 | **M2: 説明書＋2択** | ManualPanel/ChoicePanel、3段階更新、controls/hazards 動的切替＋差分演出 | ✅ 完了 |
 | **M3: ジャンル収束 + RUNNER/STG** | genreResolver、shoot/autorun フィーチャー、説明書テーマ切替、scoreFormula 評価 | ✅ 完了 (MVP) |
 | **M4: 投擲＋エンディング** | throwEngine、ThrowOverlay、scoreCalc 合算、EndingPanel | ✅ 完了 |
-| **M5: 残りジャンル** | 12+ ジャンルプラグイン、rhythm/rpg/puzzle/survival 等のフィーチャー | ✅ 完了 |
+| **M5: 残りジャンル** | 15 ジャンルプラグイン + JSON プラグイン対応、rhythm/rpg/puzzle/survival 等のフィーチャー | ✅ 完了 |
 | **M6: 学習ルール + 仕上げ** | LearningSystem 統合、難易度調整、無限選択肢、offline ビルド検証 | ⚠️ 一部完了（LearningEffect 未実装） |
 
 ---
