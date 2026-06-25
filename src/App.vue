@@ -14,13 +14,32 @@ import PluginLoader from './components/PluginLoader.vue'
 import GenreRevealOverlay from './components/GenreRevealOverlay.vue'
 import { GENRES, GENRE_THEME_COLORS } from './data/genres'
 import { GENRE_LOCKED_BOOST } from './data/gameBalance'
-import type { ThrowResult } from './domain/types'
+import type { ThrowResult, RuntimeRules } from './domain/types'
 import { TUTORIAL_ENABLED, TutorialScreen } from './tutorial'
 import { soundManager } from './plugins/SoundManager'
 
 // ─── 状態 ─────────────────────────────────────────────────────────
 const gameState = useGameState()
 const manualCtl = useManual(gameState.currentManual)
+
+/** readonly() ラッパーを剥がして RuntimeRules として返す */
+function getRules(): RuntimeRules {
+  const raw = toRaw(gameState.rules)
+  // toRaw の戻り値型は DeepReadonly だが、実際のオブジェクトはミュータブル
+  return raw as RuntimeRules
+}
+
+/** getRules の結果をディープコピー（Set 参照も複製）して返す */
+function cloneRules(): RuntimeRules {
+  const raw = getRules()
+  return {
+    ...raw,
+    controls: { ...raw.controls },
+    hazardColors: new Set(raw.hazardColors),
+    safeColors: new Set(raw.safeColors),
+    features: new Set(raw.features),
+  }
+}
 
 const canvasRef = ref<HTMLCanvasElement | null>(null)
 let scroller: SideScroller | null = null
@@ -54,9 +73,13 @@ function resizeCanvas() {
 // ─── ゲームスタート ─────────────────────────────────────────────
 function startGame() {
   gameState.startGame()
-  const canvas = canvasRef.value!
+  const canvas = canvasRef.value
+  if (!canvas) {
+    showToast('エラー: キャンバスが初期化されていません')
+    return
+  }
   resizeCanvas()
-  scroller = new SideScroller(canvas, toRaw(gameState.rules))
+  scroller = new SideScroller(canvas, getRules())
   // 初期説明書を履歴に登録
   manualCtl.recordUpdate(gameState.currentManual())
   scroller.start()
@@ -79,7 +102,11 @@ function startTutorial() {
 let snapRaf = 0
 function beginSnapshotLoop() {
   function loop() {
-    if (!scroller) return
+    // scroller が存在しない（タイトル画面等）場合はループ継続のみ
+    if (!scroller) {
+      snapRaf = requestAnimationFrame(loop)
+      return
+    }
     snapshot.value = scroller.getSnapshot()
 
     // 更新トリガー（tutorial / playing / genreLocked で発火）
@@ -98,7 +125,7 @@ function beginSnapshotLoop() {
     // ゲームオーバー → 投擲フェーズへ自動移行
     const p = gameState.phase.value
     if (snapshot.value.dead && p !== 'throwing' && p !== 'ending' && p !== 'updating') {
-      gameState.startThrowing(snapshot.value.playScore)
+      gameState.startThrowing()
     }
 
     // LearningSystem エフェクト通知
@@ -132,7 +159,7 @@ function onChoose(cardId: string) {
   const currentManual = gameState.currentManual()
   manualCtl.recordUpdate(currentManual)
   // ルールをゲームエンジンへ反映
-  scroller.updateRules(toRaw(gameState.rules), currentManual)
+  scroller.updateRules(getRules(), currentManual)
   // 更新完了を scroller に通知
   scroller.markUpdated(idx)
 }
@@ -141,11 +168,12 @@ function onChoose(cardId: string) {
 function giveUp() {
   scroller?.recalcPlayScore()  // 死亡経路と同様に scoreFormula を適用して確定
   scroller?.setPaused(true)
-  gameState.startThrowing(snapshot.value.playScore)
+  gameState.startThrowing()
 }
 
 // ─── 投擲完了 ────────────────────────────────────────────────────
 function onThrown(result: ThrowResult) {
+  scroller?.stop()  // 投擲後はscrollerループを停止
   gameState.finalizeThrowing(result, snapshot.value.playScore)
 }
 
@@ -156,6 +184,8 @@ function restart() {
     genreLockedBoostTimer = null
   }
   cancelAnimationFrame(snapRaf)
+  if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
+  genreLockedBoostTimer = null
   scroller?.stop()
   scroller = null
   revealActive.value = false
@@ -168,6 +198,12 @@ const currentTheme = computed(() => {
   const genre = gameState.lockedGenre.value
   if (!genre) return 'plain'
   return GENRES.find(g => g.id === genre)?.theme ?? 'plain'
+})
+
+// ─── ゲームプレイ中UIの表示判定（フェーズ追加時の保守性向上） ─────
+const showGameUI = computed(() => {
+  const p = gameState.phase.value
+  return !['title', 'ending', 'tutorialIntro'].includes(p)
 })
 
 // ─── ジャンル別テーマカラー CSS 変数（JSON 駆動 #36） ─────────────
@@ -185,34 +221,30 @@ const giveupThemeStyle = computed(() => {
 })
 
 // ─── フェーズ遷移で一時停止/再開 ────
-watch(gameState.phase, (newPhase) => {
-  if (newPhase === 'updating') {
-    // 選択肢が表示されるときはゲーム一時停止（スムーズに選択できるように）
-    scroller?.setPaused(true)
-  } else if (['playing', 'tutorial', 'genreLocked'].includes(newPhase)) {
-    // 中央表示アニメーション中は再開しない
-    if (!manualCtl.isCentered.value) {
-      scroller?.setPaused(false)
-    }
-  }
-  // tutorialIntro は startGame() で既に一時停止済み
+// 2つのwatchを統合し、一時停止/再開の競合状態を防ぐ
+// 一時停止条件:
+//   - phase === 'updating'（選択肢表示中）
+//   - isCentered === true（説明書中央表示アニメーション中）
+//   - phase === 'tutorialIntro'（チュートリアル画面中）
+// 再開条件:
+//   - phase が playing/tutorial/genreLocked かつ isCentered === false
+const shouldPause = computed(() => {
+  const p = gameState.phase.value
+  if (p === 'updating') return true
+  if (p === 'tutorialIntro') return true
+  if (manualCtl.isCentered.value) return true
+  return false
 })
 
-// ─── 中央表示アニメーション終了でゲーム再開 ───
-watch(manualCtl.isCentered, (centered) => {
-  if (!centered && ['playing', 'tutorial', 'genreLocked'].includes(gameState.phase.value)) {
-    scroller?.setPaused(false)
-  } else if (centered) {
-    // アニメーション開始時は強制一時停止
-    scroller?.setPaused(true)
-  }
+watch(shouldPause, (paused) => {
+  scroller?.setPaused(paused)
 })
 
 // ─── ジャンル確定オーバーレイ ────
 const revealActive = ref(false)
 
 // ─── ジャンル確定時: 加速エフェクト + BGM + オーバーレイ ────
-let genreLockedBoostTimer: number | null = null
+let genreLockedBoostTimer: ReturnType<typeof setTimeout> | null = null
 watch(() => gameState.lockedGenre.value, (newGenre) => {
   if (!newGenre || !scroller) return
 
@@ -225,12 +257,17 @@ watch(() => gameState.lockedGenre.value, (newGenre) => {
     soundManager.playBgm(genreDef.bgm)
   }
 
-  const currentRules = toRaw(gameState.rules)
-  scroller.updateRules({ ...currentRules, scrollSpeed: currentRules.scrollSpeed * GENRE_LOCKED_BOOST.mult })
-
+  // 前のタイマーをクリア（重複防止）
   if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
+
+  // cloneRules で Set 参照も複製し、元の rules に影響しないようにする
+  const rawRules = cloneRules()
+  rawRules.scrollSpeed = rawRules.scrollSpeed * GENRE_LOCKED_BOOST.mult
+  scroller.updateRules(rawRules, gameState.currentManual())
+
   genreLockedBoostTimer = window.setTimeout(() => {
-    scroller?.updateRules(toRaw(gameState.rules))
+    genreLockedBoostTimer = null
+    scroller?.updateRules(getRules(), gameState.currentManual())
   }, GENRE_LOCKED_BOOST.durationMs)
 })
 
@@ -240,6 +277,8 @@ onMounted(() => {
 onUnmounted(() => {
   cancelAnimationFrame(snapRaf)
   scroller?.stop()
+  if (genreLockedBoostTimer !== null) clearTimeout(genreLockedBoostTimer)
+  if (toastTimer !== null) clearTimeout(toastTimer)
   window.removeEventListener('resize', resizeCanvas)
 })
 </script>
@@ -304,7 +343,7 @@ onUnmounted(() => {
     </Transition>
 
     <!-- ─── ゲームプレイ中 HUD ─── -->
-    <template v-if="gameState.phase.value !== 'title' && gameState.phase.value !== 'ending' && gameState.phase.value !== 'tutorialIntro'">
+    <template v-if="showGameUI">
       <Hud
         :distance="snapshot.distance"
         :play-score="snapshot.playScore"
@@ -419,8 +458,6 @@ onUnmounted(() => {
 </template>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=M+PLUS+1+Code&display=swap');
-
 /* グローバルCSS変数 */
 :root {
   --bg:          #0a0a0a;
@@ -433,8 +470,8 @@ onUnmounted(() => {
   --text-dim:    rgba(184, 255, 184, 0.45);
   --danger:      #ff3333;
   --amber:       #ffbb00;
-  --font-mono:   'M PLUS 1 Code', monospace;
-  --font-hand:   'M PLUS 1 Code', monospace;
+  --font-mono:   'Courier New', 'Consolas', 'Liberation Mono', monospace;
+  --font-hand:   'Courier New', 'Consolas', 'Liberation Mono', monospace;
   --scanline: repeating-linear-gradient(
     to bottom,
     transparent 0px, transparent 2px,
@@ -721,18 +758,6 @@ body { font-family: var(--font-mono); }
   transition: opacity 0.5s;
 }
 .genre-reveal-leave-to { opacity: 0; }
-
-/* グリッド背景（説明書イメージ） */
-.title-grid-bg {
-  position: absolute;
-  inset: 0;
-  background-image:
-    linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-  background-size: 20px 20px;
-  pointer-events: none;
-  opacity: 0.4;
-}
 
 /* ── エラートースト ── */
 .error-toast {

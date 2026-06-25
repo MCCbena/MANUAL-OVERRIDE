@@ -89,6 +89,7 @@ export class SideScroller {
   // スポーン
   private nextSpawnDist = INITIAL_SPAWN_DIST
   private updateTriggeredFor = new Set<number>()
+  private readonly MAX_TRIGGER_CACHE = 256  // updateTriggeredFor の最大キャッシュ数
 
   // ─── 入力・パーティクル ──────────────────────────────────────────
   private input = new InputManager()
@@ -170,6 +171,13 @@ export class SideScroller {
     if (rules.features.has('double_jump')) {
       this.player.jumpsLeft = Math.max(this.player.jumpsLeft, 2)
     }
+    // LearningSystem の副作用状態をリセット（ルール差し替えで古いエフェクトが残らないよう）
+    this._disabledActions.clear()
+    this._invertHazardUntil = -Infinity
+    this._changeKeyUntil.clear()
+    this._originalKeys = {}
+    this._pendingLearningMsg = null
+    this._gameStats.beatHazardInverted = false
     // ManualVersion から learningRules を取得
     if (manual?.learningRules) {
       this.learningRules = JSON.parse(JSON.stringify(manual.learningRules))
@@ -253,6 +261,14 @@ export class SideScroller {
 
   markUpdated(index: number): void {
     this.updateTriggeredFor.add(index)
+    // メモリリーク防止: キャッシュが肥大化したら古いエントリを削除
+    if (this.updateTriggeredFor.size > this.MAX_TRIGGER_CACHE) {
+      const sorted = [...this.updateTriggeredFor].sort((a, b) => a - b)
+      const toRemove = sorted.slice(0, sorted.length - this.MAX_TRIGGER_CACHE / 2)
+      for (const idx of toRemove) {
+        this.updateTriggeredFor.delete(idx)
+      }
+    }
   }
 
   getStats(): ActionStats { return this.stats }
@@ -979,12 +995,16 @@ export class SideScroller {
   }
 
   private _lighten(hex: string, amount: number): string {
+    // 非16進数カラー（"red", "rgb(...)" 等）はそのまま返す
+    if (!hex.startsWith('#') || hex.length < 7) return hex
     const r = parseInt(hex.slice(1, 3), 16)
     const g = parseInt(hex.slice(3, 5), 16)
     const b = parseInt(hex.slice(5, 7), 16)
-    const rr = Math.min(255, r + amount)
-    const gg = Math.min(255, g + amount)
-    const bb = Math.min(255, b + amount)
+    // NaN チェック（parseInt が失敗した場合）
+    if (Number.isNaN(r) || Number.isNaN(g) || Number.isNaN(b)) return hex
+    const rr = Math.max(0, Math.min(255, r + amount))
+    const gg = Math.max(0, Math.min(255, g + amount))
+    const bb = Math.max(0, Math.min(255, b + amount))
     return `rgb(${rr},${gg},${bb})`
   }
 

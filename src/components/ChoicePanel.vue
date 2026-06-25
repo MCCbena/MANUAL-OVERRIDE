@@ -14,10 +14,13 @@ const emit = defineEmits<{
 const selected = ref<string | null>(null)
 const revealed = ref(false)
 
+let choiceTimer: ReturnType<typeof setTimeout> | null = null
+
+
 function pick(choiceId: string) {
   if (selected.value) return
   selected.value = choiceId
-  setTimeout(() => emit('choose', choiceId), 150)
+  choiceTimer = setTimeout(() => emit('choose', choiceId), 150)
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -31,6 +34,7 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  if (choiceTimer !== null) clearTimeout(choiceTimer)
   window.removeEventListener('keydown', onKeydown)
 })
 </script>

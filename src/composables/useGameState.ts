@@ -177,7 +177,7 @@ export function useGameState() {
     return resolved !== 'base' ? resolved : DEFAULT_FALLBACK_GENRE as typeof resolved
   }
 
-  function startThrowing(_playScoreRaw: number) {
+  function startThrowing() {
     soundManager.onThrowStart()
     phase.value = 'throwing'
   }

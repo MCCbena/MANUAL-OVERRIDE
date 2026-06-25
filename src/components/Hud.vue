@@ -12,7 +12,7 @@ const props = defineProps<{
   maxHp: number
   beatHits: number
   genre: string
-  features: Set<string>
+  features: Set<string> | ReadonlySet<string>
 }>()
 
 const displayScore = useScoreAnimation(toRef(props, 'playScore'))
