@@ -7,7 +7,8 @@
     "puzzle": { "accent": "#222222", "border": "#444444", "hint": "rgba(80,80,80,0.5)",    "bg": "#0d0d0d", "glow": "rgba(80,80,80,0.15)",   "font": "'Courier New', monospace" },
     "rhythm": { "accent": "#ee88ff", "border": "#9900ff", "hint": "rgba(204,136,255,0.5)", "bg": "#0d0019", "glow": "rgba(153,0,255,0.25)" },
     "horror": { "accent": "#cc4444", "border": "#880000", "hint": "rgba(204,68,68,0.4)",   "bg": "#1a0000", "glow": "rgba(204,68,68,0.25)" },
-    "aquatic":{ "accent": "#88ccff", "border": "#0088bb", "hint": "rgba(136,204,255,0.4)", "bg": "#00141a", "glow": "rgba(136,204,255,0.25)" }
+    "aquatic":{ "accent": "#88ccff", "border": "#0088bb", "hint": "rgba(136,204,255,0.4)", "bg": "#00141a", "glow": "rgba(136,204,255,0.25)" },
+    "tetris": { "accent": "#a000f0", "border": "#a000f0", "hint": "rgba(160,0,240,0.5)",   "bg": "#0a0a0a", "glow": "rgba(160,0,240,0.25)", "font": "'Courier New', monospace" }
   },
   "genres": [
     {
