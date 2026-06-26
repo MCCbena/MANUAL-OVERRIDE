@@ -177,7 +177,7 @@ export function useGameState() {
     return resolved !== 'base' ? resolved : DEFAULT_FALLBACK_GENRE as typeof resolved
   }
 
-  function startThrowing() {
+ function startThrowing() {
     soundManager.onThrowStart()
     phase.value = 'throwing'
   }
@@ -210,7 +210,7 @@ export function useGameState() {
 
   return {
     phase: readonly(phase),
-    rules: readonly(rules) as RuntimeRules,
+   rules: readonly(rules) as RuntimeRules,
     choiceHistory: readonly(choiceHistory),
     lockedGenre: readonly(lockedGenre),
     finalScore: readonly(finalScore),

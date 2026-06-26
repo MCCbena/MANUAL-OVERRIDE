@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted } from 'vue'
 
+
 const props = defineProps<{
   choices: readonly { id: string; label: string }[]
   version: string
@@ -16,6 +17,9 @@ const revealed = ref(false)
 
 let choiceTimer: ReturnType<typeof setTimeout> | null = null
 
+onUnmounted(() => {
+  if (choiceTimer !== null) clearTimeout(choiceTimer)
+})
 
 onUnmounted(() => {
   if (choiceTimer !== null) clearTimeout(choiceTimer)

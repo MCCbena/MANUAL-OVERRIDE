@@ -158,7 +158,7 @@ function onChoose(cardId: string) {
   // 新しい説明書を記録（差分演出）
   const currentManual = gameState.currentManual()
   manualCtl.recordUpdate(currentManual)
-  // ルールをゲームエンジンへ反映
+ // ルールをゲームエンジンへ反映
   scroller.updateRules(getRules(), currentManual)
   // 更新完了を scroller に通知
   scroller.markUpdated(idx)
@@ -236,7 +236,6 @@ const shouldPause = computed(() => {
   return false
 })
 
-
 watch(shouldPause, (paused) => {
   scroller?.setPaused(paused)
 })
@@ -249,7 +248,7 @@ let genreLockedBoostTimer: ReturnType<typeof setTimeout> | null = null
 watch(() => gameState.lockedGenre.value, (newGenre) => {
   if (!newGenre || !scroller) return
 
-  // 演出オーバーレイ表示
+// 演出オーバーレイ表示
   revealActive.value = true
 
   // BGM 起動

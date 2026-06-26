@@ -1,4 +1,4 @@
-import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule, LearningEffect } from '../domain/types'
+import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule, LearningEffect, FeatureId } from '../domain/types'
 import type { MutableWorld, GameStats } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES, DISTANCE_ACCEL } from '../data/gameBalance'
@@ -149,7 +149,7 @@ export class SideScroller {
     this.player = new Player(PLAYER_INITIAL_X, gY)
     this.player.jumpsLeft = rules.features.has('double_jump') ? 2 : 1
 
-    this.input.setGameKeys(rules.controls)
+   this.input.setGameKeys(rules.controls)
   }
 
   // ルール更新（ManualVersion があれば learningRules を同期）
@@ -163,6 +163,17 @@ export class SideScroller {
         this.player.vy *= newGravity / oldGravity
       } else if (newGravity === 0) {
         this.player.vy *= 0.3
+      }
+    }
+
+    // 非アクティブになった Feature の onDisable を呼び出す
+    const oldFeatures = this.rules.features
+    const world = this._buildWorld()
+    for (const sys of getActiveSystems(oldFeatures)) {
+      const ids = Array.isArray(sys.handles) ? sys.handles : [sys.handles]
+      const stillActive = ids.some((id: FeatureId) => rules.features.has(id as FeatureId))
+      if (!stillActive) {
+        sys.onDisable?.(world)
       }
     }
 
@@ -186,7 +197,7 @@ export class SideScroller {
       this.learningRules = null
     }
     // updateRules はループ外から呼ばれるため _frameWorld を使わず直接構築
-    const world = this._buildWorld()
+    // world は既に上で構築済み（onDisable 用）
     for (const sys of getActiveSystems(rules.features)) {
       sys.onManualUpdated?.(world, '')
     }
@@ -369,7 +380,7 @@ export class SideScroller {
 
     const r = this.rules
     const H = this.canvas.height
-    const dashKey  = r.controls.dash ?? 'Shift'
+  const dashKey  = r.controls.dash ?? 'Shift'
     const isVertical = r.scrollAxis === 'y'
 
     if (r.features.has('dash') && this.input.justPressed.has(dashKey)) {
@@ -386,7 +397,7 @@ export class SideScroller {
       sys.preUpdate?.(this._getWorld(), inputSnap, dt)
     }
 
-    if (isVertical ? this._updateVertical(dt, effectiveScrollSpeed)
+ if (isVertical ? this._updateVertical(dt, effectiveScrollSpeed)
                    : this._updateHorizontal(dt, effectiveScrollSpeed)) return
 
     // ════════════════════════════════════════════════════════
@@ -501,15 +512,17 @@ export class SideScroller {
     const rightKey = r.controls.moveRight
     const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
-    if (!r.features.has('auto_run') && this.input.keys.has(leftKey))  this.stats.moveLeft++
-    if ( r.features.has('auto_run') || this.input.keys.has(rightKey)) this.stats.moveRight++
+    if (!r.features.has('auto_run') && !r.features.has('tetris_mode') && this.input.keys.has(leftKey))  this.stats.moveLeft++
+    if ((r.features.has('auto_run') || this.input.keys.has(rightKey)) && !r.features.has('tetris_mode')) this.stats.moveRight++
     if (p.onGround) {
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
     }
 
     const isDouble         = r.features.has('double_jump')
     const jumpDisabled     = this._isActionDisabled('jump')
-    const jumpJustPressed  = !jumpDisabled && this.input.justPressed.has(jumpKey)
+    // tetris_mode: jump key is repurposed for hard drop; skip jump detection entirely
+    const tetrisMode       = r.features.has('tetris_mode')
+    const jumpJustPressed  = !tetrisMode && !jumpDisabled && this.input.justPressed.has(jumpKey)
     const jumpJustReleased = this.input.justReleased.has(jumpKey)
 
     if (p.onGround) {
@@ -584,7 +597,7 @@ export class SideScroller {
     }
     if (p.landSquash > 0) p.landSquash *= PHYSICS.landSquashDecay
 
-    if (!r.features.has('auto_run')) p.x += p.vx * dt
+    if (!r.features.has('auto_run') && !r.features.has('tetris_mode')) p.x += p.vx * dt
     p.x = Math.max(PHYSICS.playerMinX, Math.min(W * PHYSICS.playerMaxXRatio, p.x))
 
     this.distance += speed * dt
