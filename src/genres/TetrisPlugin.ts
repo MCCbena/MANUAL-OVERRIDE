@@ -80,3 +80,5 @@ export class TetrisPlugin extends GenrePluginBase {
     ctx.fillRect(w * 0.75, cy + blockSize * 0.25, blockSize * 0.2, blockSize * 0.2)
   }
 }
+
+export default new TetrisPlugin()
