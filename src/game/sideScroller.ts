@@ -112,7 +112,7 @@ export class SideScroller {
   private _frameWorld: MutableWorld | null = null
 
   // ─── 統計 ────────────────────────────────────────────────────────
-  private stats: ActionStats = { jumps: 0, moveRight: 0, moveLeft: 0, shots: 0, ticks: 0 }
+  private stats: ActionStats = { jumps: 0, moveRight: 0, moveLeft: 0, shots: 0, ticks: 0, collisions: 0 }
   private rafId = 0
   private lastTime = 0
 
@@ -636,6 +636,8 @@ export class SideScroller {
 
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
+    // 衝突回数をカウント（プレイスタイル検出用）
+    this.stats.collisions++
     const world = this._getWorld()
     soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {
