@@ -18,7 +18,7 @@ export interface ConfigValidationResult {
 const REQUIRED_SECTIONS: GameConfigSection[] = [
   'physics', 'shoot', 'throw', 'spawn', 'vfx', 'camera', 'background',
   'hazard_vfx', 'ui', 'score', 'difficulty', 'boss', 'rhythm_tuning',
-  'stealth', 'genre_params', 'game_balance', 'genres'
+  'stealth', 'genre_params', 'game_balance', 'genres', 'survival'
 ]
 
 const REQUIRED_NUMBER_FIELDS: Partial<Record<GameConfigSection, string[]>> = {
@@ -39,6 +39,7 @@ const REQUIRED_NUMBER_FIELDS: Partial<Record<GameConfigSection, string[]>> = {
   stealth: ['stealthAlpha', 'stealthDurationSec', 'stealthCooldownSec', 'detectionRange'],
   genre_params: ['recommendedSingleChoice', 'recommendedMaxPerAxis'],
   game_balance: ['scoreRatioPlay', 'scoreRatioThrow', 'baseScrollSpeed'],
+  survival:   ['maxPlayerHp', 'maxHunger', 'hungerDecayRate', 'hungerCriticalThreshold', 'hungerDamageInterval', 'hungerDamageAmount', 'hpRestore', 'meleeDamage', 'meleeRange', 'meleeCooldown', 'meleeArc', 'meleeActiveRatio', 'meleeVerticalRatio', 'meleeCollisionGrace', 'xpPerKill', 'xpPerLevel', 'xpLevelScale', 'levelUpHealHp', 'levelUpDamageBonus', 'foodRestore', 'foodDropChance', 'weaponDropChance', 'hpDropChance', 'weaponUpgradeAmount', 'hudBarHeight', 'hudTextSize', 'hudTopOffset', 'hudBarWidth', 'meleeHitParticleCount', 'meleeHitParticleSpeedMin', 'meleeHitParticleSpeedMax', 'meleeHitParticleLife', 'meleeHitParticleSize', 'meleeSwingLineWidth', 'meleeSwingShadowBlur', 'levelUpParticleCount', 'levelUpParticleSpeedMin', 'levelUpParticleSpeedMax', 'levelUpParticleLife', 'levelUpParticleSize', 'levelUpShakeIntensity', 'hudPanelPadding', 'hudPanelRadius'],
 }
 
 const RANGE_CHECKS: Array<{
@@ -97,6 +98,50 @@ const RANGE_CHECKS: Array<{
   { section: 'game_balance', field: 'scoreRatioThrow', min: 0, max: 1 },
   { section: 'game_balance', field: 'baseScrollSpeed', min: 0 },
   { section: 'game_balance', field: 'maxRounds', min: 1 },
+  { section: 'survival',     field: 'maxPlayerHp',          min: 1 },
+  { section: 'survival',     field: 'maxHunger',            min: 1 },
+  { section: 'survival',     field: 'hungerDecayRate',      min: 0 },
+  { section: 'survival',     field: 'hungerCriticalThreshold', min: 0 },
+  { section: 'survival',     field: 'hungerDamageInterval', min: 0 },
+  { section: 'survival',     field: 'hungerDamageAmount',   min: 0 },
+  { section: 'survival',     field: 'meleeDamage',          min: 0 },
+  { section: 'survival',     field: 'meleeRange',           min: 0 },
+  { section: 'survival',     field: 'meleeCooldown',       min: 0 },
+  { section: 'survival',     field: 'meleeActiveRatio',    min: 0, max: 1 },
+  { section: 'survival',     field: 'xpPerKill',            min: 0 },
+  { section: 'survival',     field: 'xpPerLevel',           min: 1 },
+  { section: 'survival',     field: 'xpLevelScale',         min: 1 },
+  { section: 'survival',     field: 'foodRestore',          min: 0 },
+  { section: 'survival',     field: 'hpRestore',            min: 0 },
+  { section: 'survival',     field: 'foodDropChance',       min: 0, max: 1 },
+  { section: 'survival',     field: 'weaponDropChance',     min: 0, max: 1 },
+  { section: 'survival',     field: 'hpDropChance',         min: 0, max: 1 },
+  { section: 'survival',     field: 'meleeArc',              min: 0 },
+  { section: 'survival',     field: 'meleeVerticalRatio',   min: 0 },
+  { section: 'survival',     field: 'meleeCollisionGrace',  min: 0 },
+  { section: 'survival',     field: 'meleeCooldown',        min: 0 },
+  { section: 'survival',     field: 'levelUpHealHp',       min: 0 },
+  { section: 'survival',     field: 'levelUpDamageBonus',   min: 0 },
+  { section: 'survival',     field: 'weaponUpgradeAmount',  min: 0 },
+  { section: 'survival',     field: 'hudBarHeight',         min: 1 },
+  { section: 'survival',     field: 'hudTextSize',          min: 1 },
+  { section: 'survival',     field: 'hudTopOffset',         min: 0 },
+  { section: 'survival',     field: 'hudBarWidth',          min: 1 },
+  { section: 'survival',     field: 'meleeHitParticleCount',   min: 0 },
+  { section: 'survival',     field: 'meleeHitParticleSpeedMin', min: 0 },
+  { section: 'survival',     field: 'meleeHitParticleSpeedMax', min: 0 },
+  { section: 'survival',     field: 'meleeHitParticleLife',    min: 0 },
+  { section: 'survival',     field: 'meleeHitParticleSize',    min: 0 },
+  { section: 'survival',     field: 'meleeSwingLineWidth',    min: 0 },
+  { section: 'survival',     field: 'meleeSwingShadowBlur',   min: 0 },
+  { section: 'survival',     field: 'levelUpParticleCount',    min: 0 },
+  { section: 'survival',     field: 'levelUpParticleSpeedMin', min: 0 },
+  { section: 'survival',     field: 'levelUpParticleSpeedMax', min: 0 },
+  { section: 'survival',     field: 'levelUpParticleLife',     min: 0 },
+  { section: 'survival',     field: 'levelUpParticleSize',     min: 0 },
+  { section: 'survival',     field: 'levelUpShakeIntensity',   min: 0, max: 1 },
+  { section: 'survival',     field: 'hudPanelPadding',         min: 0 },
+  { section: 'survival',     field: 'hudPanelRadius',          min: 0 },
 ]
 
 export function validateGameConfig(config: GameConfigMap): ConfigValidationResult {

@@ -320,11 +320,13 @@ export interface PuzzleConfig {
 
 /** survival.json — サバイバルゲーム固有パラメータ */
 export interface SurvivalConfig {
+  maxPlayerHp: number
   maxHunger: number
   hungerDecayRate: number
   hungerCriticalThreshold: number
   hungerDamageInterval: number
   hungerDamageAmount: number
+  hpRestore: number
   meleeDamage: number
   meleeRange: number
   meleeCooldown: number
@@ -340,6 +342,7 @@ export interface SurvivalConfig {
   foodRestore: number
   weaponDropChance: number
   foodDropChance: number
+  hpDropChance: number
   weaponUpgradeAmount: number
   hudBarHeight: number
   hudTextSize: number
@@ -369,8 +372,13 @@ export interface SurvivalConfig {
   // Popup colors
   foodPopupColor: string
   weaponPopupColor: string
+  hpPopupColor: string
   // HUD colors
   hudLabelColor: string
+  hudHpTextColor: string
+  hudHpBarColorHigh: string
+  hudHpBarColorMid: string
+  hudHpBarColorLow: string
   hudHungerColorHigh: string
   hudHungerColorMid: string
   hudHungerColorLow: string
@@ -381,6 +389,7 @@ export interface SurvivalConfig {
   hudPanelBgColor: string
   hudPanelPadding: number
   hudPanelRadius: number
+  hitParticleColor: string
 }
 
 /** extra_movement.json — 拡張移動フィーチャー */

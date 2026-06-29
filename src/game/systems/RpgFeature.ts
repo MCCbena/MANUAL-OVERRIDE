@@ -11,8 +11,9 @@
 import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { rectsOverlap } from '../entities'
-import { VFX, SPAWN } from '../../data/tunables'
+import { SPAWN } from '../../data/tunables'
 import { getActiveSystems } from '../../engine/GameRegistry'
+import { applyPlayerHitEffect } from './hitEffect'
 
 export class RpgFeature implements FeatureSystem {
   readonly handles = ['hp', 'exp', 'item_pickup', 'shield'] as const
@@ -20,28 +21,20 @@ export class RpgFeature implements FeatureSystem {
   /** hp feature: 被弾時に HP 減算・無敵・シェイク・パーティクルを処理 */
   onPlayerHit(world: MutableWorld): void {
     if (!world.rules.features.has('hp')) return
-    const p = world.player
-    world.modifyPlayerHp(-1)
-    if (p.hp > 0) {
-      p.invincible = VFX.invincibleDuration
-      world.triggerShake(VFX.hitShakeIntensity)
-      for (let i = 0; i < VFX.hitParticleCount; i++) {
-        const angle = Math.random() * Math.PI * 2
-        const speed = VFX.hitParticleSpeedMin + Math.random() * (VFX.hitParticleSpeedMax - VFX.hitParticleSpeedMin)
-        const life  = VFX.hitParticleLifeMin + Math.random() * VFX.hitParticleLifeRange
-        const size  = VFX.hitParticleSizeBase + Math.random() * VFX.hitParticleSizeRange
-        world.addParticle(
-          p.x + p.w / 2, p.y + p.h / 2,
-          Math.cos(angle) * speed, Math.sin(angle) * speed + VFX.hitParticleYBoost,
-          life, '#ff4444', size,
-        )
-      }
-    }
+    /* survival_hp が有効の場合、SurvivalFeature が被弾処理を独立して担当。
+       両方が発火しないよう、ここではスキップする。
+    */
+    if (world.rules.features.has('survival_hp')) return
+    applyPlayerHitEffect(world, '#ff4444')
   }
 
   /** item_pickup feature: アイテムのパルスアニメ・収集判定・EXP / HP 付与 */
   update(world: MutableWorld, _input: InputSnapshot, dt: number): void {
     if (!world.rules.features.has('item_pickup')) return
+    /* survival_item が有効の場合、SurvivalFeature がアイテム収集を独立して担当。
+       処理が二重にならないよう skip する。
+    */
+    if (world.rules.features.has('survival_item')) return
     const p = world.player
     for (const item of world.items) {
       if (!item.alive) continue

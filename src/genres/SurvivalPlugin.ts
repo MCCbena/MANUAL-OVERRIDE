@@ -13,14 +13,8 @@ import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry, MutableWorld } from '../engine/types'
 import type { GenreId } from '../domain/types'
 import type { Hazard } from '../game/entities'
-import { Item } from '../game/entities'
+import { Item, ITEM_WIDTH, ITEM_HEIGHT } from '../game/entities'
 import { SURVIVAL } from '../data/tunables'
-
-// HUD描画の定数（survival.json から読み込み）
-const HUD_BAR_HEIGHT = SURVIVAL.hudBarHeight
-const HUD_TEXT_SIZE = SURVIVAL.hudTextSize
-const HUD_TOP_OFFSET = SURVIVAL.hudTopOffset
-const HUD_BAR_WIDTH = SURVIVAL.hudBarWidth
 
 export class SurvivalPlugin extends GenrePluginBase {
   readonly id: GenreId = 'survival'
@@ -29,7 +23,7 @@ export class SurvivalPlugin extends GenrePluginBase {
   readonly groundColors = ['#0d1a09', '#070f05'] as const
   readonly farLayerColor  = '#0a1a08'
   readonly midLayerColor  = '#081408'
-  readonly starColor: string | undefined = undefined
+  readonly starColor: string | undefined = undefined  // Abstract from GenrePluginBase; unused for survival (no stars)
 
   readonly palette = {
     danger: '#cc4400', dangerGlow: '#ff7722',
@@ -67,6 +61,9 @@ export class SurvivalPlugin extends GenrePluginBase {
   onGenreLocked(world: MutableWorld): void {
     // ジャンル確定時に状態を初期化
     const p = world.player
+    const maxHp = SURVIVAL.maxPlayerHp
+    p.hp = maxHp
+    p.maxHp = maxHp
     p.hunger = SURVIVAL.maxHunger
     p.level = 1
     p.weaponDamage = SURVIVAL.meleeDamage
@@ -164,71 +161,101 @@ export class SurvivalPlugin extends GenrePluginBase {
     ctx.beginPath(); ctx.moveTo(w * 0.60, h * 0.76); ctx.lineTo(w * 0.72 + legSwing * 0.4, h * 0.98); ctx.stroke()
   }
 
-  // ─── ジャンル固有HUD: hungerバー / XPバー / レベル / 武器ダメージ ─
+  // ─── ジャンル固有HUD: HP / hungerバー / XPバー / レベル / 武器ダメージ ─
   drawGenreHUD(ctx: CanvasRenderingContext2D, world: MutableWorld, W: number, _H: number): void {
     const p = world.player
     const padding = SURVIVAL.hudPanelPadding
     const radius = SURVIVAL.hudPanelRadius
-    const x = W - HUD_BAR_WIDTH - HUD_TOP_OFFSET
-    let y = HUD_TOP_OFFSET
+    const barW = SURVIVAL.hudBarWidth
+    const barH = SURVIVAL.hudBarHeight
+    const textSz = SURVIVAL.hudTextSize
+    const x = W - barW - SURVIVAL.hudTopOffset
+    let y = SURVIVAL.hudTopOffset
+    /* パネル高さは構成要素から計算: HP(テキスト+バー) + hunger(テキスト+バー) + XP(テキスト+バー) + ATK(テキスト)
+       - HP: textSz + 4 + barH + 6
+       - hunger: textSz + 4 + barH + 6
+       - XP: textSz + 4 + barH + 6
+       - ATK: textSz
+    */
+    const panelHeight3 = (textSz + 4 + barH + 6) * 3 + textSz
 
     // 背景パネル
     ctx.fillStyle = SURVIVAL.hudPanelBgColor
-    this._roundRect(ctx, x - padding, y - radius, HUD_BAR_WIDTH + padding * 2, 80, radius)
+    this._roundRect(ctx, x - padding, y - radius, barW + padding * 2, panelHeight3, radius)
     ctx.fill()
 
-    // ── hungerバー ──
-    ctx.font = `bold ${HUD_TEXT_SIZE}px "Courier New", monospace`
+    // ── HPバー ──
+    ctx.font = `bold ${textSz}px "Courier New", monospace`
     ctx.fillStyle = SURVIVAL.hudLabelColor
-    ctx.fillText('HUNGER', x, y + HUD_TEXT_SIZE)
-    y += HUD_TEXT_SIZE + 4
+    ctx.fillText('HP', x, y + textSz)
+    ctx.fillStyle = SURVIVAL.hudHpTextColor
+    ctx.fillText(`${p.hp}/${p.maxHp}`, x + barW - 30, y + textSz)
+    y += textSz + 4
+
+    const hpRatio = p.hp / p.maxHp
+    const hpColor = hpRatio > 0.5 ? SURVIVAL.hudHpBarColorHigh : hpRatio > 0.25 ? SURVIVAL.hudHpBarColorMid : SURVIVAL.hudHpBarColorLow
+    ctx.fillStyle = SURVIVAL.hudBarBgColor
+    ctx.fillRect(x, y, barW, barH)
+    ctx.fillStyle = hpColor
+    ctx.fillRect(x, y, barW * hpRatio, barH)
+    y += barH + 6
+
+    // ── hungerバー ──
+    ctx.fillStyle = SURVIVAL.hudLabelColor
+    ctx.fillText('HUNGER', x, y + textSz)
+    y += textSz + 4
 
     const hungerRatio = p.hunger / SURVIVAL.maxHunger
     const hungerColor = hungerRatio > 0.5 ? SURVIVAL.hudHungerColorHigh : hungerRatio > 0.25 ? SURVIVAL.hudHungerColorMid : SURVIVAL.hudHungerColorLow
     ctx.fillStyle = SURVIVAL.hudBarBgColor
-    ctx.fillRect(x, y, HUD_BAR_WIDTH, HUD_BAR_HEIGHT)
+    ctx.fillRect(x, y, barW, barH)
     ctx.fillStyle = hungerColor
-    ctx.fillRect(x, y, HUD_BAR_WIDTH * hungerRatio, HUD_BAR_HEIGHT)
-    y += HUD_BAR_HEIGHT + 6
+    ctx.fillRect(x, y, barW * hungerRatio, barH)
+    y += barH + 6
 
     // ── XPバー ──
     // p.currentLevelXp / p.nextLevelXp は SurvivalFeature で同期済み
     const xpRatio = p.nextLevelXp > 0 ? Math.min(1, p.currentLevelXp / p.nextLevelXp) : 0
 
     ctx.fillStyle = SURVIVAL.hudLabelColor
-    ctx.fillText(`Lv.${p.level}`, x, y + HUD_TEXT_SIZE)
+    ctx.fillText(`Lv.${p.level}`, x, y + textSz)
     ctx.fillStyle = SURVIVAL.hudXpTextColor
-    ctx.fillText(`${p.currentLevelXp}/${p.nextLevelXp}`, x + HUD_BAR_WIDTH - 40, y + HUD_TEXT_SIZE)
-    y += HUD_TEXT_SIZE + 4
+    ctx.fillText(`${p.currentLevelXp}/${p.nextLevelXp}`, x + barW - 40, y + textSz)
+    y += textSz + 4
 
     ctx.fillStyle = SURVIVAL.hudBarBgColor
-    ctx.fillRect(x, y, HUD_BAR_WIDTH, HUD_BAR_HEIGHT)
+    ctx.fillRect(x, y, barW, barH)
     ctx.fillStyle = SURVIVAL.hudXpBarColor
-    ctx.fillRect(x, y, HUD_BAR_WIDTH * xpRatio, HUD_BAR_HEIGHT)
-    y += HUD_BAR_HEIGHT + 6
+    ctx.fillRect(x, y, barW * xpRatio, barH)
+    y += barH + 6
 
     // ── 武器ダメージ ──
     ctx.fillStyle = SURVIVAL.hudAtkTextColor
-    ctx.fillText(`ATK: ${p.weaponDamage}`, x, y + HUD_TEXT_SIZE)
+    ctx.fillText(`ATK: ${p.weaponDamage}`, x, y + textSz)
   }
 
-  // ─── 敵撃破時に食料/武器ドロップ ─────────────────────────────────
+  // ─── 敵撃破時に食料/武器/HPドロップ ───────────────────────────────
   onHazardDestroyed(world: MutableWorld, hazard: Hazard): void {
     const sx = hazard.x + hazard.w / 2
     const sy = hazard.y
 
-    // アイテムサイズに依存しないオフセット計算
-    // Item.w = 22, Item.h = 22 なので、中心に配置するため w/2 を引く
-    const halfItemW = 11
+    // アイテムをhazard中央に配置するため w/2 オフセット
+    // 縦にスタックする（ITEM_HEIGHT ずつずらす）
+    const halfItemW = ITEM_WIDTH / 2
 
     // 食料ドロップ
     if (Math.random() < SURVIVAL.foodDropChance) {
       world.spawnItem(new Item(sx - halfItemW, sy, 'food'))
     }
 
-    // 武器ドロップ（食料より上にドロップ）
+    // 武器ドロップ（食料より上にドロップ)
     if (Math.random() < SURVIVAL.weaponDropChance) {
-      world.spawnItem(new Item(sx - halfItemW, sy - 22, 'weapon'))
+      world.spawnItem(new Item(sx - halfItemW, sy - ITEM_HEIGHT, 'weapon'))
+    }
+
+    // HPドロップ（武器より上にドロップ）
+    if (Math.random() < SURVIVAL.hpDropChance) {
+      world.spawnItem(new Item(sx - halfItemW, sy - ITEM_HEIGHT * 2, 'hp'))
     }
   }
 }

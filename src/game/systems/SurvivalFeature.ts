@@ -13,18 +13,19 @@ import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
 import { rectsOverlap, Hazard } from '../entities'
 import { SURVIVAL, VFX } from '../../data/tunables'
+import { applyPlayerHitEffect } from './hitEffect'
 import { getActiveSystems } from '../../engine/GameRegistry'
 
 interface SurvivalState {
   meleeCooldown: number
   meleeActive: number   // 攻撃判定残り時間
   lastHungerDamage: number
-  xp: number
+  accumulatedXp: number  // レベルアップ超過分の蓄積XP
   nextLevelXp: number
 }
 
 export class SurvivalFeature implements FeatureSystem {
-  readonly handles = ['survival_hunger', 'survival_melee', 'survival_level'] as const
+  readonly handles = ['survival_hunger', 'survival_melee', 'survival_level', 'survival_hp', 'survival_item'] as const
 
   private state: SurvivalState = this._fresh()
 
@@ -33,7 +34,7 @@ export class SurvivalFeature implements FeatureSystem {
       meleeCooldown: 0,
       meleeActive: 0,
       lastHungerDamage: 0,
-      xp: 0,
+      accumulatedXp: 0,
       nextLevelXp: SURVIVAL.xpPerLevel,
     }
   }
@@ -55,10 +56,16 @@ export class SurvivalFeature implements FeatureSystem {
 
   private _resetPlayer(world: MutableWorld): void {
     const p = world.player
+    const maxHp = SURVIVAL.maxPlayerHp
+    p.hp = maxHp
+    p.maxHp = maxHp
     p.hunger = SURVIVAL.maxHunger
     p.level = 1
     p.weaponDamage = SURVIVAL.meleeDamage
     p.currentLevelXp = 0
+    /* nextLevelXp はレベル1固定。レベルアップ時に動的に計算する。
+       xpPerLevel * scale^(level-1) でスケール。
+    */
     p.nextLevelXp = SURVIVAL.xpPerLevel
   }
 
@@ -67,12 +74,25 @@ export class SurvivalFeature implements FeatureSystem {
     this._updateHunger(world, dt)
     this._handleMeleeAttack(world, input)
     this._resolveMeleeCollisions(world)
-    this._processItemPickups(world)
+    if (world.rules.features.has('survival_item')) {
+      this._processItemPickups(world)
+    }
   }
 
   render(ctx: CanvasRenderingContext2D, world: MutableWorld): void {
     if (this.state.meleeActive <= 0) return
     this._drawMeleeSwing(ctx, world)
+  }
+
+  // survival_hp: 被弾時に HP 減算・無敵フレーム・シェイク・パーティクルを処理
+  onPlayerHit(world: MutableWorld): void {
+    /* RpgFeature.onPlayerHit と同等の処理だが、
+       survival_hp が有効な場合に SurvivalFeature が独立して処理する。
+       両方（RpgFeature と SurvivalFeature）が active なら二重に発火しないよう、
+       survival_hp 時は RpgFeature 側がガードしてスキップする（互いに排反）。
+    */
+    if (!world.rules.features.has('survival_hp')) return
+    applyPlayerHitEffect(world, SURVIVAL.hitParticleColor)
   }
 
   // ─── 内部: タイマー更新 ──────────────────────────────────────────
@@ -91,15 +111,22 @@ export class SurvivalFeature implements FeatureSystem {
     if (p.hunger < 0) p.hunger = 0
 
     // 臨界域以下で定期的なHPダメージ
-    // dtが大きい場合（タブ切り替え復帰時等）に複数回発火する可能性があるため、
-    // 1フレームで最大1回に制限する
+    // dtが大きい場合（タブ切り替え復帰時等）に複数回のダメージを正しく処理する
     if (p.hunger <= SURVIVAL.hungerCriticalThreshold) {
       this.state.lastHungerDamage += dt
-      if (this.state.lastHungerDamage >= SURVIVAL.hungerDamageInterval) {
-        this.state.lastHungerDamage = 0
-        world.modifyPlayerHp(-SURVIVAL.hungerDamageAmount)
-        world.triggerShake(VFX.hitShakeIntensity * 0.5)
-        world.addScorePopup(p.x + p.w / 2, p.y - 10, 'starving...', SURVIVAL.hudHungerColorLow)
+      const interval = SURVIVAL.hungerDamageInterval
+      // 経過時間から発火回数を計算する（複数回発火可能）
+      const numHits = Math.floor(this.state.lastHungerDamage / interval)
+      if (numHits > 0) {
+        this.state.lastHungerDamage -= numHits * interval
+        for (let i = 0; i < numHits; i++) {
+          world.modifyPlayerHp(-SURVIVAL.hungerDamageAmount)
+          if (i === 0) {
+            // 最初のhits-only の演出コストを抑制
+            world.triggerShake(VFX.hitShakeIntensity * 0.5)
+            world.addScorePopup(p.x + p.w / 2, p.y - 10, 'starving...', SURVIVAL.hudHungerColorLow)
+          }
+        }
       }
     } else {
       this.state.lastHungerDamage = 0
@@ -134,7 +161,8 @@ export class SurvivalFeature implements FeatureSystem {
     const meleeBottom = p.y + p.h + range * SURVIVAL.meleeVerticalRatio
     const meleeRect = { x: meleeLeft, y: meleeTop, w: meleeRight - meleeLeft, h: meleeBottom - meleeTop }
 
-    for (const h of world.hazards) {
+    for (let i = world.hazards.length - 1; i >= 0; i--) {
+      const h = world.hazards[i]
       if (h.isSafe || h.hp <= 0) continue
       if (!rectsOverlap(meleeRect, h.rect, SURVIVAL.meleeCollisionGrace)) continue
 
@@ -162,16 +190,18 @@ export class SurvivalFeature implements FeatureSystem {
     const p = world.player
 
     p.exp += SURVIVAL.xpPerKill
-    this.state.xp += SURVIVAL.xpPerKill
+    this.state.accumulatedXp += SURVIVAL.xpPerKill
     p.currentLevelXp += SURVIVAL.xpPerKill
 
     // レベルアップ判定
     // xpPerLevel <= 0 または xpLevelScale <= 1 の場合、nextLevelXpが減少しないため無限ループする
-    // 最大100回のレベルアップを1フレームで許可するガード
-    let guard = 100
-    while (this.state.xp >= this.state.nextLevelXp && guard > 0) {
+    // ConfigValidator で xpPerLevel >= 1, xpLevelScale >= 1 を保証しているため、
+    // nextLevelXpは毎ループで増加する。ただし、1フレームでの連続レベルアップを制限するガード
+    const MAX_LEVEL_UPS_PER_FRAME = 100
+    let guard = MAX_LEVEL_UPS_PER_FRAME
+    while (this.state.accumulatedXp >= this.state.nextLevelXp && guard > 0) {
       guard--
-      this.state.xp -= this.state.nextLevelXp
+      this.state.accumulatedXp -= this.state.nextLevelXp
       p.currentLevelXp -= this.state.nextLevelXp
       p.level++
       this.state.nextLevelXp = Math.floor(SURVIVAL.xpPerLevel * Math.pow(SURVIVAL.xpLevelScale, p.level - 1))
@@ -211,12 +241,12 @@ export class SurvivalFeature implements FeatureSystem {
     world.triggerShake(VFX.hitShakeIntensity * SURVIVAL.levelUpShakeIntensity)
   }
 
-  // ─── 内部: food/weaponアイテム収集 ──────────────────────────────
+  // ─── 内部: food/weapon/hp アイテム収集 ──────────────────────────
   private _processItemPickups(world: MutableWorld): void {
     const p = world.player
     for (const item of world.items) {
       if (!item.alive) continue
-      if (item.type !== 'food' && item.type !== 'weapon') continue
+      if (item.type !== 'food' && item.type !== 'weapon' && item.type !== 'hp') continue
 
       const iRect = { ...item.rect, x: item.rect.x - world.cameraX }
       if (!rectsOverlap(p.rect, iRect, 0)) continue
@@ -230,6 +260,11 @@ export class SurvivalFeature implements FeatureSystem {
       } else if (item.type === 'weapon') {
         p.weaponDamage += SURVIVAL.weaponUpgradeAmount
         world.addScorePopup(item.x - world.cameraX, item.y, `+${SURVIVAL.weaponUpgradeAmount} ATK`, SURVIVAL.weaponPopupColor)
+      } else if (item.type === 'hp' && p.hp < p.maxHp) {
+        const heal = SURVIVAL.hpRestore
+        const actualHeal = Math.min(heal, p.maxHp - p.hp)
+        p.hp += actualHeal
+        world.addScorePopup(item.x - world.cameraX, item.y, `+${actualHeal} HP`, SURVIVAL.hpPopupColor)
       }
 
       // onItemPickup フック発火

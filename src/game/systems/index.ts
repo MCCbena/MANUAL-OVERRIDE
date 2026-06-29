@@ -15,17 +15,17 @@ import { registerFeature } from '../../engine/GameRegistry'
 import { ShootFeature }     from './ShootFeature'
 import { RhythmFeature }    from './RhythmFeature'
 import { MovementFeature }  from './MovementFeature'
+import { SurvivalFeature }  from './SurvivalFeature'
 import { RpgFeature }       from './RpgFeature'
 import { PuzzleFeature }    from './PuzzleFeature'
 import { SpecialFeature }   from './SpecialFeature'
 import { TetrisFeature }    from './TetrisFeature'
-import { SurvivalFeature }  from './SurvivalFeature'
 
 registerFeature(new ShootFeature())
 registerFeature(new RhythmFeature())
 registerFeature(new MovementFeature())
+registerFeature(new SurvivalFeature())
 registerFeature(new RpgFeature())
 registerFeature(new PuzzleFeature())
 registerFeature(new SpecialFeature())
 registerFeature(new TetrisFeature())
-registerFeature(new SurvivalFeature())

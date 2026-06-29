@@ -100,9 +100,12 @@ export class Bullet {
 // ──────────────────────────────────────────────────────────────────────
 // Item（RPGのアイテム）
 // ──────────────────────────────────────────────────────────────────────
+export const ITEM_WIDTH = 22
+export const ITEM_HEIGHT = 22
+
 export class Item {
   x: number; y: number
-  w = 22; h = 22
+  w = ITEM_WIDTH; h = ITEM_HEIGHT
   type: 'exp' | 'hp' | 'food' | 'weapon'
   alive = true
   pulse = Math.random() * Math.PI * 2  // ランダム位相
