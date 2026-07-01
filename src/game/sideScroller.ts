@@ -76,8 +76,9 @@ export class SideScroller {
   private scoreVarsItemsCollected = 0 // アイテム収集総数
   private scoreVarsBossKills = 0      // ボス撃破数
   private scoreVarsStealthBonus = 0   // ステルス継続フレーム数の累積
-  private scoreVarsColorTouches = 0   // 安全色タッチ回数
-  private deaths = 0                  // 死亡回数（hp 有効時は複数回あり得る）
+  private scoreVarsColorTouches = 0        // 安全色タッチ回数
+  private scoreVarsColorTouchMisses = 0    // 危険色接触回数（accuracy 計算用）
+  private deaths = 0                       // 死亡回数（hp 有効時は複数回あり得る）
 
   // カメラ
   private cameraX = 0
@@ -309,6 +310,7 @@ export class SideScroller {
       bossKills: this.scoreVarsBossKills,
       stealthBonus: this.scoreVarsStealthBonus,
       colorTouches: this.scoreVarsColorTouches,
+      colorTouchMisses: this.scoreVarsColorTouchMisses,
     }
 
     const genre = GENRES.find(g => g.id === this.rules.genre)
@@ -455,8 +457,8 @@ export class SideScroller {
     const rightKey = r.controls.moveRight
     const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
-    if (this.input.keys.has(leftKey))  this.stats.moveLeft++
-    if (this.input.keys.has(rightKey)) this.stats.moveRight++
+    if (!r.features.has('tetris_mode') && this.input.keys.has(leftKey))  this.stats.moveLeft++
+    if (!r.features.has('tetris_mode') && this.input.keys.has(rightKey)) this.stats.moveRight++
     p.x += p.vx * dt
     p.x = Math.max(0, Math.min(W - p.w, p.x))
     p.y = Math.max(0, Math.min(H - p.h, p.y + p.vy * dt))
@@ -487,6 +489,7 @@ export class SideScroller {
         const h = this.hazards[i]
         if (!rectsOverlap(p.rect, h.rect)) continue
         if (!h.isSafe) {
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -514,7 +517,7 @@ export class SideScroller {
     const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
     if (!r.features.has('auto_run') && !r.features.has('tetris_mode') && this.input.keys.has(leftKey))  this.stats.moveLeft++
-    if ((r.features.has('auto_run') || this.input.keys.has(rightKey)) && !r.features.has('tetris_mode')) this.stats.moveRight++
+    if (!r.features.has('auto_run') && !r.features.has('tetris_mode') && this.input.keys.has(rightKey)) this.stats.moveRight++
     if (p.onGround) {
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
     }
@@ -625,6 +628,7 @@ export class SideScroller {
           ? h.isSafe
           : !h.isSafe
         if (isHazardous) {
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -1272,6 +1276,7 @@ export class SideScroller {
       addScoreVarsBossKill()   { self.scoreVarsBossKills++ },
       addScoreVarsStealthBonus(amount: number) { self.scoreVarsStealthBonus += amount },
       addScoreVarsColorTouch() { self.scoreVarsColorTouches++ },
+      addScoreVarsColorTouchMiss() { self.scoreVarsColorTouchMisses++ },
     }
   }
 
