@@ -111,6 +111,13 @@ export interface GenrePlugin {
    */
   readonly scrollSpeedBonus?: number
 
+  /**
+   * ジャンル固有のハザードスポーン密度設定。
+   * 省略時は game_balance.json の HAZARD_SPAWN を使用する。
+   * Bullet Hell や Survival など敵密度を調整したいジャンルで使用する。
+   */
+  readonly spawnDensity?: import('../domain/types').SpawnDensityConfig
+
   // ─── 描画フック（必須） ───────────────────────────────────────────
   /**
    * 遠景（山稜・宇宙岩礁など）を描く。

@@ -18,5 +18,10 @@
     "moveDown": "ArrowDown"
   },
   "gravity": 1600,
-  "endingFlavor": "あなたは生き延びた。説明書は焚き火の燃料になっていた。"
+  "endingFlavor": "あなたは生き延びた。説明書は焚き火の燃料になっていた。",
+  "spawnDensity": {
+    "baseInterval": 2000,
+    "minInterval": 700,
+    "decayRate": 0.00018
+  }
 }
