@@ -181,23 +181,29 @@ export function resolveGenre(
 
 // ─────────────────────────────────────────────────────────────
 // 未収束時に「最も確率の高いジャンル」を返す（強制解決用）
+// genrePoints を考慮して、軸ベース収束と直接ポイントの両方から最高値を決定
 // ─────────────────────────────────────────────────────────────
 export function resolveHighestProbGenre(
   accumulated: GenreParams,
   genres: GenreDef[],
   bayesConfig?: BayesConfig,
+  genrePoints?: Record<string, number>,
 ): GenreId {
   const config = bayesConfig ?? DEFAULT_BAYES_CONFIG
   const posteriors = computeBayesianPosteriors(accumulated, genres, config)
 
   let bestId: GenreId = genres.find(g => g.id !== 'base')?.id ?? 'base' as GenreId
-  let bestProb = 0
+  let bestScore = -Infinity
 
   for (const genre of genres) {
     if (genre.id === 'base') continue
-    const prob = posteriors[genre.id] ?? 0
-    if (prob > bestProb) {
-      bestProb = prob
+    const bayesProb = posteriors[genre.id] ?? 0
+    const directPoints = genrePoints?.[genre.id] ?? 0
+    // ベイズ確率を 0〜1 のスコアに、直接ポイントを 0〜MAX_POINT_SCORE に正規化して合算
+    const pointScore = Math.min(directPoints / 10, 1.0)
+    const combined = bayesProb * 0.7 + pointScore * 0.3
+    if (combined > bestScore) {
+      bestScore = combined
       bestId = genre.id
     }
   }

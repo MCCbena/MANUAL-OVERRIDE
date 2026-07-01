@@ -152,6 +152,13 @@ export function useGameState() {
       lastRuntimeConfig.value = card.runtimeConfig
     }
 
+    // addFeatures: 選択時に features に追加
+    if (card.addFeatures?.length) {
+      for (const feat of card.addFeatures) {
+        rules.features.add(feat)
+      }
+    }
+
     roundCount.value++
 
     // ベイズ更新
@@ -177,9 +184,18 @@ export function useGameState() {
       return undefined
     }
 
+    // genrePoints の累積（resolveHighestProbGenre に渡すため）
+    const allGenrePoints = choiceHistory.reduce<Record<string, number>>((acc, h) => {
+      if (!h.genrePoints) return acc
+      for (const [g, p] of Object.entries(h.genrePoints)) {
+        acc[g] = (acc[g] ?? 0) + p
+      }
+      return acc
+    }, {})
+
     // ジャンル収束チェック
     if (roundCount.value >= MAX_ROUNDS || newState.converged) {
-      lockedGenre.value = newState.convergedGenre ?? resolveHighestProbGenre(accumulated, GENRES)
+      lockedGenre.value = newState.convergedGenre ?? resolveHighestProbGenre(accumulated, GENRES, undefined, allGenrePoints)
       if (lockedGenre.value === 'base') {
         lockedGenre.value = DEFAULT_FALLBACK_GENRE as GenreId
       }

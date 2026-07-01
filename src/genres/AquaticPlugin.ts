@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/AquaticPlugin.ts
  * 'aquatic' ジャンル（水中アドベンチャー）のプラグイン。
  *
@@ -150,7 +150,7 @@ export class AquaticPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = performance.now() / 80
     const swim = Math.sin(runCycle * Math.PI * 2) * 4
 

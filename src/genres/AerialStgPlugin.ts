@@ -107,7 +107,7 @@ export class AerialStgPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = performance.now() / 60
     // 機体（小型三角戦闘機・上向き）
     ctx.fillStyle = '#aaddff'

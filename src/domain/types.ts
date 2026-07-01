@@ -134,6 +134,8 @@ export interface ManualCard {
   genreAffinity?: string[]
   /** 矛盾するカードID群。選択時、対象カードの説明書テキストが取り消し線になる */
   conflictsWith?: string[]
+  /** 選択時に features に追加されるフィーチャー ID 群 */
+  addFeatures?: string[]
 }
 
 /** 説明書バージョンが runtime に適用できる上書き設定 */

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/RacingPlugin.ts
  * 'racing' ジャンル（レーシングゲーム）のプラグイン。
  *
@@ -109,7 +109,7 @@ export class RacingPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = performance.now() / 60
     const wheelBounce = Math.abs(Math.sin(runCycle * Math.PI * 4)) * 1.5
 

@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/SurvivalPlugin.ts
  * 'survival' ジャンル（サバイバルゲーム）のプラグイン。
  *
@@ -96,7 +96,7 @@ export class SurvivalPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = runCycle * Math.PI * 2
     const legSwing = onGround ? Math.sin(t) * 10 : 0
 

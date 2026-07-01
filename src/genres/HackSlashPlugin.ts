@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/HackSlashPlugin.ts
  * 'hack_slash' ジャンル（ハックアンドスラッシュ）のプラグイン。
  *
@@ -123,7 +123,7 @@ export class HackSlashPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = performance.now() / 70
     const legSwing = onGround ? Math.sin(runCycle * Math.PI * 2) * 10 : 0
     const swordAngle = onGround

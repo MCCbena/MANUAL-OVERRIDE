@@ -96,7 +96,7 @@ export class PlatformerPlugin extends DarkThemePlugin {
     ctx.globalAlpha = 1
   }
 
-  override drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number): void {
+  override drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = runCycle * Math.PI * 2
     const legSwing = onGround ? Math.sin(t) * 11 : 0
     const armSwing = onGround ? Math.sin(t + Math.PI) * 14 : 0

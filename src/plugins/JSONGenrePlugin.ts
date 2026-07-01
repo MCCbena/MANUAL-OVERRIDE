@@ -113,8 +113,8 @@ export class JSONGenrePlugin implements PluginBase {
     this._delegate.drawMidLayer(ctx, offsetX, W, gY)
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number): void {
-    this._delegate.drawPlayer(ctx, w, h, onGround, runCycle)
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, onGround: boolean, runCycle: number, scrollAxis?: 'x' | 'y'): void {
+    this._delegate.drawPlayer(ctx, w, h, onGround, runCycle, scrollAxis)
   }
 
   drawHazard(ctx: CanvasRenderingContext2D, hazard: Hazard, sx: number, world: MutableWorld): boolean {

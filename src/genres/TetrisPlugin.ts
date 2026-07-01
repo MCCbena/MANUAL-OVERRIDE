@@ -46,6 +46,7 @@ export class TetrisPlugin extends GenrePluginBase {
     w: number, h: number,
     _onGround: boolean,
     _runCycle: number,
+    _scrollAxis?: 'x' | 'y',
   ): void {
     // Tテトリミノ風のキャラクター（パープルブロック）
     const blockSize = w / 3

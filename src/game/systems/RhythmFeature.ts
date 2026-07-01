@@ -17,6 +17,7 @@ export class RhythmFeature implements FeatureSystem {
   readonly handles = ['beat_hazard', 'just_input', 'beat_dash'] as const
 
   private state: RhythmState
+  private _hadBeatHazardPrev = false
 
   constructor(bpm = 120) {
     this.state = this._fresh(bpm)
@@ -52,19 +53,25 @@ export class RhythmFeature implements FeatureSystem {
     s.beatMarkers.forEach(m => { m.t -= dtMs })
     s.beatMarkers = s.beatMarkers.filter(m => m.t > 0)
 
+    const hadBeatHazard = r.features.has('beat_hazard')
+
     if (s.nextBeat <= 0) {
       s.nextBeat += s.beatInterval
       s.beatCount++
 
-      if (r.features.has('beat_hazard')) {
+      if (hadBeatHazard) {
         s.beatHazardInverted = s.beatCount % 2 === 0
         s.beatMarkers.push({ t: 400, x: Math.random() * 600 + 100, strength: 1 })
+      } else if (!this._hadBeatHazardPrev) {
+        s.beatHazardInverted = false
       }
     }
 
-    if (r.features.has('beat_hazard')) {
+    if (hadBeatHazard) {
       world.setBeatHazardInverted(s.beatHazardInverted)
     }
+
+    this._hadBeatHazardPrev = hadBeatHazard
 
     if (!r.features.has('just_input')) return
 

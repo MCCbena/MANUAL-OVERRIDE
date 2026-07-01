@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/BulletRunnerPlugin.ts
  * 'bullet_runner' ジャンル（弾幕ランナー）のプラグイン。
  *
@@ -122,7 +122,7 @@ export class BulletRunnerPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     const t = performance.now() / 80
     const legSwing = Math.sin(runCycle * Math.PI * 2) * 9
 

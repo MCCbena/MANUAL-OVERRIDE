@@ -64,9 +64,9 @@ export interface GenrePlugin {
     alphaRange?: [number, number]
   }
 
-  /**
-   * ハザードの演出カスタマイズ。省略時は HAZARD_VFX の値を使用。
-   */
+ /**
+    * ハザードの演出カスタマイズ。省略時は HAZARD_VFX の値を使用。
+    */
   readonly hazardConfig?: {
     /** shadowBlur の値（デフォルト 12、0 でグロー無効） */
     glowBlur?: number
@@ -74,6 +74,8 @@ export interface GenrePlugin {
     pulseSpeed?: number
     /** パルス振幅 0〜1（デフォルト 0.08） */
     pulseAmplitude?: number
+    /** ハザードの形状（'rect'|'diamond'|'pillar'|'spike'） */
+    shape?: 'rect' | 'diamond' | 'pillar' | 'spike'
   }
 
   /**
@@ -104,12 +106,18 @@ export interface GenrePlugin {
    */
   readonly groundDashAlpha?: number
 
-  /**
-   * スクロール速度ボーナス px/s。
-   * RuntimeRules.scrollSpeed の最終計算に加算される（省略時 0）。
-   * tempo パラメータとは別に、ジャンル固有の速度補正をかけたい時に使う。
-   */
+/**
+    * スクロール速度ボーナス px/s。
+    * RuntimeRules.scrollSpeed の最終計算に加算される（省略時 0）。
+    * tempo パラメータとは別に、ジャンル固有の速度補正をかけたい時に使う。
+    */
   readonly scrollSpeedBonus?: number
+
+  /**
+    * 敵密度倍率。1.0 が標準。大きいほど敵が密集する。
+    * 省略時は DIFFICULTY.enemyDensityRate が使用される。
+    */
+  readonly spawnDensityPerGenre?: number
 
   // ─── 描画フック（必須） ───────────────────────────────────────────
   /**
@@ -149,6 +157,7 @@ export interface GenrePlugin {
     h: number,
     onGround: boolean,
     runCycle: number,
+    scrollAxis?: 'x' | 'y',
   ): void
 
   // ─── オプショナルフック ───────────────────────────────────────────

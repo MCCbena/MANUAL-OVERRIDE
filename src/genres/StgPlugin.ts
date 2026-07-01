@@ -26,6 +26,15 @@ export class StgPlugin extends GenrePluginBase {
     { shape: 'pillar',  placement: 'air',    weightStart: 0,  weightEnd: 3,  wRange: [15, 22], hRange: [45, 75] },
   ]
 
+  readonly hazardConfig = {
+    glowBlur: 16,
+    pulseSpeed: 2.0,
+    pulseAmplitude: 0.12,
+    shape: 'diamond' as const,
+  }
+
+  readonly spawnDensityPerGenre = 1.3
+
   drawFarLayer(ctx: CanvasRenderingContext2D, offsetX: number, W: number, gY: number): void {
     // ネビュラ光
     ctx.globalAlpha = 0.06
@@ -65,7 +74,13 @@ export class StgPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number, scrollAxis?: 'x' | 'y'): void {
+    ctx.save()
+    if (scrollAxis === 'y') {
+      ctx.translate(w / 2, h / 2)
+      ctx.rotate(Math.PI / 2)
+      ctx.translate(-w / 2, -h / 2)
+    }
     // 宇宙船
     ctx.fillStyle = '#88ccff'
     ctx.beginPath()
@@ -90,6 +105,7 @@ export class StgPlugin extends GenrePluginBase {
     ctx.beginPath()
     ctx.arc(w * 0.65, h * 0.5, h * 0.15, 0, Math.PI * 2)
     ctx.fill()
+    ctx.restore()
   }
 }
 

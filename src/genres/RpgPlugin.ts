@@ -1,4 +1,4 @@
-﻿/**
+/**
  * genres/RpgPlugin.ts
  * 'rpg' ジャンル（森/中世ファンタジー）のプラグイン。
  */
@@ -58,7 +58,7 @@ export class RpgPlugin extends GenrePluginBase {
     ctx.globalAlpha = 1
   }
 
-  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number): void {
+  drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     // 騎士
     ctx.fillStyle = '#7777bb'
     this._roundRect(ctx, 2, h * 0.4, w - 4, h * 0.55, 3)

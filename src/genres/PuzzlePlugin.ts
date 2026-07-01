@@ -25,6 +25,8 @@ export class PuzzlePlugin extends DarkThemePlugin {
     { shape: 'rect',   placement: 'air',    weightStart: 1, weightEnd: 3, wRange: [35, 56], hRange: [22, 36] },
   ]
 
+  readonly spawnDensityPerGenre = 0.6
+
   override drawFarLayer(_ctx: CanvasRenderingContext2D, _offsetX: number, _W: number, _gY: number): void {
     // パズルは遠景なし（白背景で視認性を保つ）
   }
@@ -44,7 +46,7 @@ export class PuzzlePlugin extends DarkThemePlugin {
     ctx.globalAlpha = 1
   }
 
-  override drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number): void {
+  override drawPlayer(ctx: CanvasRenderingContext2D, w: number, h: number, _onGround: boolean, _runCycle: number, _scrollAxis?: 'x' | 'y'): void {
     ctx.fillStyle = '#444488'
     ctx.fillRect(4, 0, w - 8, h)
     ctx.fillStyle = '#6666aa'

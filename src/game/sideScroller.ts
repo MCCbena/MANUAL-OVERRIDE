@@ -468,7 +468,9 @@ export class SideScroller {
 
     if (this.distance >= this.nextSpawnDist) {
       this._spawnHazard()
-      const interval = HAZARD_SPAWN.baseInterval * Math.exp(-HAZARD_SPAWN.decayRate * this.distance)
+      const plugin = getGenre(this.rules.genre)
+      const densityMult = plugin.spawnDensityPerGenre ?? DIFFICULTY.enemyDensityRate
+      const interval = HAZARD_SPAWN.baseInterval * Math.exp(-HAZARD_SPAWN.decayRate * this.distance) / densityMult
       this.nextSpawnDist += (Math.max(HAZARD_SPAWN.minInterval, interval) / 1000) * speed
     }
 
@@ -883,7 +885,9 @@ export class SideScroller {
     ctx.translate(-p.w / 2, -p.h)
 
     // ジャンルプラグインに描画を委譲（ここに if/else は一切不要）
-    getGenre(this.rules.genre).drawPlayer(ctx, p.w, p.h, p.onGround, this.runCycle)
+    const genreId = this.rules.genre
+    const scrollAxis = (genreId === 'aerial_stg' || genreId === 'bullet_hell') ? 'y' : 'x'
+    getGenre(genreId).drawPlayer(ctx, p.w, p.h, p.onGround, this.runCycle, scrollAxis)
 
     ctx.restore()
   }
@@ -917,7 +921,9 @@ export class SideScroller {
 
     ctx.fillStyle = color
 
-    switch (h.shape) {
+    // hazardConfig.shape が設定されていればそれを優先、なければハザード自身の shape を使用
+    const shape = hCfg?.shape ?? h.shape
+    switch (shape) {
       case 'spike':
         this._drawSpike(ctx, sx, y, h.w, h.h, color)
         break
