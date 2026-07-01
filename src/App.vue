@@ -163,6 +163,26 @@ function onChoose(cardId: string) {
   scroller.updateRules(getRules(), currentManual)
   // 更新完了を scroller に通知
   scroller.markUpdated(idx)
+  // キャンバス側トランジション演出
+  const accent = GENRE_THEME_COLORS['plain']?.accent ?? '#00ff41'
+  const newFeatLabels = formatFeatureLabels(scroller.getPendingNewFeatures())
+  scroller.triggerTransition(accent, newFeatLabels)
+  // UI 側 feature 通知
+  if (newFeatLabels.length > 0) {
+    manualCtl.showFeatureNotification(newFeatLabels)
+  }
+}
+
+/** FeatureId 配列を日本語ラベルに変換 */
+function formatFeatureLabels(ids: string[]): string[] {
+  const labelMap: Record<string, string> = {
+    shoot: '射撃', double_jump: 'ダブルジャンプ', dash: 'ダッシュ',
+    enemy_hp: '敵HP', auto_run: '自動走行', item_pickup: 'アイテム',
+    combo: 'コンボ', beat_hazard: 'ビートハザード', tower: 'タワー',
+    stealth: '隠密', survival_hp: 'HP管理', growth: '成長',
+    puzzle_grid: 'グリッド', rhythm_beat: 'リズム',
+  }
+  return ids.map(id => labelMap[id] ?? id)
 }
 
 // ─── ギブアップ ───────────────────────────────────────────────────
@@ -271,6 +291,9 @@ watch(() => gameState.lockedGenre.value, (newGenre) => {
   rawRules.scrollSpeed = rawRules.scrollSpeed * GENRE_LOCKED_BOOST.mult
   scroller.updateRules(rawRules, gameState.currentManual())
 
+  // ジャンル確定時の大規模トランジション演出
+  scroller.triggerGenreLockEffect('#00ff41')
+
   genreLockedBoostTimer = window.setTimeout(() => {
     genreLockedBoostTimer = null
     scroller?.updateRules(getRules(), gameState.currentManual())
@@ -374,6 +397,7 @@ onUnmounted(() => {
         :features="gameState.rules.features"
         :controls="gameState.rules.controls"
         :highlight="gameState.phase.value === 'tutorial'"
+        :new-features="manualCtl.newFeatures.value"
       />
 
       <!-- 説明書更新時のフォーカスオーバーレイ -->

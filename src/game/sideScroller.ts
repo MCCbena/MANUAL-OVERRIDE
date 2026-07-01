@@ -15,6 +15,15 @@ import { ParticleSystem } from './ParticleSystem'
 import '../genres/index'
 import '../game/systems/index'
 
+// ─── トランジション演出用データ型 ────────────────────────────────
+interface FeatureText {
+  text: string
+  color: string
+  life: number
+  maxLife: number
+  scale: number
+}
+
 export interface GameSnapshot {
   distance: number
   playScore: number
@@ -113,6 +122,13 @@ export class SideScroller {
   private _timescaleScale = 1.0
   private _timescaleRemaining = -1
 
+  // ─── 演出: ルール更新時トランジション ────────────────────────
+  private transitionFlashAlpha = 0
+  private transitionFlashColor = '#00ff41'
+  private transitionFeatureTexts: FeatureText[] = []
+  private transitionActive = false
+  private _pendingNewFeatures: string[] = []
+
   // フレーム内で一度だけ _buildWorld() するためのキャッシュ
   private _frameWorld: MutableWorld | null = null
 
@@ -199,6 +215,15 @@ export class SideScroller {
     for (const sys of getActiveSystems(rules.features)) {
       sys.onManualUpdated?.(world, '')
     }
+
+    // 新たに追加された feature を検出（トランジション演出用）
+    const newFeats: string[] = []
+    for (const feat of rules.features) {
+      if (!oldFeatures.has(feat)) {
+        newFeats.push(feat)
+      }
+    }
+    this._pendingNewFeatures = newFeats
   }
 
   /** フレーム内で _buildWorld() を1回だけ呼ぶためのキャッシュアクセサ */
@@ -327,6 +352,22 @@ export class SideScroller {
       this._timescaleRemaining -= rawDt
       if (this._timescaleRemaining <= 0) this._timescaleScale = 1.0
     }
+
+    // ─── トランジション状態更新 ───────────────────────────────
+    if (this.transitionFlashAlpha > 0) {
+      this.transitionFlashAlpha = Math.max(0, this.transitionFlashAlpha - rawDt * 2.5)
+      if (this.transitionFlashAlpha <= 0) {
+        this.transitionActive = false
+      }
+    }
+    for (const ft of this.transitionFeatureTexts) {
+      ft.life -= rawDt
+    }
+    this.transitionFeatureTexts = this.transitionFeatureTexts.filter(ft => ft.life > 0)
+    if (this.transitionFeatureTexts.length === 0 && this.transitionFlashAlpha <= 0) {
+      this.transitionActive = false
+    }
+
     const dt = rawDt * this._timescaleScale
 
     this.input.tick()
@@ -676,6 +717,67 @@ export class SideScroller {
     return this.playScore
   }
 
+  /** updateRules() で検出された新規 feature のリストを返す（一度読み取り後クリア） */
+  getPendingNewFeatures(): string[] {
+    const feats = this._pendingNewFeatures
+    this._pendingNewFeatures = []
+    return feats
+  }
+
+  /**
+   * ルール更新時のトランジションエフェクトをトリガー。
+   * App.vue の onChoose() から呼ばれる。
+   */
+  triggerTransition(accentColor: string, newFeatureLabels: string[]): void {
+    this.transitionFlashAlpha = 1.0
+    this.transitionFlashColor = accentColor
+    this.transitionActive = true
+
+    for (const label of newFeatureLabels) {
+      this.transitionFeatureTexts.push({
+        text: `+${label}`,
+        color: accentColor,
+        life: 1.2,
+        maxLife: 1.2,
+        scale: 1.0,
+      })
+    }
+
+    this.shakeIntensity = Math.max(this.shakeIntensity, 8)
+    this._timescaleScale = 0.3
+    this._timescaleRemaining = 0.4
+  }
+
+  /**
+   * ジャンル確定時の大規模トランジション。
+   * App.vue の lockedGenre watch から呼ばれる。
+   */
+  triggerGenreLockEffect(accentColor: string): void {
+    this.shakeIntensity = Math.max(this.shakeIntensity, 16)
+    this.transitionFlashAlpha = 1.0
+    this.transitionFlashColor = accentColor
+    this.transitionActive = true
+
+    this._timescaleScale = 0.2
+    this._timescaleRemaining = 0.8
+
+    const W = this.canvas.width
+    const H = this.canvas.height
+    for (let i = 0; i < 40; i++) {
+      const angle = (i / 40) * Math.PI * 2
+      const speed = 80 + Math.random() * 200
+      this.particles.add(
+        W / 2 + (Math.random() - 0.5) * 40,
+        H / 2 + (Math.random() - 0.5) * 40,
+        Math.cos(angle) * speed,
+        Math.sin(angle) * speed,
+        0.8 + Math.random() * 0.6,
+        accentColor,
+        3 + Math.random() * 4,
+      )
+    }
+  }
+
   // ─── 描画 ────────────────────────────────────────────────────────
   private _render(): void {
     const ctx = this.ctx
@@ -734,6 +836,33 @@ export class SideScroller {
     if (!this.dead) this._drawPlayer()
 
     ctx.restore()  // shake の restore
+
+    // ─── トランジションフラッシュ ───────────────────────────────
+    if (this.transitionFlashAlpha > 0) {
+      ctx.globalAlpha = this.transitionFlashAlpha * 0.7
+      ctx.fillStyle = this.transitionFlashColor
+      ctx.fillRect(0, 0, W, H)
+      ctx.globalAlpha = 1
+    }
+
+    // ─── トランジション feature 通知テキスト ────────────────────
+    for (const ft of this.transitionFeatureTexts) {
+      const alpha = Math.max(0, ft.life / ft.maxLife)
+      const yOffset = (1 - alpha) * 30
+      const scale = 0.8 + alpha * 0.3
+      ctx.globalAlpha = alpha
+      ctx.fillStyle = ft.color
+      ctx.font = `bold ${Math.round(22 * scale)}px "Courier New", monospace`
+      ctx.textAlign = 'center'
+      ctx.textBaseline = 'middle'
+      ctx.shadowColor = ft.color
+      ctx.shadowBlur = 20 * alpha
+      ctx.fillText(ft.text, W / 2, H / 2 - yOffset)
+      ctx.shadowBlur = 0
+    }
+    ctx.globalAlpha = 1
+    ctx.textAlign = 'left'
+    ctx.textBaseline = 'alphabetic'
 
     // ─── 死亡オーバーレイ ─────────────────────────────────────────
     if (this.dead) {

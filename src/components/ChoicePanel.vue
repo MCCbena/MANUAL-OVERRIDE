@@ -13,6 +13,7 @@ const emit = defineEmits<{
 
 const selected = ref<string | null>(null)
 const revealed = ref(false)
+const selectedButtonIdx = ref<number | null>(null)
 
 let choiceTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -20,6 +21,8 @@ let choiceTimer: ReturnType<typeof setTimeout> | null = null
 function pick(choiceId: string) {
   if (selected.value) return
   selected.value = choiceId
+  const idx = props.choices.findIndex(c => c.id === choiceId)
+  selectedButtonIdx.value = idx >= 0 ? idx : null
   choiceTimer = setTimeout(() => emit('choose', choiceId), 150)
 }
 
@@ -55,7 +58,7 @@ onUnmounted(() => {
 
       <!-- 選択肢 -->
       <div class="choice-options">
-        <button
+       <button
           v-for="(c, idx) in choices"
           :key="c.id"
           class="choice-btn"
@@ -64,6 +67,7 @@ onUnmounted(() => {
             selected: selected === c.id,
             faded:    selected !== null && selected !== c.id,
             staggered: revealed,
+            bursting: selectedButtonIdx === idx && selected === c.id,
           }"
           :style="{ '--delay': idx * 60 + 'ms' }"
           @click="pick(c.id)"
@@ -128,6 +132,14 @@ onUnmounted(() => {
 @keyframes cardFlipIn {
   0%   { opacity: 0.4; transform: rotateY(70deg) scale(0.97); }
   100% { opacity: 1;   transform: rotateY(0deg)  scale(1); }
+}
+
+.choice-card.revealed {
+  animation: cardFlipIn 0.15s cubic-bezier(0.22, 1, 0.36, 1) both, cardGlowPulse 2s 0.8s ease-in-out infinite;
+}
+@keyframes cardGlowPulse {
+  0%, 100% { box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 0 50px rgba(0,0,0,0.5), inset 0 1px 2px rgba(0,255,65,0.05); }
+  50%       { box-shadow: 0 0 30px rgba(0,255,65,0.25), 0 0 60px rgba(0,0,0,0.5), inset 0 1px 2px rgba(0,255,65,0.08); }
 }
 
 /* ─── ジャンル別文体テーマ (B4) ─── */
@@ -525,6 +537,30 @@ onUnmounted(() => {
   0%   { background: #001a00; }
   40%  { background: #002a00; }
   100% { background: #003300; }
+}
+
+/* ─── 選択時のバーストエフェクト ─── */
+.choice-btn.bursting {
+  animation: choiceBurst 0.3s ease-out both;
+}
+@keyframes choiceBurst {
+  0%   { transform: scale(1); box-shadow: 0 6px 16px rgba(0,255,65,0.2); }
+  50%  { transform: scale(0.95); box-shadow: 0 0 30px rgba(0,255,65,0.5); }
+  100% { transform: scale(0.92); box-shadow: 0 0 20px rgba(0,255,65,0.3); }
+}
+
+.choice-btn.bursting::after {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 4px;
+  background: radial-gradient(circle, rgba(0,255,65,0.3) 0%, transparent 70%);
+  animation: burstRadiate 0.4s ease-out both;
+  pointer-events: none;
+}
+@keyframes burstRadiate {
+  0%   { opacity: 1; transform: scale(0.8); }
+  100% { opacity: 0; transform: scale(1.5); }
 }
 
 .choice-btn.faded {

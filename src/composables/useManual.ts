@@ -62,6 +62,18 @@ export function useManual(_currentManual: () => ManualVersion) {
   let animTimer: ReturnType<typeof setTimeout> | null = null
   let centerTimer: ReturnType<typeof setTimeout> | null = null
 
+  // 新規 feature 通知（例: ['射撃', 'コンボ']）
+  const newFeatures = ref<string[]>([])
+  let featureTimer: ReturnType<typeof setTimeout> | null = null
+
+  /** 新規 feature ラベルを表示。App.vue から呼ばれる。 */
+  function showFeatureNotification(labels: string[]) {
+    if (labels.length === 0) return
+    newFeatures.value = [...labels]
+    if (featureTimer !== null) clearTimeout(featureTimer)
+    featureTimer = setTimeout(() => { newFeatures.value = [] }, 2000)
+  }
+
   function recordUpdate(nextManual: ManualVersion) {
     const prev = history.value[history.value.length - 1]
     history.value.push(nextManual)
@@ -92,5 +104,5 @@ export function useManual(_currentManual: () => ManualVersion) {
     centerTimer = setTimeout(() => { isCentered.value = false }, CENTER_DURATION_MS)
   }
 
-  return { history, diffLines, isAnimating, isCentered, recordUpdate }
+  return { history, diffLines, isAnimating, isCentered, newFeatures, showFeatureNotification, recordUpdate }
 }

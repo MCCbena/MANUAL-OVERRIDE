@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import type { ManualVersion, ManualTheme, Controls } from '../domain/types'
 
 const props = defineProps<{
@@ -12,6 +12,8 @@ const props = defineProps<{
   features?: Set<string> | ReadonlySet<string>
   controls: Controls
   highlight?: boolean
+  /** 選択で新たに有効になった feature ラベル（例: ['射撃']） */
+  newFeatures?: string[]
 }>()
 
 const showHistory = ref(false)
@@ -39,6 +41,61 @@ function keyLabel(key: string): string {
   }
   return map[key] ?? key.toUpperCase()
 }
+
+// ─── タイプライター効果 ──────────────────────────────────────
+const typewriterProgress = ref<Record<number, number>>({})
+const typewriterActive = ref(false)
+let typewriterRAF: number | null = null
+const TYPEWRITER_CHARS_PER_SEC = 35
+
+function startTypewriter() {
+  const addedIndices: number[] = []
+  props.diffLines.forEach((line, i) => {
+    if (line.type === 'added') addedIndices.push(i)
+  })
+  if (addedIndices.length === 0) return
+
+  typewriterActive.value = true
+  const progress: Record<number, number> = {}
+  addedIndices.forEach(idx => { progress[idx] = 0 })
+  typewriterProgress.value = progress
+
+  let lastTime = performance.now()
+  function tick(now: number) {
+    const dt = (now - lastTime) / 1000
+    lastTime = now
+    let allDone = true
+    for (const idx of addedIndices) {
+      const line = props.diffLines[idx]
+      if (!line) continue
+      const target = line.text.length
+      const next = typewriterProgress.value[idx] ?? 0
+      const increment = TYPEWRITER_CHARS_PER_SEC * dt
+      const newVal = Math.min(target, next + increment)
+      typewriterProgress.value = { ...typewriterProgress.value, [idx]: newVal }
+      if (newVal < target) allDone = false
+    }
+    if (!allDone) {
+      typewriterRAF = requestAnimationFrame(tick)
+    } else {
+      typewriterActive.value = false
+      if (typewriterRAF !== null) cancelAnimationFrame(typewriterRAF)
+      typewriterRAF = null
+    }
+  }
+  typewriterRAF = requestAnimationFrame(tick)
+}
+
+watch(() => props.isAnimating, (val) => {
+  if (val) {
+    if (typewriterRAF !== null) cancelAnimationFrame(typewriterRAF)
+    startTypewriter()
+  }
+})
+
+onUnmounted(() => {
+  if (typewriterRAF !== null) cancelAnimationFrame(typewriterRAF)
+})
 </script>
 
 <template>
@@ -79,7 +136,7 @@ function keyLabel(key: string): string {
       />
     </div>
 
-    <!-- 本文（差分強調） -->
+    <!-- 本文（差分強調 + タイプライター） -->
     <div class="manual-body">
       <template v-if="isAnimating && filteredDiffLines.length > 0">
         <div
@@ -87,10 +144,12 @@ function keyLabel(key: string): string {
           :key="i"
           class="manual-line"
           :class="`line-${line.type}`"
-          :style="line.type === 'added' ? { animationDelay: (i * 40) + 'ms' } : {}"
         >
           <span v-if="line.type === 'removed'" class="line-removed">{{ line.text }}</span>
-          <span v-else-if="line.type === 'added'" class="line-added">{{ line.text }}</span>
+          <span v-else-if="line.type === 'added'" class="line-added">
+            <span class="typewriter-text">{{ line.text.slice(0, Math.ceil(typewriterProgress[i] ?? line.text.length)) }}</span>
+            <span v-if="typewriterActive && (typewriterProgress[i] ?? 0) < line.text.length" class="typewriter-cursor">|</span>
+          </span>
           <span v-else class="line-unchanged">{{ line.text }}</span>
         </div>
       </template>
@@ -123,6 +182,15 @@ function keyLabel(key: string): string {
         </template>
       </div>
     </div>
+
+    <!-- 新規 feature 通知 -->
+    <Transition name="feature-slide">
+      <div v-if="newFeatures && newFeatures.length > 0" class="feature-notifications">
+        <div v-for="feat in newFeatures" :key="feat" class="feature-badge">
+          <span class="feature-plus">+</span>{{ feat }}
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -170,8 +238,14 @@ function keyLabel(key: string): string {
 }
 
 @keyframes panelCenterIn {
-  0%   { opacity: 0; transform: translate(50%, 50%) scale(0.85); }
-  100% { opacity: 1; transform: translate(50%, 50%) scale(1); }
+  0%   { opacity: 0; transform: translate(50%, 50%) scale(0.85) rotateX(8deg); }
+  40%  { opacity: 1; transform: translate(50%, 50%) scale(1.03) rotateX(-2deg); }
+  100% { opacity: 1; transform: translate(50%, 50%) scale(1) rotateX(0deg); }
+}
+
+@keyframes panelCenterOut {
+  0%   { opacity: 1; transform: translate(50%, 50%) scale(1); }
+  100% { opacity: 0.6; transform: translate(50%, 50%) scale(0.92) translateY(30px); }
 }
 
 /* 中央表示解除時のトランジション（position/z-index はアニメーション不可のため除外） */
@@ -708,4 +782,70 @@ function keyLabel(key: string): string {
 .theme-survival .key-action     { color: #6aaa6a; }
 .theme-survival .manual-controls { border-color: rgba(42,74,42,0.3); }
 .theme-survival .manual-history { border-color: rgba(42,74,42,0.2); color: rgba(100,160,100,0.35); }
+
+/* ── タイプライター効果 ──────────────────────────────────── */
+.typewriter-text { display: inline; }
+.typewriter-cursor {
+  display: inline-block;
+  color: #00ff88;
+  animation: cursorBlink 0.5s steps(1) infinite;
+  font-family: 'M PLUS 1 Code', monospace;
+  font-weight: 700;
+  margin-left: 1px;
+}
+@keyframes cursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+/* ── 新規 feature 通知バッジ ────────────────────────────── */
+.feature-notifications {
+  position: absolute;
+  bottom: 100%;
+  right: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 4px;
+  margin-bottom: 6px;
+  pointer-events: none;
+  z-index: 5;
+}
+.feature-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(0, 255, 65, 0.12);
+  border: 1px solid rgba(0, 255, 65, 0.4);
+  color: #00ff88;
+  font-family: 'M PLUS 1 Code', monospace;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  white-space: nowrap;
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.15);
+}
+.feature-plus {
+  color: #00ff41;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+/* feature 通知スライドイン */
+.feature-slide-enter-active {
+  animation: featureSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.feature-slide-leave-active {
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+.feature-slide-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+@keyframes featureSlideIn {
+  0%   { opacity: 0; transform: translateY(12px) scale(0.9); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
 </style>
