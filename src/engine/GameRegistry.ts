@@ -116,11 +116,7 @@ export function resetRegistry(): void {
  * 起動時の1回限りのイミュータブルな初期化ではあるので、内部的に型キャストを使用する。
  * 型安全性を維持するためにGameRegistry内で閉じている。
  */
-export function mergeSpawnDensity(id: GenreId, density: {
-  baseInterval?: number
-  minInterval?: number
-  decayRate?: number
-}): void {
+export function mergeSpawnDensity(id: GenreId, density: import('../domain/types').SpawnDensityConfig): void {
   const plugin = _genres.get(id)
   if (plugin === undefined) return
   // TypeScript readonlyはビルド時のみ効く。起動時の初期化には型キャストを許容する。

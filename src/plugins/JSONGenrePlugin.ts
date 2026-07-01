@@ -21,7 +21,7 @@ export interface GenreJsonDef {
   id: string
   /** ManualUIのテーマ。visual.templateが未指定のときのフォールバックに使う */
   theme?: string
-  spawnDensity?: { baseInterval?: number; minInterval?: number; decayRate?: number }
+  spawnDensity?: import('../domain/types').SpawnDensityConfig
   visual?: {
     /** 描画を委譲するテンプレート名。省略時はthemeから自動決定。
      *  'runner'=地上横スク / 'space'=宇宙STG / 'dungeon'=RPG暗洞窟
@@ -69,7 +69,7 @@ export class JSONGenrePlugin implements PluginBase {
   readonly starColor: string
   readonly palette: { danger: string; dangerGlow: string; safe: string; safeGlow: string }
   readonly spawnTable: readonly SpawnEntry[]
-  readonly spawnDensity?: { baseInterval?: number; minInterval?: number; decayRate?: number }
+  readonly spawnDensity?: import('../domain/types').SpawnDensityConfig
 
   private readonly _delegate: PluginBase
 

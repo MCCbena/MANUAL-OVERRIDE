@@ -29,11 +29,7 @@ export abstract class GenrePluginBase implements GenrePlugin {
   abstract readonly spawnTable: readonly SpawnEntry[]
 
   // ─── オプション: spawnDensity (省略可) ────────────────────
-  readonly spawnDensity?: {
-    baseInterval?: number
-    minInterval?: number
-    decayRate?: number
-  }
+  readonly spawnDensity?: import('../domain/types').SpawnDensityConfig
 
   // ─── 必須描画フック（サブクラスで実装） ──────────────────────────
   abstract drawFarLayer(ctx: CanvasRenderingContext2D, offsetX: number, W: number, gY: number): void
