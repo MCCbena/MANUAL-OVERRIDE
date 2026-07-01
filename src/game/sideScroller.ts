@@ -456,8 +456,8 @@ export class SideScroller {
     const rightKey = r.controls.moveRight
     const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
-    if (this.input.keys.has(leftKey))  this.stats.moveLeft++
-    if (this.input.keys.has(rightKey)) this.stats.moveRight++
+    if (!r.features.has('tetris_mode') && this.input.keys.has(leftKey))  this.stats.moveLeft++
+    if (!r.features.has('tetris_mode') && this.input.keys.has(rightKey)) this.stats.moveRight++
     p.x += p.vx * dt
     p.x = Math.max(0, Math.min(W - p.w, p.x))
     p.y = Math.max(0, Math.min(H - p.h, p.y + p.vy * dt))

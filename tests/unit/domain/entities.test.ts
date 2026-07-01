@@ -84,11 +84,17 @@ describe('Hazard', () => {
     expect(rect.y).toBe(200)
   })
 
-  it('floatAmp が positive の場合 rect は float する', () => {
-    const h = new Hazard(100, 200, 30, 30, '#ff0000', '#ff6666', 'rect', 1, false, 10)
-    // pulse = 0 なので sin(0) = 0, floatAmp * 0 = 0
+  it('floatAmp が 0 の場合 rect は浮遊しない', () => {
+    const h = new Hazard(100, 200, 30, 30, '#ff0000', '#ff6666', 'rect', 1, false, 0)
     const rect = h.rect
     expect(rect.y).toBe(200)
+  })
+
+  it('floatAmp が positive で pulse=PI/2 の場合 rect が下方に移動する', () => {
+    const h = new Hazard(100, 200, 30, 30, '#ff0000', '#ff6666', 'rect', 1, false, 10)
+    h.pulse = Math.PI / 2 // sin(PI/2) = 1
+    const rect = h.rect
+    expect(rect.y).toBe(210) // y + floatAmp * sin(pulse) = 200 + 10
   })
 })
 

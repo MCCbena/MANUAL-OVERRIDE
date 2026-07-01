@@ -1,110 +1,77 @@
-import { describe, it, expect } from 'vitest'
+﻿import { describe, it, expect } from 'vitest'
 import { evalScoreFormula, calcThrowScore, calcFinalScore, getLastFormulaError } from '../../../src/domain/scoreCalc'
 import type { ThrowResult, ScoreVars } from '../../../src/domain/types'
 
+const emptyVars: ScoreVars = {
+  distance: 0, kills: 0, combo: 0, exp: 0, beatHits: 0,
+  survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
+  itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
+  colorTouchMisses: 0,
+}
+
 describe('evalScoreFormula', () => {
   it('基本的な計算式を評価する', () => {
-    const vars: ScoreVars = {
-      distance: 1000, kills: 5, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 10, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
+    const vars: ScoreVars = { ...emptyVars, distance: 1000, kills: 5, survivedSec: 10 }
     const result = evalScoreFormula('distance * 0.5 + kills * 100', vars)
     expect(result).toBe(1000) // 1000 * 0.5 + 5 * 100 = 500 + 500 = 1000
   })
 
   it('変数が未定義の場合 0 を返す', () => {
-    const vars: ScoreVars = {
-      distance: 0, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
-    const result = evalScoreFormula('unknownVar * 100', vars)
+    const result = evalScoreFormula('unknownVar * 100', emptyVars)
     expect(result).toBe(0)
   })
 
   it('括弧を含む式を評価する', () => {
-    const vars: ScoreVars = {
-      distance: 100, kills: 10, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 5, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
+    const vars: ScoreVars = { ...emptyVars, distance: 100, kills: 10, survivedSec: 5 }
     const result = evalScoreFormula('(kills + 5) * 50', vars)
     expect(result).toBe(750) // (10 + 5) * 50 = 750
   })
 
   it('負の値を返す式は max(0, ...) で補正される', () => {
-    const vars: ScoreVars = {
-      distance: 0, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
-    const result = evalScoreFormula('distance * -100', vars)
+    const result = evalScoreFormula('distance * -100', emptyVars)
     // Math.max(0, -0) → 0 (ただし -0 !== 0 に注意)
     expect(result === 0 || Object.is(result, 0)).toBe(true)
   })
 
   it('不正な式はデフォルト式で代替する', () => {
-    const vars: ScoreVars = {
-      distance: 100, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
+    const vars: ScoreVars = { ...emptyVars, distance: 100 }
     const result = evalScoreFormula('eval("bad")', vars)
     // 不正な式 → デフォルト式 'distance * 0.5 + kills * 100' で評価
     expect(result).toBe(50) // 100 * 0.5 + 0 * 100 = 50
   })
 
   it(' getLastFormulaError はエラー後にメッセージを返す', () => {
-    const vars: ScoreVars = {
-      distance: 0, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
-    evalScoreFormula('eval("bad")', vars)
+    evalScoreFormula('eval("bad")', emptyVars)
     const error = getLastFormulaError()
     expect(error).toBeTruthy()
     expect(error).toContain('不正なスコア式')
   })
 
   it(' getLastFormulaError は取り出し後に null になる', () => {
-    const vars: ScoreVars = {
-      distance: 0, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
-    evalScoreFormula('eval("bad")', vars)
+    evalScoreFormula('eval("bad")', emptyVars)
     getLastFormulaError() // 取り出し
     expect(getLastFormulaError()).toBeNull()
   })
 
   it('colorTouchMisses 変数を含む式を評価する', () => {
     const vars: ScoreVars = {
-      distance: 500, kills: 3, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 10, accuracy: 0.8, maxCombo: 0, deaths: 0,
-      itemsCollected: 1, bossKills: 0, stealthBonus: 0, colorTouches: 5,
-      colorTouchMisses: 2,
+      ...emptyVars, distance: 500, kills: 3, survivedSec: 10,
+      accuracy: 0.8, itemsCollected: 1, colorTouches: 5, colorTouchMisses: 2,
     }
     const result = evalScoreFormula('distance * 0.5 + kills * 100 - colorTouchMisses * 50', vars)
     expect(result).toBe(450) // 250 + 300 - 100 = 450
   })
 
   it('division by zero で 0 を返す', () => {
-    const vars: ScoreVars = {
-      distance: 100, kills: 0, combo: 0, exp: 0, beatHits: 0,
-      survivedSec: 0, accuracy: 0, maxCombo: 0, deaths: 0,
-      itemsCollected: 0, bossKills: 0, stealthBonus: 0, colorTouches: 0,
-    }
-    const result = evalScoreFormula('distance / 0', vars)
+    const result = evalScoreFormula('distance / 0', emptyVars)
     expect(result).toBe(0)
   })
 
   it('複雑な式を評価する', () => {
     const vars: ScoreVars = {
-      distance: 2000, kills: 10, combo: 5, exp: 100, beatHits: 8,
+      ...emptyVars, distance: 2000, kills: 10, combo: 5, exp: 100, beatHits: 8,
       survivedSec: 30, accuracy: 0.9, maxCombo: 5, deaths: 1,
-      itemsCollected: 3, bossKills: 1, stealthBonus: 50, colorTouches: 10,
-      colorTouchMisses: 1,
+      itemsCollected: 3, bossKills: 1, stealthBonus: 50, colorTouches: 10, colorTouchMisses: 1,
     }
     const result = evalScoreFormula(
       'distance * 0.5 + kills * 100 + combo * 50 + exp * 0.1 + beatHits * 30',
