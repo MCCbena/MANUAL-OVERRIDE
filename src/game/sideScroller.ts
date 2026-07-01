@@ -47,6 +47,9 @@ export interface GameSnapshot {
 // ループ内 dt のクランプ上限（フレーム落ち時に物理が発散するのを防ぐ）
 const MAX_DELTA_SEC = 0.05
 
+// ミリ秒 to 秒の変換定数
+const MS_TO_SEC = 1000
+
 // LearningSystem の最初のチェックまでの遅延（秒）
 const INITIAL_LEARNING_DELAY_SEC = 0.5
 
@@ -480,7 +483,7 @@ export class SideScroller {
     if (this.distance >= this.nextSpawnDist) {
       this._spawnHazard()
       const interval = HAZARD_SPAWN.baseInterval * Math.exp(-HAZARD_SPAWN.decayRate * this.distance)
-      this.nextSpawnDist += (Math.max(HAZARD_SPAWN.minInterval, interval) / 1000) * speed
+      this.nextSpawnDist += (Math.max(HAZARD_SPAWN.minInterval, interval) / MS_TO_SEC) * speed
     }
 
     if (p.invincible > 0) p.invincible -= dt
@@ -489,7 +492,6 @@ export class SideScroller {
         const h = this.hazards[i]
         if (!rectsOverlap(p.rect, h.rect)) continue
         if (!h.isSafe) {
-          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -610,7 +612,7 @@ export class SideScroller {
     if (this.distance >= this.nextSpawnDist) {
       this._spawnHazard()
       const interval = HAZARD_SPAWN.baseInterval * Math.exp(-HAZARD_SPAWN.decayRate * this.distance)
-      this.nextSpawnDist += (Math.max(HAZARD_SPAWN.minInterval, interval) / 1000) * speed
+      this.nextSpawnDist += (Math.max(HAZARD_SPAWN.minInterval, interval) / MS_TO_SEC) * speed
     }
 
     for (const h of this.hazards) {
@@ -628,7 +630,6 @@ export class SideScroller {
           ? h.isSafe
           : !h.isSafe
         if (isHazardous) {
-          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -648,6 +649,7 @@ export class SideScroller {
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
     this.stats.collisions += 1
+    this.scoreVarsColorTouchMisses++  // 危険色接触は被弾時必ずカウント（防御的）
     const world = this._getWorld()
     soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {

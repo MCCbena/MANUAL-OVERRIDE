@@ -108,7 +108,7 @@ export interface MutableWorld {
   addScoreVarsStealthBonus(amount: number): void
   /** 安全色タッチ回数をインクリメント（color_touch Feature が使用） */
   addScoreVarsColorTouch(): void
-  /** 危険色接触回数をインクリメント（accuracy 計算用） */
+  /** 危険色接触回数をインクリメント（accuracy 計算用、SideScroller 内部で直接使用） */
   addScoreVarsColorTouchMiss(): void
 }
 
