@@ -1,5 +1,5 @@
 {
-  "$comment": "ジャンル定義テーブル（21エントリ）。thresholdsは8ステップ後に収束するよう調整済み。",
+  "$comment": "ジャンル定義テーブル（21エントリ）。thresholdsはカードシステム(5ラウンド)で収束するよう調整済み。",
   "section": "genres",
   "themeColors": {
     "stg":        { "accent": "#1a66ff", "border": "#1a66ff", "hint": "rgba(168,216,255,0.5)",  "bg": "#000d1a", "glow": "rgba(26,102,255,0.25)" },
@@ -43,7 +43,7 @@
     {
       "id": "runner",
       "label": "エンドレスランナー",
-      "thresholds": {"tempo": 14},
+      "thresholds": {"tempo": 8},
       "enableFeatures": ["auto_run", "double_jump", "long_air"],
       "disableFeatures": ["grid_stop", "puzzle_solve"],
       "scoreFormula": "distance * 1.2 + survivedSec * 8 + combo * 50",
@@ -64,7 +64,7 @@
     {
       "id": "stg",
       "label": "シューティングゲーム",
-      "thresholds": {"range": 11, "enemy": 11},
+      "thresholds": {"range": 3, "enemy": 6},
       "enableFeatures": ["shoot", "three_way", "enemy_hp"],
       "disableFeatures": ["grid_stop", "puzzle_solve"],
       "scoreFormula": "kills * 120 + distance * 0.5 + combo * 80",
@@ -87,7 +87,7 @@
     {
       "id": "rpg",
       "label": "ロールプレイングゲーム",
-      "thresholds": {"growth": 16},
+      "thresholds": {"growth": 8},
       "enableFeatures": ["hp", "exp", "item_pickup", "slow_precise"],
       "disableFeatures": ["auto_run", "beat_hazard"],
       "scoreFormula": "exp * 2 + kills * 60 + distance * 0.3",
@@ -109,7 +109,7 @@
     {
       "id": "puzzle",
       "label": "パズルゲーム",
-      "thresholds": {"combo": 16},
+      "thresholds": {"combo": 6},
       "enableFeatures": ["grid_stop"],
       "disableFeatures": ["auto_run", "shoot", "beat_hazard"],
       "scoreFormula": "combo * 200 + survivedSec * 3",
@@ -130,7 +130,7 @@
     {
       "id": "rhythm",
       "label": "リズムゲーム",
-      "thresholds": {"tempo": 10, "rhythm": 10},
+      "thresholds": {"tempo": 6, "rhythm": 6},
       "enableFeatures": ["beat_hazard", "just_input", "beat_dash"],
       "disableFeatures": ["grid_stop"],
       "scoreFormula": "beatHits * 150 + combo * 100 + distance * 0.4",
@@ -151,7 +151,7 @@
     {
       "id": "aerial_stg",
       "label": "縦スクロールシューティング",
-      "thresholds": {"vertical": 7, "range": 8, "enemy": 8},
+      "thresholds": {"vertical": 3, "range": 3, "enemy": 4},
       "enableFeatures": ["shoot", "vertical_scroll", "enemy_hp", "spread_shot"],
       "disableFeatures": ["grid_stop", "puzzle_solve", "auto_run"],
       "scoreFormula": "kills * 130 + combo * 90 + survivedSec * 3",
@@ -175,7 +175,7 @@
     {
       "id": "bullet_hell",
       "label": "弾幕シューティング",
-      "thresholds": {"vertical": 8, "enemy": 14},
+      "thresholds": {"vertical": 4, "enemy": 8},
       "enableFeatures": ["shoot", "spread_shot", "enemy_hp", "vertical_scroll"],
       "disableFeatures": ["grid_stop", "auto_run", "slow_precise"],
       "scoreFormula": "kills * 80 + combo * 150 + survivedSec * 10 + accuracy * 500",
@@ -199,7 +199,7 @@
     {
       "id": "survival",
       "label": "サバイバルゲーム",
-      "thresholds": {"survive": 10, "growth": 9},
+      "thresholds": {"survive": 6, "growth": 6},
       "enableFeatures": ["hp", "item_pickup", "shield"],
       "disableFeatures": ["auto_run", "beat_hazard", "grid_stop"],
       "scoreFormula": "survivedSec * 15 + itemsCollected * 80 + distance * 0.2",
@@ -221,7 +221,7 @@
     {
       "id": "stealth_action",
       "label": "ステルスアクション",
-      "thresholds": {"stealth": 14},
+      "thresholds": {"stealth": 7},
       "enableFeatures": ["stealth_mode", "slow_precise"],
       "disableFeatures": ["shoot", "auto_run", "beat_hazard", "boss"],
       "scoreFormula": "stealthBonus * 0.5 + survivedSec * 10 + distance * 0.4",
@@ -243,7 +243,7 @@
     {
       "id": "racing",
       "label": "レーシングゲーム",
-      "thresholds": {"speed": 10, "tempo": 9},
+      "thresholds": {"speed": 4, "tempo": 6},
       "enableFeatures": ["auto_run", "dash", "time_bonus"],
       "disableFeatures": ["grid_stop", "puzzle_solve", "beat_hazard", "slow_precise"],
       "scoreFormula": "distance * 2.0 + survivedSec * 3 + combo * 30",
@@ -265,7 +265,7 @@
     {
       "id": "platformer",
       "label": "プラットフォームアクション",
-      "thresholds": {"aerial": 9, "combo": 9},
+      "thresholds": {"aerial": 5, "combo": 4},
       "enableFeatures": ["double_jump", "long_air", "wall_jump"],
       "disableFeatures": ["auto_run", "grid_stop", "beat_hazard"],
       "scoreFormula": "combo * 150 + distance * 0.8 + survivedSec * 5",
@@ -287,7 +287,7 @@
     {
       "id": "dungeon",
       "label": "ダンジョン探索",
-      "thresholds": {"growth": 14, "craft": 10},
+      "thresholds": {"growth": 6, "craft": 5},
       "enableFeatures": ["hp", "exp", "item_pickup", "slow_precise"],
       "disableFeatures": ["auto_run", "beat_hazard", "vertical_scroll"],
       "scoreFormula": "exp * 3 + kills * 70 + itemsCollected * 60 + distance * 0.2",
@@ -309,7 +309,7 @@
     {
       "id": "tower_def",
       "label": "タワーディフェンス",
-      "thresholds": {"craft": 14, "enemy": 10},
+      "thresholds": {"craft": 6, "enemy": 6},
       "enableFeatures": ["tower", "enemy_hp", "item_pickup"],
       "disableFeatures": ["auto_run", "beat_hazard", "vertical_scroll", "stealth_mode"],
       "scoreFormula": "kills * 90 + combo * 110 + survivedSec * 8",
@@ -330,7 +330,7 @@
     {
       "id": "sports",
       "label": "スポーツゲーム",
-      "thresholds": {"speed": 9, "rhythm": 9},
+      "thresholds": {"speed": 4, "rhythm": 5},
       "enableFeatures": ["dash", "time_bonus", "just_input"],
       "disableFeatures": ["grid_stop", "puzzle_solve", "enemy_hp", "stealth_mode"],
       "scoreFormula": "combo * 180 + distance * 1.0 + beatHits * 80",
@@ -352,7 +352,7 @@
     {
       "id": "idle",
       "label": "放置ゲーム",
-      "thresholds": {"craft": 16},
+      "thresholds": {"craft": 7},
       "enableFeatures": ["item_pickup", "exp", "tower"],
       "disableFeatures": ["auto_run", "shoot", "beat_hazard", "boss", "stealth_mode"],
       "scoreFormula": "itemsCollected * 200 + exp * 4 + survivedSec * 5",
@@ -373,7 +373,7 @@
     {
       "id": "bullet_runner",
       "label": "弾幕ランナー",
-      "thresholds": {"tempo": 12, "enemy": 9},
+      "thresholds": {"tempo": 7, "enemy": 6},
       "enableFeatures": ["auto_run", "shoot", "enemy_hp"],
       "disableFeatures": ["grid_stop", "puzzle_solve", "slow_precise", "stealth_mode"],
       "scoreFormula": "kills * 100 + distance * 1.5 + combo * 60",
@@ -395,7 +395,7 @@
     {
       "id": "arena",
       "label": "アリーナバトル",
-      "thresholds": {"enemy": 18, "combo": 10},
+      "thresholds": {"enemy": 7, "combo": 5},
       "enableFeatures": ["shoot", "enemy_hp", "boss", "dash"],
       "disableFeatures": ["auto_run", "grid_stop", "puzzle_solve", "stealth_mode"],
       "scoreFormula": "kills * 110 + bossKills * 500 + combo * 130",
@@ -418,7 +418,7 @@
     {
       "id": "aquatic",
       "label": "水中アドベンチャー",
-      "thresholds": {"vertical": 6, "aerial": 6, "survive": 7},
+      "thresholds": {"vertical": 3, "aerial": 3, "survive": 4},
       "enableFeatures": ["hp", "item_pickup", "slow_precise"],
       "disableFeatures": ["auto_run", "shoot", "boss", "beat_hazard"],
       "scoreFormula": "distance * 0.8 + itemsCollected * 100 + survivedSec * 12",
@@ -441,7 +441,7 @@
     {
       "id": "horror",
       "label": "サバイバルホラー",
-      "thresholds": {"survive": 12, "stealth": 7},
+      "thresholds": {"survive": 6, "stealth": 5},
       "enableFeatures": ["hp", "stealth_mode", "slow_precise"],
       "disableFeatures": ["auto_run", "shoot", "beat_hazard", "boss"],
       "scoreFormula": "survivedSec * 20 + stealthBonus * 0.8 + deaths * -200",
@@ -463,7 +463,7 @@
     {
       "id": "hack_slash",
       "label": "ハックアンドスラッシュ",
-      "thresholds": {"enemy": 8, "combo": 18},
+      "thresholds": {"enemy": 5, "combo": 7},
       "enableFeatures": ["shoot", "enemy_hp", "exp", "dash", "boss"],
       "disableFeatures": ["grid_stop", "puzzle_solve", "stealth_mode", "slow_precise"],
       "scoreFormula": "kills * 90 + maxCombo * 200 + exp * 2 + bossKills * 400",

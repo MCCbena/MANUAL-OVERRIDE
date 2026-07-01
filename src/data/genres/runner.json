@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/genre.schema.json",
   "id": "runner",
   "label": "エンドレスランナー",
-  "thresholds": { "tempo": 7 },
+  "thresholds": { "tempo": 8 },
   "enableFeatures": ["auto_run", "double_jump", "long_air"],
   "disableFeatures": ["grid_stop", "puzzle_solve"],
   "scoreFormula": "distance * 1.2 + survivedSec * 8 + combo * 50",

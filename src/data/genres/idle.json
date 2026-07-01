@@ -2,7 +2,7 @@
   "$schema": "../../../../schemas/genre.schema.json",
   "id": "idle",
   "label": "放置ゲーム",
-  "thresholds": { "craft": 6 },
+  "thresholds": { "craft": 7 },
   "enableFeatures": ["item_pickup", "exp", "tower"],
   "disableFeatures": ["auto_run", "shoot", "beat_hazard", "boss", "stealth_mode"],
   "scoreFormula": "itemsCollected * 200 + exp * 4 + survivedSec * 5",
