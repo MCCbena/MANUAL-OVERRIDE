@@ -76,8 +76,9 @@ export class SideScroller {
   private scoreVarsItemsCollected = 0 // アイテム収集総数
   private scoreVarsBossKills = 0      // ボス撃破数
   private scoreVarsStealthBonus = 0   // ステルス継続フレーム数の累積
-  private scoreVarsColorTouches = 0   // 安全色タッチ回数
-  private deaths = 0                  // 死亡回数（hp 有効時は複数回あり得る）
+  private scoreVarsColorTouches = 0        // 安全色タッチ回数
+  private scoreVarsColorTouchMisses = 0    // 危険色接触回数（accuracy 計算用）
+  private deaths = 0                       // 死亡回数（hp 有効時は複数回あり得る）
 
   // カメラ
   private cameraX = 0
@@ -309,7 +310,7 @@ export class SideScroller {
       bossKills: this.scoreVarsBossKills,
       stealthBonus: this.scoreVarsStealthBonus,
       colorTouches: this.scoreVarsColorTouches,
-      colorTouchMisses: this.player.colorTouchMisses,
+      colorTouchMisses: this.scoreVarsColorTouchMisses,
     }
 
     const genre = GENRES.find(g => g.id === this.rules.genre)
@@ -488,7 +489,7 @@ export class SideScroller {
         const h = this.hazards[i]
         if (!rectsOverlap(p.rect, h.rect)) continue
         if (!h.isSafe) {
-          p.colorTouchMisses++
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -627,7 +628,7 @@ export class SideScroller {
           ? h.isSafe
           : !h.isSafe
         if (isHazardous) {
-          p.colorTouchMisses++
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -1259,6 +1260,7 @@ export class SideScroller {
       addScoreVarsBossKill()   { self.scoreVarsBossKills++ },
       addScoreVarsStealthBonus(amount: number) { self.scoreVarsStealthBonus += amount },
       addScoreVarsColorTouch() { self.scoreVarsColorTouches++ },
+      addScoreVarsColorTouchMiss() { self.scoreVarsColorTouchMisses++ },
     }
   }
 

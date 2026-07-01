@@ -2,19 +2,6 @@ import { describe, it, expect } from 'vitest'
 import { Player, Hazard, Bullet, Item, rectsOverlap } from '../../../src/game/entities'
 
 describe('Player', () => {
-  it('初期状態で colorTouchMisses が 0', () => {
-    const player = new Player(100, 400)
-    expect(player.colorTouchMisses).toBe(0)
-  })
-
-  it('colorTouchMisses をインクリメントできる', () => {
-    const player = new Player(100, 400)
-    player.colorTouchMisses++
-    expect(player.colorTouchMisses).toBe(1)
-    player.colorTouchMisses++
-    expect(player.colorTouchMisses).toBe(2)
-  })
-
   it('rect が正しい位置を返す', () => {
     const player = new Player(100, 400)
     const rect = player.rect
@@ -22,6 +9,11 @@ describe('Player', () => {
     expect(rect.y).toBe(400 - player.h)
     expect(rect.w).toBe(player.w)
     expect(rect.h).toBe(player.h)
+  })
+
+  it('初期 scoreTouchMisses は未定義（SideScroller で管理）', () => {
+    const player = new Player(100, 400)
+    expect((player as unknown as Record<string, unknown>).colorTouchMisses).toBeUndefined()
   })
 
   it('初期 hp が 3', () => {
