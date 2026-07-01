@@ -492,6 +492,7 @@ export class SideScroller {
         const h = this.hazards[i]
         if (!rectsOverlap(p.rect, h.rect)) continue
         if (!h.isSafe) {
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -630,6 +631,7 @@ export class SideScroller {
           ? h.isSafe
           : !h.isSafe
         if (isHazardous) {
+          this.scoreVarsColorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -649,7 +651,6 @@ export class SideScroller {
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
     this.stats.collisions += 1
-    this.scoreVarsColorTouchMisses++  // 危険色接触は被弾時必ずカウント（防御的）
     const world = this._getWorld()
     soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {

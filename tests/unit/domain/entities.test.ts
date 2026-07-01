@@ -11,7 +11,7 @@ describe('Player', () => {
     expect(rect.h).toBe(player.h)
   })
 
-  it('初期 scoreTouchMisses は未定義（SideScroller で管理）', () => {
+  it('初期 colorTouchMisses は未定義（SideScroller で管理）', () => {
     const player = new Player(100, 400)
     expect((player as unknown as Record<string, unknown>).colorTouchMisses).toBeUndefined()
   })
@@ -71,12 +71,6 @@ describe('Hazard', () => {
   })
 
   it('floatAmp が 0 の場合 rect は float しない', () => {
-    const h = new Hazard(100, 200, 30, 30, '#ff0000', '#ff6666', 'rect', 1, false, 0)
-    const rect = h.rect
-    expect(rect.y).toBe(200)
-  })
-
-  it('floatAmp が 0 の場合 rect は浮遊しない', () => {
     const h = new Hazard(100, 200, 30, 30, '#ff0000', '#ff6666', 'rect', 1, false, 0)
     const rect = h.rect
     expect(rect.y).toBe(200)
