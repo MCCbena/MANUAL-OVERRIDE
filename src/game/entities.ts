@@ -25,6 +25,7 @@ export class Player {
   exp = 0
   airTime = 0
   landSquash = 0   // 0〜1：着地スカッシュ量
+  colorTouchMisses = 0  // 危険色ハザードへの接触回数（accuracy 計算用）
 
   constructor(x: number, groundY: number) {
     this.x = x

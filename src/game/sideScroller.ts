@@ -309,6 +309,7 @@ export class SideScroller {
       bossKills: this.scoreVarsBossKills,
       stealthBonus: this.scoreVarsStealthBonus,
       colorTouches: this.scoreVarsColorTouches,
+      colorTouchMisses: this.player.colorTouchMisses,
     }
 
     const genre = GENRES.find(g => g.id === this.rules.genre)
@@ -487,6 +488,7 @@ export class SideScroller {
         const h = this.hazards[i]
         if (!rectsOverlap(p.rect, h.rect)) continue
         if (!h.isSafe) {
+          p.colorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
@@ -514,7 +516,7 @@ export class SideScroller {
     const shootKey = (r.controls.shoot ?? 'z').toLowerCase()
 
     if (!r.features.has('auto_run') && !r.features.has('tetris_mode') && this.input.keys.has(leftKey))  this.stats.moveLeft++
-    if ((r.features.has('auto_run') || this.input.keys.has(rightKey)) && !r.features.has('tetris_mode')) this.stats.moveRight++
+    if (!r.features.has('auto_run') && !r.features.has('tetris_mode') && this.input.keys.has(rightKey)) this.stats.moveRight++
     if (p.onGround) {
       this.runCycle += Math.abs(p.vx) * dt * VFX.runCycleRate
     }
@@ -625,6 +627,7 @@ export class SideScroller {
           ? h.isSafe
           : !h.isSafe
         if (isHazardous) {
+          p.colorTouchMisses++
           this._onPlayerHit(p)
           if (this.dead) return true
         } else {
