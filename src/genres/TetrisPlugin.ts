@@ -52,7 +52,7 @@ export class TetrisPlugin extends GenrePluginBase {
     const cy = h * 0.3
 
     // 上段: 3ブロック横並び
-    ctx.fillStyle = '#a000f0'
+    ctx.fillStyle = this.tetrisColors.T
     ctx.fillRect(0, cy, w, blockSize)
 
     // 下段: 中央ブロック

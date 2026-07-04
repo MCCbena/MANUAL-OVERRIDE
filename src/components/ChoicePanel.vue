@@ -21,10 +21,6 @@ onUnmounted(() => {
   if (choiceTimer !== null) clearTimeout(choiceTimer)
 })
 
-onUnmounted(() => {
-  if (choiceTimer !== null) clearTimeout(choiceTimer)
-})
-
 function pick(choiceId: string) {
   if (selected.value) return
   selected.value = choiceId

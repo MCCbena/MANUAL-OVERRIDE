@@ -5,7 +5,7 @@
   "thresholds": { "combo": 4, "craft": 4 },
   "enableFeatures": ["tetris_mode"],
   "disableFeatures": ["auto_run", "shoot", "beat_hazard", "boss", "stealth_mode", "slow_precise"],
-  "scoreFormula": "combo * 300 + survivedSec * 5 + distance * 0.1",
+  "scoreFormula": "combo * 300 + survivedSec * 5",
   "manualReveal": "これはテトリスになりました。ブロックを積み上げてください。",
   "theme": "tetris",
   "bgColor": "#0a0a0a",
