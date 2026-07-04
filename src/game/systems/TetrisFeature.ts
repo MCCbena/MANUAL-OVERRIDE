@@ -278,7 +278,7 @@ function movePiece(state: TetrisState, dcol: number): boolean {
   return false
 }
 
-function hardDrop(state: TetrisState, world?: MutableWorld): number {
+function hardDrop(state: TetrisState): number {
   if (!state.piece || state.gameOver) return 0
   let dropped = 0
   while (true) {
@@ -382,9 +382,9 @@ export class TetrisFeature implements FeatureSystem {
     spawnPiece(this.state)
   }
 
-  onManualUpdated(world: MutableWorld, versionKey: string): void {
-    console.debug(`[Tetris] manual updated: ${versionKey}`)
-    this.onInit(world)
+  onManualUpdated(_world: MutableWorld, _versionKey: string): void {
+    // ゲーム状態は保持（説明書更新でグリッド・スコア・ピースが消えないよう）
+    // スクロール速度の保存値は firstInit 以降上書きしない（onInit 参照）
   }
 
   onDisable(world: MutableWorld): void {
@@ -438,12 +438,12 @@ export class TetrisFeature implements FeatureSystem {
     // 移動リピート
     this.state.moveTimer += dt
 
-    // 左右移動（null安全アクセス）
-    const leftKey = world.rules.controls.moveLeft?.toLowerCase() ?? 'arrowleft'
-    const rightKey = world.rules.controls.moveRight?.toLowerCase() ?? 'arrowright'
-    const upKey = world.rules.controls.moveUp?.toLowerCase() ?? 'arrowup'
-    const downKey = world.rules.controls.moveDown?.toLowerCase() ?? 'arrowdown'
-    const spaceKey = world.rules.controls.jump?.toLowerCase() ?? 'space'
+    // 左右移動（InputManager._normalize() は e.key をそのまま返すため大文字保持）
+    const leftKey = world.rules.controls.moveLeft ?? 'ArrowLeft'
+    const rightKey = world.rules.controls.moveRight ?? 'ArrowRight'
+    const upKey = world.rules.controls.moveUp ?? 'ArrowUp'
+    const downKey = world.rules.controls.moveDown ?? 'ArrowDown'
+    const spaceKey = world.rules.controls.jump ?? 'Space'
 
     if (justPressed.has(leftKey) || (keys.has(leftKey) && this.state.moveTimer >= this.state.moveDelay)) {
       if (movePiece(this.state, -1)) {
@@ -482,7 +482,7 @@ export class TetrisFeature implements FeatureSystem {
 
     // ハードドロップ
     if (justPressed.has(spaceKey)) {
-      const dropCells = hardDrop(this.state, world)
+      const dropCells = hardDrop(this.state)
       const hardDropScore = dropCells * 2
       this.state.totalScore += hardDropScore
       world.addScore(hardDropScore)

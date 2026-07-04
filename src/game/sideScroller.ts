@@ -282,7 +282,7 @@ export class SideScroller {
     }
   }
 
-  getStats(): ActionStats { return this.stats }
+  getStats(): ActionStats { return { ...this.stats } }
 
   /**
    * ScoreVars を構築し、ジャンル別 scoreFormula を使って playScore を再計算する。
