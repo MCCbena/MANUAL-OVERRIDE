@@ -149,7 +149,7 @@ export class SideScroller {
     this.player = new Player(PLAYER_INITIAL_X, gY)
     this.player.jumpsLeft = rules.features.has('double_jump') ? 2 : 1
 
-   this.input.setGameKeys(rules.controls)
+    this.input.setGameKeys(rules.controls)
   }
 
   // ルール更新（ManualVersion があれば learningRules を同期）

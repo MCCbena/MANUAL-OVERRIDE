@@ -25,7 +25,7 @@ export class MovementFeature implements FeatureSystem {
     this.driftTime = 0
   }
 
-onManualUpdated(_world: MutableWorld, _versionKey: string): void {
+  onManualUpdated(_world: MutableWorld, _versionKey: string): void {
     this.dash = { cooldown: 0, timer: 0, dir: 1 }
     this.driftTime = 0
   }

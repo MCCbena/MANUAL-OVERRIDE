@@ -18,6 +18,7 @@
 
 import type { FeatureSystem } from '../../engine/FeatureSystem'
 import type { MutableWorld, InputSnapshot } from '../../engine/types'
+import type { ScrollDirection } from '../../domain/types'
 import { TETRIS_COLORS } from './tetris-colors'
 
 // ─── グリッド定数 ───────────────────────────────────────────────────
@@ -355,7 +356,7 @@ export class TetrisFeature implements FeatureSystem {
 
   private state: TetrisState = initialState()
   // H7: save scrollDirection and scrollSpeed on init to restore on disable
-  private savedScrollDirection: string = 'horizontal'
+  private savedScrollDirection: ScrollDirection = 'horizontal'
   private savedScrollSpeed: number = 3
   private firstInit = true
   // M3: cache canvas dimensions to avoid per-frame recalculation
