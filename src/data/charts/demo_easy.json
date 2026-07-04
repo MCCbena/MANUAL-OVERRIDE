@@ -1,0 +1,53 @@
+{
+  "title": "Demo Song - Easy",
+  "artist": "OpenHands",
+  "bpm": 120,
+  "difficulty": 3,
+  "sections": [
+    {
+      "name": "Intro",
+      "notes": []
+    },
+    {
+      "name": "A-Meteru",
+      "notes": [
+        {"time": 4000, "lane": 2, "type": "tap"},
+        {"time": 6000, "lane": 1, "type": "tap"},
+        {"time": 8000, "lane": 3, "type": "tap"},
+        {"time": 10000, "lane": 2, "type": "tap"},
+        {"time": 12000, "lane": 4, "type": "tap"},
+        {"time": 14000, "lane": 0, "type": "tap"},
+        {"time": 16000, "lane": 2, "type": "tap"},
+        {"time": 18000, "lane": 1, "type": "tap"},
+        {"time": 20000, "lane": 3, "type": "tap"},
+        {"time": 22000, "lane": 2, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Interlude",
+      "notes": []
+    },
+    {
+      "name": "B-Meteru",
+      "notes": [
+        {"time": 24000, "lane": 0, "type": "tap"},
+        {"time": 25000, "lane": 1, "type": "tap"},
+        {"time": 26000, "lane": 2, "type": "tap"},
+        {"time": 27000, "lane": 3, "type": "tap"},
+        {"time": 28000, "lane": 4, "type": "tap"},
+        {"time": 30000, "lane": 2, "type": "hold", "holdLength": 1000},
+        {"time": 32000, "lane": 0, "type": "tap"},
+        {"time": 34000, "lane": 4, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Outro",
+      "notes": [
+        {"time": 36000, "lane": 2, "type": "tap"},
+        {"time": 38000, "lane": 1, "type": "tap"},
+        {"time": 40000, "lane": 3, "type": "tap"}
+      ]
+    }
+  ],
+  "noteCount": 20
+}

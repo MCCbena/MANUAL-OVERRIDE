@@ -133,3 +133,29 @@ export interface BeatMarker {
   x: number
   strength: number
 }
+
+// ──────────────────────────────────────────────────────────────────────
+// RhythmNote（プロセカ風リズムゲームのノート）
+// ──────────────────────────────────────────────────────────────────────
+export type NoteType = 'tap' | 'hold' | 'flick'
+export type JudgeLevel = 'perfect' | 'great' | 'nice' | 'miss'
+
+export interface RhythmNote {
+  id: string
+  time: number           // ミリ秒（曲開始からの絶対時間）
+  lane: number           // レーンインデックス (0-4)
+  type: NoteType
+  holdLength?: number    // ホールド長（ミリ秒）
+  judged: boolean        // 判定済みか
+  judgeLevel?: JudgeLevel
+}
+
+// 判定ポップアップ
+export interface JudgePopup {
+  level: JudgeLevel
+  x: number
+  y: number
+  life: number           // 0〜1 で消える
+  score: number
+  comboBonus: number
+}

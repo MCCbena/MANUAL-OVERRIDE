@@ -1,21 +1,18 @@
 {
   "$schema": "../../../../schemas/genre.schema.json",
   "id": "rhythm",
-  "label": "リズムゲーム",
+  "label": "リズムゲーム（プロセカ風）",
   "thresholds": { "tempo": 6, "rhythm": 6 },
-  "enableFeatures": ["beat_hazard", "just_input", "beat_dash"],
-  "disableFeatures": ["grid_stop"],
-  "scoreFormula": "beatHits * 150 + combo * 100 + distance * 0.4",
-  "manualReveal": "これはリズムゲームになりました。音に合わせてください。",
+  "enableFeatures": ["beat_hazard", "just_input"],
+  "disableFeatures": ["grid_stop", "double_jump"],
+  "scoreFormula": "perfectCount * 320 + greatCount * 280 + niceCount * 150 + combo * 10 + distance * 0.2",
+  "manualReveal": "これはリズムゲームになりました。ノートをタイミングよく叩いてください。",
   "theme": "rhythm",
-  "bgColor": "#1a0030",
+  "bgColor": "#0a0015",
   "controls": {
     "jump": "Space",
-    "moveLeft": "ArrowLeft",
-    "moveRight": "ArrowRight",
-    "moveUp": "ArrowUp",
-    "moveDown": "ArrowDown"
+    "shoot": "Z"
   },
-  "gravity": 1600,
+  "gravity": 0,
   "endingFlavor": "あなたはリズムを刻んだ。説明書のページをめくる音さえも拍子になった。"
 }

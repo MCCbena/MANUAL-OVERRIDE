@@ -1,43 +1,76 @@
 /**
  * genres/RhythmPlugin.ts
- * 'rhythm' ジャンル（サイバーパンク / ビート）のプラグイン。
+ * 'rhythm' ジャンル — プロセカ風リズムゲームの視覚テーマ。
+ * 5レーン構成、ジャッジライン、ネオンカラーのパレットを使用。
  */
 
-import type { GenrePlugin } from '../engine/GenrePlugin'
+import { GenrePluginBase } from '../engine/GenrePluginBase'
 import type { SpawnEntry } from '../engine/types'
 import type { GenreId } from '../domain/types'
-import { DarkThemePlugin } from './BasePlugin'
 
-export class RhythmPlugin extends DarkThemePlugin {
+export class RhythmPlugin extends GenrePluginBase {
   readonly id: GenreId = 'rhythm'
-  readonly skyColors: readonly [string, string] = ['#0a0015', '#150028']
-  readonly groundColors: readonly [string, string] = ['#1a0030', '#0d0018']
-  readonly farLayerColor = '#1a0040'
-  readonly midLayerColor = '#120030'
-  readonly starColor: string | undefined = '#cc88ff'
-  readonly palette: GenrePlugin['palette'] = {
-    danger: '#e84393', dangerGlow: '#fd79a8',
-    safe:   '#6c5ce7', safeGlow:   '#a29bfe',
+  
+  // プロセカ風カラフルテーマ
+  readonly skyColors: readonly [string, string] = ['#0a0015', '#1a0030']
+  readonly groundColors: readonly [string, string] = ['#0d0020', '#1a0040']
+  readonly farLayerColor = '#0a0018'
+  readonly midLayerColor = '#0f0025'
+  readonly starColor: string | undefined = '#ff69b4' // ピンク星
+  
+  // プロセカ風パレット
+  readonly palette = {
+    danger:   '#ff1493', dangerGlow: '#ff69b4', // 鮮やかなピンク
+    safe:     '#00bfff', safeGlow:   '#87cefa', // シアンブルー
   }
+  
+  // リズムゲームではハザードスポーンは使用しない（ノートを代わりに使用）
   readonly spawnTable: readonly SpawnEntry[] = [
-    { shape: 'rect',    placement: 'ground', weightStart: 6,  weightEnd: 5,  wRange: [22, 42], hRange: [30, 55] },
-    { shape: 'diamond', placement: 'float',  weightStart: 3,  weightEnd: 6,  wRange: [28, 42], hRange: [28, 42] },
-    { shape: 'spike',   placement: 'ground', weightStart: 1,  weightEnd: 4,  wRange: [22, 36], hRange: [35, 55] },
-    { shape: 'rect',    placement: 'air',    weightStart: 0,  weightEnd: 3,  wRange: [25, 42], hRange: [22, 36] },
+    { shape: 'rect', placement: 'ground', weightStart: 0, weightEnd: 0, wRange: [0], hRange: [0] },
   ]
 
+  // レーン数（5レーン）
+  readonly laneCount = 5
+  
+  override drawFarLayer(_ctx: CanvasRenderingContext2D, _offsetX: number, _W: number, _gY: number): void {
+    // リズムゲームでは遠景を描かない（ノートフォーカス）
+  }
+
   override drawMidLayer(ctx: CanvasRenderingContext2D, offsetX: number, W: number, gY: number): void {
-    // 縦ラインの光（ビート感）
-    ctx.globalAlpha = 0.08
-    ctx.fillStyle = '#cc44ff'
-    const spacing = 120
+    // 背景グリッド線（リズム感演出）
+    ctx.globalAlpha = 0.15
+    ctx.strokeStyle = '#ff69b4'
+    ctx.lineWidth = 1
+    
+    const spacing = 80
     const start = -(offsetX % spacing)
+    
     for (let x = start; x < W; x += spacing) {
-      ctx.fillRect(x, 0, 2, gY)
+      ctx.beginPath()
+      ctx.moveTo(x, 0)
+      ctx.lineTo(x, gY)
+      ctx.stroke()
     }
+    
+    // ホリゾンタルライン（奥行き演出）
+    for (let y = 0; y < gY; y += spacing * 2) {
+      ctx.beginPath()
+      ctx.moveTo(0, y)
+      ctx.lineTo(W, y)
+      ctx.stroke()
+    }
+    
     ctx.globalAlpha = 1
-    // 建物シルエット（親クラス呼び出し）
-    super.drawMidLayer(ctx, offsetX, W, gY)
+  }
+
+  override drawPlayer(_ctx: CanvasRenderingContext2D, _w: number, _h: number, _onGround: boolean, _runCycle: number): void {
+    // リズムゲームではプレイヤーキャラクターを描かない（ノートが主体）
+  }
+
+  /** レーンの色を返す */
+  getLaneColor(lane: number): string {
+    const colors = ['#ff1493', '#00bfff', '#ffd700', '#32cd32', '#9370db']
+    return colors[lane % colors.length]
   }
 }
 

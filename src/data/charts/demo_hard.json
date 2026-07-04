@@ -1,0 +1,89 @@
+{
+  "title": "Demo Song - Hard",
+  "artist": "OpenHands",
+  "bpm": 160,
+  "difficulty": 7,
+  "sections": [
+    {
+      "name": "Intro",
+      "notes": []
+    },
+    {
+      "name": "A-Meteru",
+      "notes": [
+        {"time": 4000, "lane": 2, "type": "tap"},
+        {"time": 5000, "lane": 1, "type": "tap"},
+        {"time": 6000, "lane": 3, "type": "tap"},
+        {"time": 7000, "lane": 2, "type": "flick"},
+        {"time": 8000, "lane": 0, "type": "tap"},
+        {"time": 9000, "lane": 4, "type": "tap"},
+        {"time": 10000, "lane": 2, "type": "tap"},
+        {"time": 10500, "lane": 1, "type": "tap"},
+        {"time": 11000, "lane": 3, "type": "tap"},
+        {"time": 11500, "lane": 2, "type": "flick"}
+      ]
+    },
+    {
+      "name": "Pre-Chorus",
+      "notes": [
+        {"time": 14000, "lane": 0, "type": "tap"},
+        {"time": 14500, "lane": 1, "type": "tap"},
+        {"time": 15000, "lane": 2, "type": "tap"},
+        {"time": 15500, "lane": 3, "type": "tap"},
+        {"time": 16000, "lane": 4, "type": "tap"},
+        {"time": 16500, "lane": 3, "type": "tap"},
+        {"time": 17000, "lane": 2, "type": "tap"},
+        {"time": 17500, "lane": 1, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Chorus",
+      "notes": [
+        {"time": 20000, "lane": 0, "type": "hold", "holdLength": 800},
+        {"time": 21000, "lane": 4, "type": "tap"},
+        {"time": 21500, "lane": 3, "type": "flick"},
+        {"time": 22000, "lane": 2, "type": "tap"},
+        {"time": 22500, "lane": 1, "type": "tap"},
+        {"time": 23000, "lane": 0, "type": "tap"},
+        {"time": 23500, "lane": 4, "type": "hold", "holdLength": 600},
+        {"time": 24500, "lane": 2, "type": "flick"},
+        {"time": 25000, "lane": 1, "type": "tap"},
+        {"time": 25500, "lane": 3, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Bridge",
+      "notes": [
+        {"time": 28000, "lane": 2, "type": "hold", "holdLength": 1500},
+        {"time": 30000, "lane": 0, "type": "tap"},
+        {"time": 30200, "lane": 1, "type": "tap"},
+        {"time": 30400, "lane": 2, "type": "tap"},
+        {"time": 30600, "lane": 3, "type": "tap"},
+        {"time": 30800, "lane": 4, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Final Chorus",
+      "notes": [
+        {"time": 32000, "lane": 0, "type": "tap"},
+        {"time": 32100, "lane": 4, "type": "tap"},
+        {"time": 32200, "lane": 1, "type": "flick"},
+        {"time": 32300, "lane": 3, "type": "tap"},
+        {"time": 32400, "lane": 2, "type": "hold", "holdLength": 1000},
+        {"time": 33500, "lane": 0, "type": "tap"},
+        {"time": 33600, "lane": 4, "type": "flick"},
+        {"time": 33700, "lane": 2, "type": "tap"}
+      ]
+    },
+    {
+      "name": "Outro",
+      "notes": [
+        {"time": 36000, "lane": 2, "type": "tap"},
+        {"time": 37000, "lane": 1, "type": "tap"},
+        {"time": 38000, "lane": 3, "type": "tap"},
+        {"time": 39000, "lane": 2, "type": "hold", "holdLength": 2000}
+      ]
+    }
+  ],
+  "noteCount": 41
+}
