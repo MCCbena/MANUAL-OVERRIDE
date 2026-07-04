@@ -62,7 +62,7 @@ export class MovementFeature implements FeatureSystem {
       : PLAYER_PHYSICS.runSpeed
 
     if (r.scrollAxis === 'y') {
- const moveUp   = r.controls.moveUp   ? input.keys.has(r.controls.moveUp)   : false
+      const moveUp   = r.controls.moveUp   ? input.keys.has(r.controls.moveUp)   : false
       const moveDown = r.controls.moveDown ? input.keys.has(r.controls.moveDown) : false
       p.vx = input.keys.has(r.controls.moveRight) ? runSpeed : input.keys.has(r.controls.moveLeft) ? -runSpeed : 0
       p.vy = moveUp ? -runSpeed : moveDown ? runSpeed : 0
