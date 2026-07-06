@@ -404,6 +404,95 @@ export interface SurpriseEnding {
   forcedGenre?: GenreId
 }
 
+/** hidden_genre トリガー条件 */
+export interface HiddenGenreTrigger {
+  type: 'genre_params'
+  params: GenreParam[]
+  thresholds: Partial<Record<GenreParam, number>>
+  resultGenre: string
+  requiredChoices?: string[]
+}
+
+/** bad_ending トリガー条件 */
+export interface BadEndingTrigger {
+  type: 'play_style'
+  style: DetectedPlayStyle
+  minConfidence?: number
+  maxContradictionScore?: number
+  maxRounds?: number
+  // additional conditions can be added here as needed
+
+}
+
+/** narrative_twist トリガー条件 */
+export interface NarrativeTwistTrigger {
+  type: 'pattern'
+  requiredChoices: string[]
+  additionalConditions?: {
+    minContradictionScore?: number
+    maxTempoValue?: number
+    maxPlayStyleConfidence?: number
+    badEndingNotTriggered?: boolean
+    minRoundCount?: number
+    // other conditions can be added here
+  }
+}
+
+/** サプライズエンドの条件定義 */
+export interface SurpriseEndingCondition<T = any> {
+  id: string
+  title: string
+  description: string
+  trigger: T
+}
+
+/** hidden_genre トリガー条件 */
+export interface HiddenGenreTrigger {
+  type: 'genre_params'
+  params: GenreParam[]
+  thresholds: Partial<Record<GenreParam, number>>
+  resultGenre: string
+  requiredChoices?: string[]
+}
+
+/** bad_ending トリガー条件 */
+export interface BadEndingTrigger {
+  type: 'play_style'
+  style: DetectedPlayStyle
+  minConfidence?: number
+  maxContradictionScore?: number
+  maxRounds?: number
+}
+
+/** narrative_twist トリガー条件 */
+export interface NarrativeTwistTrigger {
+  type: 'pattern'
+  requiredChoices: string[]
+  additionalConditions?: {
+    minContradictionScore?: number
+    maxTempoValue?: number
+    maxPlayStyleConfidence?: number
+    badEndingNotTriggered?: boolean
+    minRoundCount?: number
+  }
+}
+
+/** hidden_genre 条件の配列 */
+export interface HiddenGenreCondition extends SurpriseEndingCondition<HiddenGenreTrigger> {}
+
+/** bad_ending 条件の配列 */
+export interface BadEndingCondition extends SurpriseEndingCondition<BadEndingTrigger> {}
+
+/** narrative_twist 条件の配列 */
+export interface NarrativeTwistCondition extends SurpriseEndingCondition<NarrativeTwistTrigger> {}
+
+/** サプライズエンド設定全体（JSONデータの型） */
+export interface SurpriseEndingConfig {
+  hidden_genre: HiddenGenreCondition[]
+  bad_ending: BadEndingCondition[]
+  narrative_twist: NarrativeTwistCondition[]
+}
+
 // ─────────────────────────────────────────────────────────────
 // スコア計算式で使用可能な変数
 // ─────────────────────────────────────────────────────────────

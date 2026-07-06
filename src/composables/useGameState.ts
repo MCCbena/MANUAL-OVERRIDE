@@ -1,6 +1,7 @@
 import { reactive, ref, readonly } from 'vue'
 import type { Phase, GenreId, RuntimeRules, FinalScore, ManualVersion, ManualCard, GenreParam, BayesianState,
-  ActionStats, PlayStyleResult, ContradictionState, SurpriseEnding, ChoiceRecord as ChoiceRecordType } from '../domain/types'
+  ActionStats, PlayStyleResult, ContradictionState, SurpriseEnding, HiddenGenreCondition, BadEndingCondition, 
+  NarrativeTwistCondition, SurpriseEndingConfig } from '../domain/types'
 import { BAYES_DEBUG_TOP_N } from '../domain/types'
 import { MANUAL_DECK } from '../data/manualDeck'
 import { GENRES } from '../data/genres'
@@ -18,7 +19,10 @@ import { sampleCards, CARD_POOL } from '../data/cardPool'
 import { MAX_ROUNDS, DEFAULT_FALLBACK_GENRE, PARAM_JITTER_RANGE } from '../data/gameBalance'
 import { detectPlayStyle } from '../domain/playStyleDetector'
 import { trackContradictions, shouldTriggerGlitchEnd } from '../domain/contradictionTracker'
-import surpriseEndingConditions from '../data/config/surprise-ending-conditions.json'
+
+// JSON 読み込みは Vite がサポートしているため、そのままインポートできる
+import surpriseEndingConditionsData from '../data/config/surprise-ending-conditions.json'
+const surpriseEndingConditions = surpriseEndingConditionsData as SurpriseEndingConfig
 
 // genreParams のジッター幅（±20%）
 // gameBalance.ts からインポート済み
@@ -65,7 +69,8 @@ export function computeSurpriseEnding(
   if (badEnding) return badEnding
 
   // 4. narrative_twist 判定：選択履歴のパターンによる分岐
-  const twistEnding = checkNarrativeTwist(choiceHistory)
+  //    badEndingWasTriggered: false（bad_ending を既にチェックし、false の場合のみここに来るため）
+  const twistEnding = checkNarrativeTwist(choiceHistory, accumulatedParams, playStyle, contradiction, false)
   if (twistEnding) return twistEnding
 
   // どれも該当しなければ通常エンド（null）
@@ -117,8 +122,13 @@ function checkBadEnding(playStyle: PlayStyleResult | null, contradictionScore: n
     const trigger = condition.trigger
 
     if (trigger.type === 'play_style') {
-      // プレイスタイルが一致し、信頼度が閾値以上かチェック
-      if (playStyle.style !== trigger.style || playStyle.confidence < trigger.minConfidence) {
+      // プレイスタイルが一致するかチェック
+      if (playStyle.style !== trigger.style) {
+        continue
+      }
+
+      // 信頼度の閾値（オプション）
+      if (trigger.minConfidence !== undefined && playStyle.confidence < trigger.minConfidence) {
         continue
       }
 
@@ -144,14 +154,20 @@ function checkBadEnding(playStyle: PlayStyleResult | null, contradictionScore: n
 }
 
 /** narrative_twist の条件を満たすかチェック */
-function checkNarrativeTwist(history: ChoiceRecord[]): SurpriseEnding | null {
+function checkNarrativeTwist(
+  history: ChoiceRecord[],
+  accumulated: ReturnType<typeof accumulateWithMultiplier>,
+  playStyle: PlayStyleResult | null,
+  contradiction: ContradictionState,
+  badEndingWasTriggered: boolean = false,
+): SurpriseEnding | null {
   const selectedIds = new Set(history.map(r => r.choiceId))
 
   for (const condition of surpriseEndingConditions.narrative_twist) {
     const trigger = condition.trigger
 
     if (trigger.type === 'pattern') {
-      // 必須のカードIDが含まれているかチェック
+      // 必須のカードID が含まれているかチェック
       const hasRequired = trigger.requiredChoices.every(id => selectedIds.has(id))
       if (!hasRequired) continue
 
@@ -159,26 +175,32 @@ function checkNarrativeTwist(history: ChoiceRecord[]): SurpriseEnding | null {
       if (trigger.additionalConditions) {
         const ac = trigger.additionalConditions
 
-        // 矛盾スコアの下限条件（簡易実装：contradictionState は直接渡せないため、後で補完可能）
-        if (ac.minContradictionScore) {
-          // TODO: 矛盾状態をこの関数に渡す必要があるか検討
+        // 矛盾スコアの下限条件
+        if (ac.minContradictionScore && contradiction.score < ac.minContradictionScore) {
           continue
         }
 
-        // ラウンド数の下限条件（簡易実装：history の長さをカウント）
+        // ラウンド数の下限条件
         if (ac.minRoundCount && history.length < ac.minRoundCount) {
           continue
         }
 
         // 最大パラメータ値の上限条件（例：tempo <= maxTempoValue）
-        if (ac.maxTempoValue) {
-          const accumulated = accumulateWithMultiplier(history)
-          if ((accumulated.tempo ?? 0) > ac.maxTempoValue) {
-            continue
-          }
+        if (ac.maxTempoValue && (accumulated.tempo ?? 0) > ac.maxTempoValue) {
+          continue
         }
 
-        // 他の条件（badEndingNotTriggered など）は後で拡張可能
+        // 最大プレイスタイル信頼度の上限条件
+        if (ac.maxPlayStyleConfidence && playStyle && playStyle.confidence >= ac.maxPlayStyleConfidence) {
+          continue
+        }
+
+        // バッドエンドが未発動であることを確認
+        if (ac.badEndingNotTriggered && badEndingWasTriggered) {
+          // bad ending が既に発動している場合はスキップ
+          continue
+        }
+
       }
 
       return {
