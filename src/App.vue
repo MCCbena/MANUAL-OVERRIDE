@@ -82,33 +82,42 @@ function resizeCanvas() {
 
 // ─── ゲームスタート ─────────────────────────────────────────────
 function startGame() {
-  gameState.startGame()
-  const canvas = canvasRef.value
-  if (!canvas) {
-    showToast('エラー: キャンバスが初期化されていません')
-    return
-  }
-  resizeCanvas()
-  scroller = new SideScroller(canvas, getRules())
-  // 初期説明書を履歴に登録
-  manualCtl.recordUpdate(gameState.currentManual())
-  scroller.start()
-  // 初期化完了 → ローディング非表示
-  isLoading.value = false
-  // チュートリアル有効時は一時停止（チュートリアル画面の背後で静止）
-  if (TUTORIAL_ENABLED) {
-    scroller.setPaused(true)
-  }
+  try {
+    gameState.startGame()
+    const canvas = canvasRef.value
+    if (!canvas) {
+      showToast('エラー: キャンバスが初期化されていません')
+      return
+    }
+    resizeCanvas()
+    scroller = new SideScroller(canvas, getRules())
+    // 初期説明書を履歴に登録
+    manualCtl.recordUpdate(gameState.currentManual())
+    scroller.start()
 
-  // デバッグ: ジャンル強制（lockedGenre の watch が scroller へルールを反映する）
-  if (debugCtl.debugSettings.forceGenre) {
-    gameState.debugForceGenre(debugCtl.debugSettings.forceGenre)
-    // チュートリアルをスキップして genreLocked へ直行するため明示的に再開する。
-    // phase が title→genreLocked と遷移し shouldPause が変化しないため watch では再開されない。
-    scroller.setPaused(false)
-  }
+    // チュートリアル有効時は一時停止（チュートリアル画面の背後で静止）
+    if (TUTORIAL_ENABLED) {
+      scroller.setPaused(true)
+    }
 
-  beginSnapshotLoop()
+    // デバッグ: ジャンル強制（lockedGenre の watch が scroller へルールを反映する）
+    if (debugCtl.debugSettings.forceGenre) {
+      gameState.debugForceGenre(debugCtl.debugSettings.forceGenre)
+      // チュートリアルをスキップして genreLocked へ直行するため明示的に再開する。
+      // phase が title→genreLocked と遷移し shouldPause が変化しないため watch では再開されない。
+      scroller.setPaused(false)
+    }
+
+    beginSnapshotLoop()
+    // 初期化完了 → ローディング非表示（成功時のみ）
+    isLoading.value = false
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : 'ゲームの初期化に失敗しました'
+    showToast(`⚠ ${msg}`)
+    // 回復可能にするため isLoading と phase を戻す（タイトル画面が表示される）
+    isLoading.value = true
+    gameState.phase.value = 'title'
+  }
 }
 
 // ─── デバッグパネル「OK」: 設定を反映して通常フローでゲーム開始 ───
