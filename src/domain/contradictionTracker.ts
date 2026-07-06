@@ -60,10 +60,3 @@ export function trackContradictions(history: ChoiceRecord[]): ContradictionState
 export function shouldTriggerGlitchEnd(state: ContradictionState): boolean {
   return state.hasEffect
 }
-
-/**
- * 矛盾スコアを 0〜100 のパーセンテージで返す（UI 表示用）。
- */
-export function contradictionPercentage(state: ContradictionState): number {
-  return Math.round(state.score * 100)
-}

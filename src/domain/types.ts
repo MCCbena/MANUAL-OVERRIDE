@@ -446,37 +446,6 @@ export interface SurpriseEndingCondition<T = any> {
   trigger: T
 }
 
-/** hidden_genre トリガー条件 */
-export interface HiddenGenreTrigger {
-  type: 'genre_params'
-  params: GenreParam[]
-  thresholds: Partial<Record<GenreParam, number>>
-  resultGenre: string
-  requiredChoices?: string[]
-}
-
-/** bad_ending トリガー条件 */
-export interface BadEndingTrigger {
-  type: 'play_style'
-  style: DetectedPlayStyle
-  minConfidence?: number
-  maxContradictionScore?: number
-  maxRounds?: number
-}
-
-/** narrative_twist トリガー条件 */
-export interface NarrativeTwistTrigger {
-  type: 'pattern'
-  requiredChoices: string[]
-  additionalConditions?: {
-    minContradictionScore?: number
-    maxTempoValue?: number
-    maxPlayStyleConfidence?: number
-    badEndingNotTriggered?: boolean
-    minRoundCount?: number
-  }
-}
-
 /** hidden_genre 条件の配列 */
 export interface HiddenGenreCondition extends SurpriseEndingCondition<HiddenGenreTrigger> {}
 

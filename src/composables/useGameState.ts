@@ -195,12 +195,6 @@ function checkNarrativeTwist(
           continue
         }
 
-        // バッドエンドが未発動であることを確認
-        if (ac.badEndingNotTriggered && badEndingWasTriggered) {
-          // bad ending が既に発動している場合はスキップ
-          continue
-        }
-
       }
 
       return {

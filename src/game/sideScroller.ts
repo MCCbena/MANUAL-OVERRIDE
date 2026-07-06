@@ -1252,7 +1252,10 @@ export class SideScroller {
       setBeatHazardInverted(v) { self._gameStats.beatHazardInverted = v },
 
       addScoreVarsHit()        { self.scoreVarsHits++ },
-      addScoreVarsItemCollected() { self.scoreVarsItemsCollected++ },
+      addScoreVarsItemCollected() { 
+        self.scoreVarsItemsCollected++
+        self.stats.itemsCollected++
+      },
       addScoreVarsBossKill()   { self.scoreVarsBossKills++ },
       addScoreVarsStealthBonus(amount: number) { self.scoreVarsStealthBonus += amount },
       addScoreVarsColorTouch() { self.scoreVarsColorTouches++ },
