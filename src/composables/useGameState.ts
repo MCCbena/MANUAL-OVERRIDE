@@ -1,6 +1,6 @@
 import { reactive, ref, readonly } from 'vue'
 import type { Phase, GenreId, RuntimeRules, FinalScore, ManualVersion, ManualCard, GenreParam, BayesianState,
-  ActionStats, PlayStyleResult, ContradictionState, SurpriseEnding } from '../domain/types'
+  ActionStats, PlayStyleResult, ContradictionState, SurpriseEnding, ChoiceRecord as ChoiceRecordType } from '../domain/types'
 import { BAYES_DEBUG_TOP_N } from '../domain/types'
 import { MANUAL_DECK } from '../data/manualDeck'
 import { GENRES } from '../data/genres'
@@ -18,6 +18,7 @@ import { sampleCards, CARD_POOL } from '../data/cardPool'
 import { MAX_ROUNDS, DEFAULT_FALLBACK_GENRE, PARAM_JITTER_RANGE } from '../data/gameBalance'
 import { detectPlayStyle } from '../domain/playStyleDetector'
 import { trackContradictions, shouldTriggerGlitchEnd } from '../domain/contradictionTracker'
+import surpriseEndingConditions from '../data/config/surprise-ending-conditions.json'
 
 // genreParams のジッター幅（±20%）
 // gameBalance.ts からインポート済み
@@ -36,12 +37,13 @@ export function computeContradiction(history: ChoiceRecord[]): ContradictionStat
   return trackContradictions(history)
 }
 
-/** サプライズエンドを判定（矛盾・プレイスタイルから） */
+/** サプライズエンドを判定（矛盾・プレイスタイル・選択履歴から） */
 export function computeSurpriseEnding(
   contradiction: ContradictionState,
-  _playStyle: PlayStyleResult,
+  playStyle: PlayStyleResult | null,
+  choiceHistory: ChoiceRecord[],
 ): SurpriseEnding | null {
-  // 矛盾スコアが閾値を超えていれば glitch エンド
+  // 1. glitch エンド：矛盾スコアが閾値を超えていれば即座に発動
   if (shouldTriggerGlitchEnd(contradiction)) {
     return {
       type: 'glitch',
@@ -50,7 +52,143 @@ export function computeSurpriseEnding(
       forcedGenre: 'glitch',
     }
   }
-  // TODO: hidden_genre / bad_ending / narrative_twist の判定ロジックを実装
+
+  // 選択履歴から累積パラメータを取得（hidden_genre判定用）
+  const accumulatedParams = accumulateWithMultiplier(choiceHistory)
+
+  // 2. hidden_genre 判定：条件テーブルに合致するかチェック
+  const hiddenEnding = checkHiddenGenre(accumulatedParams, choiceHistory)
+  if (hiddenEnding) return hiddenEnding
+
+  // 3. bad_ending 判定：プレイスタイルに基づく結末
+  const badEnding = checkBadEnding(playStyle, contradiction.score, choiceHistory.length)
+  if (badEnding) return badEnding
+
+  // 4. narrative_twist 判定：選択履歴のパターンによる分岐
+  const twistEnding = checkNarrativeTwist(choiceHistory)
+  if (twistEnding) return twistEnding
+
+  // どれも該当しなければ通常エンド（null）
+  return null
+}
+
+/** hidden_genre の条件を満たすかチェック */
+function checkHiddenGenre(accumulated: ReturnType<typeof accumulateWithMultiplier>, history: ChoiceRecord[]): SurpriseEnding | null {
+  for (const condition of surpriseEndingConditions.hidden_genre) {
+    const trigger = condition.trigger
+
+    if (trigger.type === 'genre_params') {
+      // 指定されたパラメータの閾値を超えるかチェック
+      let meetsThresholds = true
+      for (const [param, threshold] of Object.entries(trigger.thresholds)) {
+        const value = accumulated[param as GenreParam] ?? 0
+        if (value < threshold) {
+          meetsThresholds = false
+          break
+        }
+      }
+
+      // 必要なカードIDが選択履歴に含まれているか確認（オプション）
+      if (meetsThresholds && trigger.requiredChoices) {
+        const selectedIds = new Set(history.map(r => r.choiceId))
+        const hasRequired = trigger.requiredChoices.every(id => selectedIds.has(id))
+        if (!hasRequired) continue
+      }
+
+      if (meetsThresholds) {
+        return {
+          type: 'hidden_genre',
+          title: condition.title,
+          description: condition.description,
+          forcedGenre: trigger.resultGenre as GenreId,
+        }
+      }
+    }
+  }
+
+  return null
+}
+
+/** bad_ending の条件を満たすかチェック */
+function checkBadEnding(playStyle: PlayStyleResult | null, contradictionScore: number, roundCount: number): SurpriseEnding | null {
+  if (!playStyle) return null
+
+  for (const condition of surpriseEndingConditions.bad_ending) {
+    const trigger = condition.trigger
+
+    if (trigger.type === 'play_style') {
+      // プレイスタイルが一致し、信頼度が閾値以上かチェック
+      if (playStyle.style !== trigger.style || playStyle.confidence < trigger.minConfidence) {
+        continue
+      }
+
+      // 矛盾スコアの上限条件（オプション）
+      if (trigger.maxContradictionScore && contradictionScore >= trigger.maxContradictionScore) {
+        continue
+      }
+
+      // ラウンド数の上限条件（オプション）
+      if (trigger.maxRounds && roundCount > trigger.maxRounds) {
+        continue
+      }
+
+      return {
+        type: 'bad_ending',
+        title: condition.title,
+        description: condition.description,
+      }
+    }
+  }
+
+  return null
+}
+
+/** narrative_twist の条件を満たすかチェック */
+function checkNarrativeTwist(history: ChoiceRecord[]): SurpriseEnding | null {
+  const selectedIds = new Set(history.map(r => r.choiceId))
+
+  for (const condition of surpriseEndingConditions.narrative_twist) {
+    const trigger = condition.trigger
+
+    if (trigger.type === 'pattern') {
+      // 必須のカードIDが含まれているかチェック
+      const hasRequired = trigger.requiredChoices.every(id => selectedIds.has(id))
+      if (!hasRequired) continue
+
+      // additionalConditions をチェック（オプション）
+      if (trigger.additionalConditions) {
+        const ac = trigger.additionalConditions
+
+        // 矛盾スコアの下限条件（簡易実装：contradictionState は直接渡せないため、後で補完可能）
+        if (ac.minContradictionScore) {
+          // TODO: 矛盾状態をこの関数に渡す必要があるか検討
+          continue
+        }
+
+        // ラウンド数の下限条件（簡易実装：history の長さをカウント）
+        if (ac.minRoundCount && history.length < ac.minRoundCount) {
+          continue
+        }
+
+        // 最大パラメータ値の上限条件（例：tempo <= maxTempoValue）
+        if (ac.maxTempoValue) {
+          const accumulated = accumulateWithMultiplier(history)
+          if ((accumulated.tempo ?? 0) > ac.maxTempoValue) {
+            continue
+          }
+        }
+
+        // 他の条件（badEndingNotTriggered など）は後で拡張可能
+      }
+
+      return {
+        type: 'narrative_twist',
+        title: condition.title,
+        description: condition.description,
+      }
+    }
+  }
+
   return null
 }
 
@@ -260,7 +398,7 @@ export function useGameState() {
       style: 'balanced',
       confidence: 0,
       scores: { aggressive: 0, defensive: 0, explorer: 0, balanced: 0, chaotic: 0, passive: 0 },
-    })
+    }, choiceHistory)
     surpriseEnding.value = ending
 
     // glitch エンドがトリガーされたらジャンルを強制書き換え

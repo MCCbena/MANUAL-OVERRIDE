@@ -1,0 +1,91 @@
+{
+  "hidden_genre": [
+    {
+      "id": "hide-stealth-action",
+      "title": "隠された戦術ジャンル",
+      "description": "あなたの選択が、影を纏った戦闘スタイルへと導きました",
+      "trigger": {
+        "type": "genre_params",
+        "params": ["stealth", "enemy"],
+        "thresholds": { "stealth": 2.5, "enemy": 2.0 },
+        "resultGenre": "stealth_action"
+      }
+    },
+    {
+      "id": "hide-rhythm-game",
+      "title": "リズムの法則",
+      "description": "時間と間隔が完璧に同期し、リズムゲームの世界へ突入",
+      "trigger": {
+        "type": "genre_params",
+        "params": ["tempo", "rhythm"],
+        "thresholds": { "tempo": 3.0, "rhythm": 2.5 },
+        "resultGenre": "rhythm"
+      }
+    }
+  ],
+  "bad_ending": [
+    {
+      "id": "bad-chaos",
+      "title": "混沌の果てに",
+      "description": "無秩序な選択がゲームを意味のないものに変えました",
+      "trigger": {
+        "type": "play_style",
+        "style": "chaotic",
+        "minConfidence": 0.7,
+        "maxContradictionScore": 0.4
+      }
+    },
+    {
+      "id": "bad-passive",
+      "title": "何もしない結末",
+      "description": "あまりにも消極的なプレイが、何も起こらない終わりを招きました",
+      "trigger": {
+        "type": "play_style",
+        "style": "passive",
+        "minConfidence": 0.6,
+        "maxRounds": 5
+      }
+    }
+  ],
+  "narrative_twist": [
+    {
+      "id": "twist-memory",
+      "title": "記憶の歪み",
+      "description": "過去の選択が現在を狂わせ、予期せぬ転換点が現れました",
+      "trigger": {
+        "type": "pattern",
+        "requiredChoices": ["c-surprise-memory"],
+        "additionalConditions": {
+          "minContradictionScore": 0.3,
+          "maxPlayStyleConfidence": 0.5
+        }
+      }
+    },
+    {
+      "id": "twist-loop",
+      "title": "無限のループ",
+      "description": "同じ選択を繰り返すうちに、時間は歪み始めました",
+      "trigger": {
+        "type": "pattern",
+        "requiredChoices": ["c-surprise-loop"],
+        "additionalConditions": {
+          "minRoundCount": 8,
+          "maxTempoValue": 2.0
+        }
+      }
+    },
+    {
+      "id": "twist-void",
+      "title": "虚無への誘い",
+      "description": "存在しないものを操作し続けた結果、現実そのものが崩壊し始めました",
+      "trigger": {
+        "type": "pattern",
+        "requiredChoices": ["c-surprise-void"],
+        "additionalConditions": {
+          "minContradictionScore": 0.5,
+          "badEndingNotTriggered": true
+        }
+      }
+    }
+  ]
+}
