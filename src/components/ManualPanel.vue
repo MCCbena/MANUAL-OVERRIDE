@@ -48,8 +48,9 @@ function keyLabel(key: string): string {
   <div class="manual-panel"
        :class="[themeClass, {
          'panel-centered': isCentered,
-         'manual-highlight': highlight,
-         'update-pulse': hasUpdate
+         // Only apply update-pulse if highlight is not active to avoid animation conflicts
+         'update-pulse': hasUpdate && !highlight,
+         'manual-highlight': highlight
        }]">
     <!-- ヘッダー -->
     <div class="manual-header">
@@ -194,22 +195,6 @@ function keyLabel(key: string): string {
   }
 }
 
-/* Ensure manual-highlight takes precedence when both classes are present */
-.manual-panel.update-pulse.manual-highlight {
-  animation: highlight-override 1.8s ease-in-out infinite !important;
-}
-
-@keyframes highlight-override {
-  0%, 100% { 
-    box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
-    border-color: #33aa55;
-  }
-  50% { 
-    box-shadow: 0 0 32px rgba(0,255,65,0.6), 0 2px 12px rgba(0,0,0,0.5), 0 0 0 2px rgba(0,255,65,0.4);
-    border-color: #33aa55;
-  }
-}
-
 /* ── 中央表示（説明書更新時） ── */
 .panel-centered {
   position: fixed !important;
@@ -308,27 +293,6 @@ function keyLabel(key: string): string {
   transition: all 0.15s;
 }
 .history-btn:hover { background: #001a00; border-color: #00ff41; color: #00ff41; }
-
-/* Update notification badge */
-.update-notification {
-  position: absolute;
-  top: -8px;
-  right: 60px;
-  background: linear-gradient(90deg, #ff4444, #ff8844);
-  color: white;
-  font-size: 11px;
-  font-weight: bold;
-  padding: 2px 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
-  animation: notification-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
-  z-index: 30;
-}
-
-@keyframes notification-bounce {
-  0%   { opacity: 0; transform: scale(0.8) translateY(-10px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
 
 /* ── 履歴 ── */
 .manual-history {
