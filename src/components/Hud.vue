@@ -43,15 +43,18 @@ const POPUP_X_MARGIN = 60
 const POPUP_Y_MIN = 40
 const POPUP_Y_RANGE = 60
 const POPUP_LIFETIME_MS = 700
+const POPUP_COOLDOWN_MS = 300  // 初回や連続スコア増加時のポップアップspam防止
 
 const popupIdCounter = ref(0)
 const popups = ref<ScorePopup[]>([])
 const prevScore = ref(props.playScore)
 const popupTimers = ref<ReturnType<typeof setTimeout>[]>([])
+let lastPopupTime = 0         // 最後のポップアップ時刻
 
 // 前回のスコアを監視
 watch(() => props.playScore, (newScore) => {
-  if (newScore > prevScore.value) {
+  const now = performance.now()
+  if (newScore > prevScore.value && (now - lastPopupTime) >= POPUP_COOLDOWN_MS) {
     const delta = newScore - prevScore.value
     const popupId = popupIdCounter.value++
     // ポップアップを生成（ランダム位置）
@@ -62,6 +65,7 @@ watch(() => props.playScore, (newScore) => {
       value: delta,
       createdAt: performance.now(),
     })
+    lastPopupTime = now  // コールダウンタイマー更新
     // POPUP_LIFETIME_MS 後に削除
     const timer = setTimeout(() => {
       popups.value = popups.value.filter(p => p.id !== popupId)

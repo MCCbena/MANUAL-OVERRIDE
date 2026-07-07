@@ -82,6 +82,13 @@ function resizeCanvas() {
 
 // ─── ゲームスタート ─────────────────────────────────────────────
 function startGame() {
+  // 前回のゲーム状態を完全にクリアしてリセット
+  gameState.restart()
+  
+  // scroller を停止・破棄（残っていた場合）
+  scroller?.stop()
+  scroller = null
+  
   gameState.startGame()
   const canvas = canvasRef.value
   if (!canvas) {
