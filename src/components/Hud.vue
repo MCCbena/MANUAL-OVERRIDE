@@ -63,7 +63,7 @@ watch(() => props.playScore, (newScore) => {
       x: POPUP_X_MARGIN + Math.random() * (window.innerWidth - POPUP_X_MARGIN * 2),
       y: POPUP_Y_MIN + Math.random() * POPUP_Y_RANGE,
       value: delta,
-      createdAt: performance.now(),
+      createdAt: now,
     })
     lastPopupTime = now  // コールダウンタイマー更新
     // POPUP_LIFETIME_MS 後に削除
