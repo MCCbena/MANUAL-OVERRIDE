@@ -17,8 +17,8 @@ const props = defineProps<{
 const showHistory = ref(false)
 const themeClass = computed(() => `theme-${props.theme}`)
 
-// Update notification badge visibility
-const hasUpdate = computed(() => props.isAnimating && props.diffLines.length > 0)
+// Update notification badge visibility - use filtered data to avoid showing when all diff lines are filtered out
+const hasUpdate = computed(() => props.isAnimating && filteredDiffLines.value.length > 0)
 
 // auto_run が有効な場合、左右移動の説明を除外
 const filteredManualText = computed(() => {
@@ -53,17 +53,19 @@ function keyLabel(key: string): string {
        }]">
     <!-- ヘッダー -->
     <div class="manual-header">
-      <div class="manual-ver-badge">
-        <span class="manual-ver-dot" />
-        ver.{{ manual.version }}
-      </div>
-      
-      <!-- Update notification badge -->
-      <transition name="fade-scale">
-        <div v-if="hasUpdate" class="update-notification" role="status" aria-live="polite">
-          更新中！
+      <div class="manual-ver-badge-wrapper">
+        <div class="manual-ver-badge">
+          <span class="manual-ver-dot" />
+          ver.{{ manual.version }}
         </div>
-      </transition>
+        
+        <!-- Update notification badge - placed next to version using flexbox -->
+        <transition name="fade-scale">
+          <div v-if="hasUpdate" class="update-notification" role="status" aria-live="polite">
+            更新中！
+          </div>
+        </transition>
+      </div>
       
       <button class="history-btn" @click="showHistory = !showHistory" tabindex="-1">
         {{ showHistory ? '▲' : '▼ 履歴' }}
@@ -150,6 +152,7 @@ function keyLabel(key: string): string {
   position: absolute;
   bottom: 58px; right: 16px;
   width: 420px; /* Increased from 340px for better readability */
+  max-width: calc(100vw - 40px); /* Ensure panel doesn't overflow viewport on small screens */
   background: #0d120d;
   border: 2px solid #33aa55;
   border-radius: 2px;
@@ -166,6 +169,15 @@ function keyLabel(key: string): string {
   overflow-y: auto;
 }
 
+/* Responsive adjustments for smaller viewports */
+@media (max-width: 768px) {
+  .manual-panel {
+    width: calc(100vw - 32px);
+    right: 4px;
+    bottom: 50px;
+  }
+}
+
 /* Update notification badge - pulsing animation */
 .manual-panel.update-pulse {
   animation: pulse-border-glow 1.5s ease-in-out infinite;
@@ -179,6 +191,22 @@ function keyLabel(key: string): string {
   50% { 
     box-shadow: 0 0 40px rgba(0,255,65,0.4), 0 0 80px rgba(0,255,65,0.2), 0 2px 8px rgba(0,0,0,0.5);
     border-color: #00ff41;
+  }
+}
+
+/* Ensure manual-highlight takes precedence when both classes are present */
+.manual-panel.update-pulse.manual-highlight {
+  animation: highlight-override 1.8s ease-in-out infinite !important;
+}
+
+@keyframes highlight-override {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
+    border-color: #33aa55;
+  }
+  50% { 
+    box-shadow: 0 0 32px rgba(0,255,65,0.6), 0 2px 12px rgba(0,0,0,0.5), 0 0 0 2px rgba(0,255,65,0.4);
+    border-color: #33aa55;
   }
 }
 
@@ -227,6 +255,12 @@ function keyLabel(key: string): string {
   padding-bottom: 5px;
   margin-bottom: 7px;
 }
+.manual-ver-badge-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .manual-ver-badge {
   display: flex;
   align-items: center;
@@ -236,6 +270,24 @@ function keyLabel(key: string): string {
   letter-spacing: 0.5px;
   color: #00ff41;
   font-family: 'M PLUS 1 Code', monospace;
+}
+
+/* Update notification badge - now placed in flex container, no absolute positioning */
+.update-notification {
+  background: linear-gradient(90deg, #ff4444, #ff8844);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  animation: notification-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  margin-left: auto; /* Push to right if needed within flex container */
+}
+
+@keyframes notification-bounce {
+  0%   { opacity: 0; transform: scale(0.8) translateY(-10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 .manual-ver-dot {
   display: inline-block;
