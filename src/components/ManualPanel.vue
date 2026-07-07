@@ -17,6 +17,9 @@ const props = defineProps<{
 const showHistory = ref(false)
 const themeClass = computed(() => `theme-${props.theme}`)
 
+// Update notification badge visibility
+const hasUpdate = computed(() => props.isAnimating && props.diffLines.length > 0)
+
 // auto_run が有効な場合、左右移動の説明を除外
 const filteredManualText = computed(() => {
   if (!props.features?.has('auto_run')) return props.manual.manualText
@@ -42,13 +45,26 @@ function keyLabel(key: string): string {
 </script>
 
 <template>
-  <div class="manual-panel" :class="[themeClass, { 'panel-centered': isCentered, 'manual-highlight': highlight }]">
+  <div class="manual-panel" 
+       :class="[themeClass, { 
+         'panel-centered': isCentered, 
+         'manual-highlight': highlight,
+         'update-pulse': hasUpdate
+       }]">
     <!-- ヘッダー -->
     <div class="manual-header">
       <div class="manual-ver-badge">
         <span class="manual-ver-dot" />
         ver.{{ manual.version }}
       </div>
+      
+      <!-- Update notification badge -->
+      <transition name="fade-scale">
+        <div v-if="hasUpdate" class="update-notification">
+          <span class="notification-text">更新中！</span>
+        </div>
+      </transition>
+      
       <button class="history-btn" @click="showHistory = !showHistory" tabindex="-1">
         {{ showHistory ? '▲' : '▼ 履歴' }}
       </button>
@@ -133,21 +149,47 @@ function keyLabel(key: string): string {
 .manual-panel {
   position: absolute;
   bottom: 58px; right: 16px;
-  width: 340px;
+  width: 420px; /* Increased from 340px for better readability */
   background: #0d120d;
   border: 2px solid #33aa55;
   border-radius: 2px;
   padding: 16px 18px;
   font-family: 'M PLUS 1 Code', cursive;
-  font-size: 13px;
+  font-size: 14px; /* Increased from 13px for better readability */
   line-height: 1.8;
   color: #b8ffb8;
   box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
   z-index: 20;
-  transition: font-family 0.6s, background 0.6s, border-color 0.6s, box-shadow 0.6s;
+  transition: font-family 0.6s, background 0.6s, border-color 0.6s, box-shadow 0.6s, width 0.3s ease;
   user-select: none;
-  max-height: 380px;
+  max-height: 420px; /* Increased from 380px */
   overflow-y: auto;
+}
+
+/* Update notification badge - pulsing animation */
+.manual-panel.update-pulse {
+  animation: pulse-border-glow 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-border-glow {
+  0%, 100% { 
+    box-shadow: 0 0 20px rgba(0,255,65,0.15), 0 2px 8px rgba(0,0,0,0.5);
+    border-color: #33aa55;
+  }
+  50% { 
+    box-shadow: 0 0 40px rgba(0,255,65,0.4), 0 0 80px rgba(0,255,65,0.2), 0 2px 8px rgba(0,0,0,0.5);
+    border-color: #00ff41;
+  }
+}
+
+/* Pulse animation for entire panel when updated */
+.manual-panel.pulse-entire {
+  animation: pulse-entire 2s ease-in-out infinite;
+}
+
+@keyframes pulse-entire {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
 }
 
 /* ── 中央表示（説明書更新時） ── */
@@ -223,6 +265,27 @@ function keyLabel(key: string): string {
   transition: all 0.15s;
 }
 .history-btn:hover { background: #001a00; border-color: #00ff41; color: #00ff41; }
+
+/* Update notification badge */
+.update-notification {
+  position: absolute;
+  top: -8px;
+  right: 60px;
+  background: linear-gradient(90deg, #ff4444, #ff8844);
+  color: white;
+  font-size: 11px;
+  font-weight: bold;
+  padding: 2px 8px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(255, 68, 68, 0.4);
+  animation: notification-bounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  z-index: 30;
+}
+
+@keyframes notification-bounce {
+  0%   { opacity: 0; transform: scale(0.8) translateY(-10px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
 
 /* ── 履歴 ── */
 .manual-history {
@@ -340,6 +403,10 @@ function keyLabel(key: string): string {
 /* ── 履歴トランジション ── */
 .slide-enter-active, .slide-leave-active { transition: all 0.2s ease; max-height: 200px; }
 .slide-enter-from, .slide-leave-to { opacity: 0; max-height: 0; }
+
+/* Fade-scale transition for notification badge */
+.fade-scale-enter-active, .fade-scale-leave-active { transition: all 0.3s ease; }
+.fade-scale-enter-from, .fade-scale-leave-to { opacity: 0; transform: scale(0.8); }
 
 /* ──────────────────────────────────────
    チュートリアル中ハイライト
