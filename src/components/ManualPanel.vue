@@ -45,9 +45,9 @@ function keyLabel(key: string): string {
 </script>
 
 <template>
-  <div class="manual-panel" 
-       :class="[themeClass, { 
-         'panel-centered': isCentered, 
+  <div class="manual-panel"
+       :class="[themeClass, {
+         'panel-centered': isCentered,
          'manual-highlight': highlight,
          'update-pulse': hasUpdate
        }]">
@@ -60,8 +60,8 @@ function keyLabel(key: string): string {
       
       <!-- Update notification badge -->
       <transition name="fade-scale">
-        <div v-if="hasUpdate" class="update-notification">
-          <span class="notification-text">更新中！</span>
+        <div v-if="hasUpdate" class="update-notification" role="status" aria-live="polite">
+          更新中！
         </div>
       </transition>
       
@@ -182,16 +182,6 @@ function keyLabel(key: string): string {
   }
 }
 
-/* Pulse animation for entire panel when updated */
-.manual-panel.pulse-entire {
-  animation: pulse-entire 2s ease-in-out infinite;
-}
-
-@keyframes pulse-entire {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.02); }
-}
-
 /* ── 中央表示（説明書更新時） ── */
 .panel-centered {
   position: fixed !important;
@@ -229,6 +219,7 @@ function keyLabel(key: string): string {
 }
 
 .manual-header {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
