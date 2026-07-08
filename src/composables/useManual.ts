@@ -1,4 +1,4 @@
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import type { ManualVersion } from '../domain/types'
 
 export type DiffLine = { text: string; type: 'added' | 'removed' | 'unchanged' }
@@ -61,6 +61,12 @@ export function useManual(_currentManual: () => ManualVersion) {
   // タイマーIDの追跡（連続更新時に前のタイマーをクリア）
   let animTimer: ReturnType<typeof setTimeout> | null = null
   let centerTimer: ReturnType<typeof setTimeout> | null = null
+
+  // コンポーネント破棄時に未処理のタイマーをクリア
+  onUnmounted(() => {
+    if (animTimer !== null) clearTimeout(animTimer)
+    if (centerTimer !== null) clearTimeout(centerTimer)
+  })
 
   function recordUpdate(nextManual: ManualVersion) {
     const prev = history.value[history.value.length - 1]

@@ -167,6 +167,31 @@ export function resolveHighestProbGenre(
 }
 
 // ─────────────────────────────────────────────────────────────
+// 収束進捗を返す（テスト用・UI表示用）
+// 未収束でも「最も近いジャンル」と「進捗率(0〜1)」を計算する
+// ─────────────────────────────────────────────────────────────
+export function resolveGenreProgress(
+  accumulated: GenreParams,
+  genres: GenreDef[],
+  _prevGenre?: GenreId | undefined,
+  _forcedGenre?: GenreId | undefined,
+  config: BayesConfig = DEFAULT_BAYES_CONFIG,
+): { closestGenre: GenreId; progress: number } {
+  const posteriors = computeBayesianPosteriors(accumulated, genres, config)
+  const ranked = _rankGenres(posteriors, genres)
+  const top = ranked[0]
+
+  // 最も確率の高いジャンル（base は除外済みなのでそのまま使える）
+  const closestGenre = top?.id ?? 'base'
+
+  // 進捗: 最尤ジャンルの確率 / minProb（minProb で正規化、1.0 が収束ライン）
+  const topProb = top?.prob ?? 0
+  const progress = Math.min(1, topProb / config.minProb)
+
+  return { closestGenre, progress }
+}
+
+// ─────────────────────────────────────────────────────────────
 // ジャンルの有効 feature セット（enableFeatures − disableFeatures）
 // ─────────────────────────────────────────────────────────────
 export function resolveFeatureSet(genreId: GenreId, genres: GenreDef[]): Set<FeatureId> {

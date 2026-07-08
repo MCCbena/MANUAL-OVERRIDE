@@ -2,11 +2,11 @@
 
 export interface Rect { x: number; y: number; w: number; h: number }
 
-// 衝突判定（grace付き — 最大で辺の半分までクランプしてフェア判定）
+// 衝突判定（grace付き — 両方の rect に均等に適用し順序依存を排除）
 export function rectsOverlap(a: Rect, b: Rect, grace = 4): boolean {
-  const g = Math.min(grace, Math.floor(Math.min(a.w, a.h) / 2))
-  const ag = { x: a.x + g, y: a.y + g, w: a.w - g * 2, h: a.h - g * 2 }
-  return ag.x < b.x + b.w && ag.x + ag.w > b.x && ag.y < b.y + b.h && ag.y + ag.h > b.y
+  const g = Math.min(grace, Math.floor(Math.min(a.w, a.h, b.w, b.h) / 2))
+  return a.x + g < b.x + b.w - g && a.x + a.w - g > b.x + g &&
+         a.y + g < b.y + b.h - g && a.y + a.h - g > b.y + g
 }
 
 // ──────────────────────────────────────────────────────────────────────
