@@ -778,15 +778,13 @@ export class SideScroller {
     // ─── プレイヤー ───────────────────────────────────────────────
     if (!this.dead) this._drawPlayer()
 
-    // ─── 前景レイヤー（ジャンル装飾: 走査線・ビネット・HUD枠など） ──
-    getGenre(this.rules.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
-
-    // ─── ジャンル固有HUD ──────────────────────────────────────────
+    // ─── ジャンル固有HUD（シェイクの影響を受けるレイヤー） ─────
     getGenre(r.genre).drawGenreHUD?.(ctx, this._getWorld(), W, H)
 
     ctx.restore()  // shake の restore
 
-    // ─── ジャンル前景（HUD フレーム等。シェイクの影響を受けない画面固定レイヤー） ──
+    // ─── 前景レイヤー（シェイクの影響を受けない画面固定レイヤー） ──
+    // ビネット・スキャンライン・HUDフレーム等の画面固定装飾はここで1回だけ描画
     getGenre(r.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
 
     // ─── 死亡オーバーレイ ─────────────────────────────────────────
