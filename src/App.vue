@@ -282,6 +282,9 @@ let genreLockedBoostTimer: ReturnType<typeof setTimeout> | null = null
 watch(() => gameState.lockedGenre.value, (newGenre) => {
   if (!newGenre || !scroller) return
 
+  // 画面フラッシュ演出
+  scroller.triggerGenreLockFlash()
+
   // 演出オーバーレイ表示
   revealActive.value = true
 

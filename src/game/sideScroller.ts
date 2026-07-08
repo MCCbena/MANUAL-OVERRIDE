@@ -104,6 +104,10 @@ export class SideScroller {
   private shakeIntensity = 0
   private shakeX = 0
   private shakeY = 0
+  /** 被ダメージフラッシュ（残像 0〜1、減衰） */
+  private hitFlash = 0
+  /** ジャンルロック画面フラッシュ（0〜1、減衰） */
+  private genreLockFlash = 0
 
   // 死亡演出
   private deathTimer = 0
@@ -221,6 +225,9 @@ export class SideScroller {
   }
 
   setPaused(v: boolean): void { this.paused = v }
+
+  /** ジャンル確定時の画面フラッシュを発火 */
+  triggerGenreLockFlash(): void { this.genreLockFlash = 1.0 }
 
   /** ウィンドウリサイズ時に呼ぶ。canvas.width/height の変更後に Canvas コンテキスト状態を復元する */
   onResize(): void {
@@ -436,6 +443,10 @@ export class SideScroller {
     if (this.shakeIntensity < VFX.shakeEpsilon) this.shakeIntensity = 0
     this.shakeX = (Math.random() - 0.5) * this.shakeIntensity * 2
     this.shakeY = (Math.random() - 0.5) * this.shakeIntensity * 2
+
+    // ─── 演出フラッシュ減衰 ───────────────────────────────────────
+    if (this.hitFlash > 0) this.hitFlash = Math.max(0, this.hitFlash - dt * 4)
+    if (this.genreLockFlash > 0) this.genreLockFlash = Math.max(0, this.genreLockFlash - dt * 1.5)
 
     // ─── 距離スコア加算 ───────────────────────────────────────────
     this.playScore += effectiveScrollSpeed * dt * SCORE.distanceScoreRate
@@ -674,6 +685,7 @@ export class SideScroller {
   // ─── 被弾処理 ────────────────────────────────────────────────────
   private _onPlayerHit(p: Player): void {
     this.stats.collisions += 1
+    this.hitFlash = 1.0  // 被ダメフラッシュ
     const world = this._getWorld()
     soundManager.onHit()
     for (const sys of getActiveSystems(this.rules.features)) {
@@ -793,6 +805,18 @@ export class SideScroller {
         ctx.textAlign = 'left'
         ctx.globalAlpha = 1
       }
+    }
+
+    // ─── 被ダメージフラッシュ ─────────────────────────────────────
+    if (this.hitFlash > 0) {
+      ctx.fillStyle = `rgba(255, 0, 0, ${this.hitFlash * 0.3})`
+      ctx.fillRect(0, 0, W, H)
+    }
+
+    // ─── ジャンルロックフラッシュ ─────────────────────────────────
+    if (this.genreLockFlash > 0) {
+      ctx.fillStyle = `rgba(255, 255, 255, ${this.genreLockFlash * 0.15})`
+      ctx.fillRect(0, 0, W, H)
     }
   }
 
