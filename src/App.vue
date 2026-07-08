@@ -136,9 +136,8 @@ function beginSnapshotLoop() {
     }
     snapshot.value = scroller.getSnapshot()
 
-    // ジャンル確定後も選択は続行し、矛盾の蓄積次第でゲームが「壊れる」ことがある。
-    // 最初のジャンプまで待つ
-    const activePlay = ['playing', 'tutorial', 'genreLocked'].includes(gameState.phase.value)
+    // 最初のジャンプまで待つ（ジャンル確定後は triggerUpdate を行わない）
+    const activePlay = ['playing', 'tutorial'].includes(gameState.phase.value)
     if (snapshot.value.shouldUpdate !== null && snapshot.value.firstJumpDone && activePlay) {
       scroller.setPaused(true)
       if (!gameState.triggerUpdate()) {
