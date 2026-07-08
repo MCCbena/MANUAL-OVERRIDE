@@ -88,8 +88,6 @@ describe('genreResolver - convergence', () => {
     baseDecay: bayesConfig.baseDecay,
     minProb: bayesConfig.minProb,
     dominanceRatio: bayesConfig.dominanceRatio,
-    convergenceThreshold: bayesConfig.convergenceThreshold,
-    candidateThreshold: bayesConfig.candidateThreshold,
   }
 
   // ── ベイズ設定の整合性 ────────────────────────────────────
