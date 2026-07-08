@@ -142,7 +142,7 @@ export class MovementFeature implements FeatureSystem {
     }
   }
 
-  private _updateSlide(world: MutableWorld, input: InputSnapshot, dt: number): void {
+  private _updateSlide(world: MutableWorld, input: InputSnapshot, _dt: number): void {
     const p = world.player
     const downKey = world.rules.controls.moveDown ?? 'ArrowDown'
 
