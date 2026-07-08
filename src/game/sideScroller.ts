@@ -712,6 +712,7 @@ export class SideScroller {
     const W = this.canvas.width, H = this.canvas.height
     const r = this.rules
     const gY = H - PHYSICS.groundYOffset
+    const plugin = getGenre(r.genre)
 
     ctx.save()
     ctx.translate(this.shakeX, this.shakeY)
@@ -731,7 +732,6 @@ export class SideScroller {
     for (const h of this.hazards) {
       const sx = h.x - this.cameraX
       if (isVerticalRender) {
-        // 縦モード: h.y がスクリーンY（cameraX=0 なので sx=h.x）
         if (h.y < -200 || h.y > H + 100) continue
         this._drawHazard(h, h.x, r)
       } else {
@@ -763,16 +763,13 @@ export class SideScroller {
     // ─── プレイヤー ───────────────────────────────────────────────
     if (!this.dead) this._drawPlayer()
 
-    // ─── 前景レイヤー（ジャンル装飾: 走査線・ビネット・HUD枠など） ──
-    getGenre(this.rules.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
+    // ─── 前景レイヤー（シェイク影響下） ─────────────────────────────
+    plugin.drawForeground?.(ctx, this.cameraX, W, H, gY)
 
     // ─── ジャンル固有HUD ──────────────────────────────────────────
-    getGenre(r.genre).drawGenreHUD?.(ctx, this._getWorld(), W, H)
+    plugin.drawGenreHUD?.(ctx, this._getWorld(), W, H)
 
     ctx.restore()  // shake の restore
-
-    // ─── ジャンル前景（HUD フレーム等。シェイクの影響を受けない画面固定レイヤー） ──
-    getGenre(r.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
 
     // ─── 死亡オーバーレイ ─────────────────────────────────────────
     if (this.dead) {
@@ -797,9 +794,8 @@ export class SideScroller {
   }
 
   // ─── 背景描画（プラグイン委譲） ──────────────────────────────────
-  private _drawBackground(W: number, H: number, gY: number): void {
+  private _drawBackground(W: number, H: number, gY: number, plugin = getGenre(this.rules.genre)): void {
     const ctx = this.ctx
-    const plugin = getGenre(this.rules.genre)
     const cam = this.cameraX
     const isVertical = this.rules.scrollAxis === 'y'
 
