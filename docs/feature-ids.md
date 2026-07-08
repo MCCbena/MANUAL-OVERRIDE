@@ -29,8 +29,8 @@
 | `long_air` | 空中でスコアボーナス（0.8pt/sec） | MovementFeature ✅ |
 | `dash` | 短距離ダッシュ（Shift など）+ 無敵フレーム + トレイル演出 | MovementFeature ✅ |
 | `wall_jump` | 画面端（壁扱い）到達時にジャンプ権回復 + 逆方向押し出し | MovementFeature ✅ |
-| `slide` | しゃがみスライド（障害物くぐり） | MovementFeature (⚠️未実装・console.warn) |
-| `gravity_flip` | 重力反転（天井を床として走る） | MovementFeature (⚠️未実装・console.warn) |
+| `slide` | しゃがみスライド（障害物くぐり）。下キーで発動、ヒットボックス縮小＋パーティクル | MovementFeature ✅ |
+| `gravity_flip` | 重力反転（天井を床として走る）— 予約済み（将来実装予定） | MovementFeature (🔜 reserved) |
 | `vertical_scroll` | 縦スクロールモード + ハザード蛇行ドリフト演出 | MovementFeature ✅ |
 
 ---
@@ -97,8 +97,8 @@
 |---|---|---|
 | ShootFeature | shoot / three_way / charge_shot / spread_shot / bomb / enemy_hp | ✅ |
 | RhythmFeature | beat_hazard / just_input / beat_dash | ✅ |
-| MovementFeature | auto_run / slow_precise / double_jump / long_air / dash / wall_jump / vertical_scroll | ✅（slide / gravity_flip は ⚠️ 未実装・console.warn） |
-| RpgFeature | hp / exp / item_pickup / shield | ✅（hp: onPlayerHit、item_pickup: update。shield は未実装） |
+| MovementFeature | auto_run / slow_precise / double_jump / long_air / dash / wall_jump / vertical_scroll / slide / gravity_flip | ✅（slide 実装済み、gravity_flip は reserved） |
+| RpgFeature | hp / exp / item_pickup / shield | ✅（hp: onPlayerHit、item_pickup: update。shield: 1回ガード+演出） |
 | PuzzleFeature | grid_stop / puzzle_solve | ✅ |
 | SpecialFeature | stealth_mode / time_bonus / tower / color_touch / boss | ✅ |
 | TetrisFeature | tetris_mode | ✅ |
