@@ -167,6 +167,41 @@ export function resolveHighestProbGenre(
 }
 
 // ─────────────────────────────────────────────────────────────
+// 収束進捗の計算
+//
+// 最尤ジャンル（base を除く）と、その進捗度 0〜1 を返す。
+// progress は minProb と dominanceRatio の両方を満たす割合で、
+// 1.0 なら resolveGenre() がそのジャンルを返す条件を満たす。
+// ─────────────────────────────────────────────────────────────
+export function resolveGenreProgress(
+  accumulated: GenreParams,
+  genres: GenreDef[],
+  _config?: BayesConfig,
+): { closestGenre: GenreId; progress: number } {
+  const config = _config ?? DEFAULT_BAYES_CONFIG
+  const posteriors = computeBayesianPosteriors(accumulated, genres, config)
+  const ranked = _rankGenres(posteriors, genres)
+
+  if (ranked.length === 0) {
+    return { closestGenre: 'base', progress: 0 }
+  }
+
+  const top = ranked[0]
+  const second = ranked[1]
+
+  // minProb 充足度 (0~1)
+  const minProbRatio = Math.min(1, top.prob / config.minProb)
+  // dominanceRatio 充足度 (0~1): top / second >= ratio なら 1
+  const dominanceRatio =
+    second && second.prob > 0
+      ? Math.min(1, top.prob / (config.dominanceRatio * second.prob))
+      : 1
+  const progress = Math.min(1, Math.max(0, (minProbRatio + dominanceRatio) / 2))
+
+  return { closestGenre: top.id, progress }
+}
+
+// ─────────────────────────────────────────────────────────────
 // ジャンルの有効 feature セット（enableFeatures − disableFeatures）
 // ─────────────────────────────────────────────────────────────
 export function resolveFeatureSet(genreId: GenreId, genres: GenreDef[]): Set<FeatureId> {
