@@ -771,9 +771,6 @@ export class SideScroller {
 
     ctx.restore()  // shake の restore
 
-    // ─── ジャンル前景（HUD フレーム等。シェイクの影響を受けない画面固定レイヤー） ──
-    getGenre(r.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
-
     // ─── 死亡オーバーレイ ─────────────────────────────────────────
     if (this.dead) {
       const fadeIn = Math.min(1, this.deathTimer * UI.deathFadeSpeed)
