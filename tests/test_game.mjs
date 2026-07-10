@@ -9,7 +9,7 @@ import { chromium } from '@playwright/test';
   console.log('✓ Title');
 
   // ゲーム開始
-  const startBtn = page.locator('button', { hasText: 'はじめる' })
+  const startBtn = page.locator('button', { hasText: 'はじめる' });
   if (await startBtn.isVisible().catch(() => false)) {
     await startBtn.click();
   }
