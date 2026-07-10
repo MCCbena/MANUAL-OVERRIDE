@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import {
   computeBayesianPosteriors,
   resolveGenre,
-  resolveHighestProbGenre,
+  resolveGenreProgress,
   DEFAULT_BAYES_CONFIG,
 } from '../../../src/domain/genreResolver'
 import { GENRES } from '../../../src/data/genres'
@@ -127,32 +127,32 @@ describe('genreResolver - convergence', () => {
   it('runner (tempo: 8) が tempo 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.tempo)
     expect(params.tempo).toBeGreaterThanOrEqual(8)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     expect(result).toBe('runner')
   })
 
   it('stg (range: 3, enemy: 6) が enemy 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.enemy)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     // enemy:11, range:3 が必要。enemy特化ではenemy=11になるがrange=0
     // rangeが不足しているため、STGには収束しない可能性がある
     // ただし、最も確率の高いジャンルになるはず
-    const closest = resolveHighestProbGenre(params, GENRES, config)
+    const progress = resolveGenreProgress(params, GENRES, config)
     // runnerやotherより確率が高くなるはず
-    expect(closest).toBeDefined()
+    expect(progress.closestGenre).toBeDefined()
   })
 
   it('rpg (growth: 8) が growth 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.growth)
     expect(params.growth).toBeGreaterThanOrEqual(8)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     expect(result).toBe('rpg')
   })
 
   it('puzzle (combo: 6) が combo 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.combo)
     expect(params.combo).toBeGreaterThanOrEqual(6)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     expect(result).toBe('puzzle')
   })
 
@@ -166,23 +166,23 @@ describe('genreResolver - convergence', () => {
       { rhythm: 2 },
     ])
     // rhythm=12, tempo=3。tempo:6が不足だが、rhythmが突出
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     // rhythm方向に確率が上がるはず（収束しなくてもdirectionは正しい）
-    const closest = resolveHighestProbGenre(params, GENRES, config)
-    expect(['rhythm', 'runner', 'sports', 'glitch', 'base']).toContain(closest)
+    const progress = resolveGenreProgress(params, GENRES, config)
+    expect(['rhythm', 'runner', 'sports', 'glitch', 'base']).toContain(progress.closestGenre)
   })
 
   it('stealth_action (stealth: 7) が stealth 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.stealth)
     expect(params.stealth).toBeGreaterThanOrEqual(7)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     expect(result).toBe('stealth_action')
   })
 
   it('idle (craft: 7) が craft 特化カードで収束する', () => {
     const params = buildParamsFromCards(cardPools.craft)
     expect(params.craft).toBeGreaterThanOrEqual(7)
-    const result = resolveGenre(params, GENRES, undefined, undefined, config)
+    const result = resolveGenre(params, GENRES, config)
     expect(result).toBe('idle')
   })
 
@@ -200,25 +200,23 @@ describe('genreResolver - convergence', () => {
     // tetrisのthresholdsはcombo:4, craft:4。deviation=0でL=1.0。
     // ただし他のジャンル（idle: craft:7, puzzle: combo:6）もdeviation=0になる可能性がある
     // 収束するか確率確認
-    const closest = resolveHighestProbGenre(params, GENRES, config)
-    expect(['tetris', 'idle', 'puzzle']).toContain(closest)
+    const progress = resolveGenreProgress(params, GENRES, config)
+    expect(['tetris', 'idle', 'puzzle']).toContain(progress.closestGenre)
   })
 
-  // ── 収束進捗の計算（事後確率で代用） ─────────────────────────
+  // ── 収束進捗の計算 ─────────────────────────────────────────
 
-  it('事後確率が0〜1の範囲である', () => {
+  it('収束進捗が0〜1の範囲である', () => {
     const params = buildParamsFromCards(cardPools.tempo)
-    const posteriors = computeBayesianPosteriors(params, GENRES, config)
-    const probs = Object.values(posteriors)
-    for (const p of probs) {
-      expect(p).toBeGreaterThanOrEqual(0)
-      expect(p).toBeLessThanOrEqual(1)
-    }
+    const progress = resolveGenreProgress(params, GENRES, config)
+    expect(progress.progress).toBeGreaterThanOrEqual(0)
+    expect(progress.progress).toBeLessThanOrEqual(1)
   })
 
-  it('無選択時はbase以外で最も確率が高いジャンルが返る', () => {
-    const closest = resolveHighestProbGenre({}, GENRES, config)
-    expect(closest).toBeDefined()
+  it('無選択時はbaseが最も確率が高い', () => {
+    const progress = resolveGenreProgress({}, GENRES, config)
+    // 選択がない場合はbase以外で最も確率が高いジャンルが返る
+    expect(progress.closestGenre).toBeDefined()
   })
 
   // ── 事後確率分布 ───────────────────────────────────────────

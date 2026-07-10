@@ -22,10 +22,8 @@ export async function startGame(page: Page): Promise<void> {
 
   // フェーズ1: タイトル画面の "はじめる" ボタンをクリック
   const startBtn = page.locator('button', { hasText: 'はじめる' })
-  const startVisible = await startBtn.isVisible({ timeout: 5_000 }).catch(() => false)
-  if (startVisible) {
-    await startBtn.click()
-  }
+  await expect(startBtn).toBeVisible({ timeout: 5_000 })
+  await startBtn.click()
 
   await expect(page.locator('canvas')).toBeVisible({ timeout: 5_000 })
 }

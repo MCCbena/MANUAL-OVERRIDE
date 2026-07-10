@@ -167,6 +167,19 @@ export function resolveHighestProbGenre(
 }
 
 // ─────────────────────────────────────────────────────────────
+// 現在のジャンル確定状況を進捗率で返す（デバッグパネル用）
+// ─────────────────────────────────────────────────────────────
+export function resolveGenreProgress(
+  accumulated: GenreParams,
+  genres: GenreDef[],
+  config: BayesConfig = DEFAULT_BAYES_CONFIG,
+): { closestGenre: GenreId; progress: number } {
+  const posteriors = computeBayesianPosteriors(accumulated, genres, config)
+  const closestGenre = resolveHighestProbGenre(accumulated, genres, config)
+  return { closestGenre, progress: posteriors[closestGenre] ?? 0 }
+}
+
+// ─────────────────────────────────────────────────────────────
 // ジャンルの有効 feature セット（enableFeatures − disableFeatures）
 // ─────────────────────────────────────────────────────────────
 export function resolveFeatureSet(genreId: GenreId, genres: GenreDef[]): Set<FeatureId> {
