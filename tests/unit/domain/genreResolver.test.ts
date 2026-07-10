@@ -2,11 +2,24 @@ import { describe, it, expect } from 'vitest'
 import {
   computeBayesianPosteriors,
   resolveGenre,
-  resolveGenreProgress,
+  resolveHighestProbGenre,
   DEFAULT_BAYES_CONFIG,
 } from '../../../src/domain/genreResolver'
+import type { GenreParams, BayesConfig } from '../../../src/domain/types'
 import { GENRES } from '../../../src/data/genres'
 import bayesConfig from '../../../src/data/config/bayes.json'
+
+// 収束の「最有力ジャンル」と進捗(0〜1=最有力ジャンルの事後確率)を現行APIから組み立てる。
+// （旧 resolveGenreProgress は Bayes 収束へのリファクタで廃止されたためテスト側で再現する）
+function resolveGenreProgress(
+  params: GenreParams,
+  genres: typeof GENRES,
+  config: BayesConfig = DEFAULT_BAYES_CONFIG,
+): { closestGenre: string; progress: number } {
+  const posteriors = computeBayesianPosteriors(params, genres, config)
+  const closestGenre = resolveHighestProbGenre(params, genres, config)
+  return { closestGenre, progress: posteriors[closestGenre] ?? 0 }
+}
 
 /**
  * ジャンル収束テスト
