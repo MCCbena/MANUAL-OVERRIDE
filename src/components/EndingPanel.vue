@@ -611,4 +611,12 @@ onUnmounted(() => {
     transform var(--transition-fast);
   box-shadow: 0 0 8px var(--genre-glow, var(--green-glow));
 }
+.restart-btn:hover {
+  background: var(--genre-glow, rgba(0, 255, 65, 0.1));
+  box-shadow: 0 0 12px var(--genre-glow, var(--green-glow));
+}
+.restart-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 0 6px var(--genre-glow, var(--green-glow));
+}
 </style>
