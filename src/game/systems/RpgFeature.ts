@@ -20,6 +20,11 @@ export class RpgFeature implements FeatureSystem {
   // シールドの内部状態（永続的な設定ではない一時的なガード）
   private _hasShieldActive: boolean = false
 
+  onInit(world: MutableWorld): void {
+    // feature セットに shield が含まれていれば初期状態は有効
+    this._hasShieldActive = world.rules.features.has('shield')
+  }
+
   /** hp feature: 被弾時に HP 減算・シールド・無敵・シェイク・パーティクルを処理 */
   onPlayerHit(world: MutableWorld): void {
     if (!world.rules.features.has('hp')) return
@@ -65,9 +70,9 @@ export class RpgFeature implements FeatureSystem {
     }
   }
 
-  onManualUpdated(_world: MutableWorld, _versionKey: string): void {
-    // シールド状態をリセット（説明書再評価時に初期化）
-    this._hasShieldActive = false
+  onManualUpdated(world: MutableWorld, _versionKey: string): void {
+    // シールド状態を feature セットに合わせて再初期化
+    this._hasShieldActive = world.rules.features.has('shield')
   }
 
   /** メンテナンス用：シールドの有効/無効を設定する */
