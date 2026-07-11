@@ -131,10 +131,8 @@ export class SideScroller {
   private _disabledActions = new Map<string, number>()
   // invertHazard 解除予定時刻（-Infinity = 永続/未設定）
   private _invertHazardUntil = -Infinity
-  // changeKey キースタック: action名 → 元のキーのスタック（複数エフェクト対応）
-  private _keyStack = new Map<string, string[]>()
-  // changeKey 解除予定時刻: action名 → 解除時刻のスタック（_keyStack と1:1対応）
-  private _changeKeyUntil = new Map<string, number[]>()
+  // changeKey キー変更履歴: action名 → {解除時刻, 保存されていた元のキー}
+  private _changeKeyUntil = new Map<string, {expiresAt: number, savedKey: string | undefined}[]>()
   // 次の getSnapshot() で一度だけ返す通知メッセージ
   private _pendingLearningMsg: string | null = null
   private _pendingFormulaError: string | null = null
@@ -187,7 +185,6 @@ export class SideScroller {
     this._disabledActions.clear()
     this._invertHazardUntil = -Infinity
     this._changeKeyUntil.clear()
-    this._keyStack.clear()
     this._pendingLearningMsg = null
     this._gameStats.beatHazardInverted = false
     // ManualVersion から learningRules を取得
@@ -371,21 +368,16 @@ export class SideScroller {
       this._gameStats.beatHazardInverted = false
       this._invertHazardUntil = -Infinity
     }
-    for (const [action, expires] of this._changeKeyUntil) {
-      // 期限切れのエントリを先頭から順に処理（スタック順）
-      while (expires.length > 0 && now >= expires[0]) {
-        expires.shift()
-        const stack = this._keyStack.get(action)
-        const orig = stack?.pop()
-        if (orig !== undefined) {
-          this._setControl(action, orig)
+    for (const [action, entries] of this._changeKeyUntil) {
+      // 期限切れのエントリを先頭から順に処理（適用順＝FIFO）
+      while (entries.length > 0 && now >= entries[0].expiresAt) {
+        const entry = entries.shift()
+        if (entry && entry.savedKey !== undefined) {
+          this._setControl(action, entry.savedKey)
         }
       }
-      if (expires.length === 0) {
+      if (entries.length === 0) {
         this._changeKeyUntil.delete(action)
-        if (this._keyStack.get(action)?.length === 0) {
-          this._keyStack.delete(action)
-        }
       }
     }
 
@@ -1420,22 +1412,18 @@ export class SideScroller {
       case 'changeKey': {
         // payload = "jump:w" のような形式（action:newKey）
         const [action, newKey] = effect.payload.split(':')
-        // スタック方式: 各エフェクトが現在のキーをプッシュし、期限切れでポップして復元
-        if (!this._keyStack.has(action)) {
-          this._keyStack.set(action, [])
-        }
+        // スタック方式: 各エフェクトが現在のキーを、解除時刻とペアで保存
         if (!this._changeKeyUntil.has(action)) {
           this._changeKeyUntil.set(action, [])
         }
         const currentKey = this._getControl(action)
-        if (currentKey) {
-          const stack = this._keyStack.get(action)
-          if (stack) stack.push(currentKey)
-        }
         this._setControl(action, newKey)
         if (effect.durationSec != null) {
-          const expires = this._changeKeyUntil.get(action)
-          if (expires) expires.push(performance.now() + effect.durationSec * 1000)
+          const entries = this._changeKeyUntil.get(action)
+          if (entries) entries.push({
+            expiresAt: performance.now() + effect.durationSec * 1000,
+            savedKey: currentKey,
+          })
         }
         break
       }
