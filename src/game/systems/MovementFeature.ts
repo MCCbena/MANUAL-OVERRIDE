@@ -162,10 +162,11 @@ export class MovementFeature implements FeatureSystem {
       }
     }
 
-    // スライド中に下キーを離した → 早期終了
+    // スライド中に下キーを離した → 早期終了（経過時間に応じてクールダウンを短縮）
     if (this.slide.active && !input.keys.has(downKey)) {
       this.slide.active = false
-      this.slide.cooldown = SLIDE_COOLDOWN_SEC
+      // 経過時間が長いほどクールダウンを短くする（タップ誤爆のペナルティ軽減）
+      this.slide.cooldown = SLIDE_COOLDOWN_SEC * (this.slide.timer / SLIDE_DURATION_SEC)
       p.h = PLAYER_PHYSICS.height
     }
   }
