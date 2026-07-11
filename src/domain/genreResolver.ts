@@ -192,11 +192,11 @@ export function resolveGenreProgress(
   // minProb 充足度 (0~1)
   const minProbRatio = Math.min(1, top.prob / config.minProb)
   // dominanceRatio 充足度 (0~1): top / second >= ratio なら 1
-  const dominanceRatio =
+  const dominanceRatioScore =
     second && second.prob > 0
       ? Math.min(1, top.prob / (config.dominanceRatio * second.prob))
       : 1
-  const progress = Math.min(1, Math.max(0, (minProbRatio + dominanceRatio) / 2))
+  const progress = Math.min(1, Math.max(0, (minProbRatio + dominanceRatioScore) / 2))
 
   return { closestGenre: top.id, progress }
 }
