@@ -17,13 +17,16 @@ import { getActiveSystems } from '../../engine/GameRegistry'
 export class RpgFeature implements FeatureSystem {
   readonly handles = ['hp', 'exp', 'item_pickup', 'shield'] as const
 
+  // シールドの内部状態（永続的な設定ではない一時的なガード）
+  private _hasShieldActive: boolean = false
+
   /** hp feature: 被弾時に HP 減算・シールド・無敵・シェイク・パーティクルを処理 */
   onPlayerHit(world: MutableWorld): void {
     if (!world.rules.features.has('hp')) return
     const p = world.player
 
     // shield feature: ダメージを1回ガード（クールダウンなし、連続被弾時は消費後即無効）
-    if (world.rules.features.has('shield') && p.hp > 0) {
+    if (this._hasShieldActive && p.hp > 0) {
       // シールド発動: ダメージを軽減（HP 減算なし）、演出のみ
       p.invincible = VFX.invincibleDuration
       world.triggerShake(VFX.hitShakeIntensity * 0.5)
@@ -39,8 +42,8 @@ export class RpgFeature implements FeatureSystem {
           life, '#88ddff', size,
         )
       }
-      // shield は1回で消費（feature フラグを削除＝永続的な shield 設定が必要な場合は外す）
-      world.rules.features.delete('shield')
+      // shield は1回で消費（内部状態をリセット）
+      this._hasShieldActive = false
       return
     }
 
@@ -60,6 +63,16 @@ export class RpgFeature implements FeatureSystem {
         )
       }
     }
+  }
+
+  onManualUpdated(_world: MutableWorld, _versionKey: string): void {
+    // シールド状態をリセット（説明書再評価時に初期化）
+    this._hasShieldActive = false
+  }
+
+  /** メンテナンス用：シールドの有効/無効を設定する */
+  setShieldActive(active: boolean): void {
+    this._hasShieldActive = active
   }
 
   /** item_pickup feature: アイテムのパルスアニメ・収集判定・EXP / HP 付与 */

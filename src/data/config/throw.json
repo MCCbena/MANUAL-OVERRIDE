@@ -8,5 +8,6 @@
   "speedMultiplier": 5,
   "outOfBoundsRight": 2400,
   "outOfBoundsLeft": -200,
-  "landingMargin": 100
+  "landingMargin": 100,
+  "minArcHeight": 30
 }

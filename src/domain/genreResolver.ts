@@ -173,8 +173,6 @@ export function resolveHighestProbGenre(
 export function resolveGenreProgress(
   accumulated: GenreParams,
   genres: GenreDef[],
-  _prevGenre?: GenreId | undefined,
-  _forcedGenre?: GenreId | undefined,
   config: BayesConfig = DEFAULT_BAYES_CONFIG,
 ): { closestGenre: GenreId; progress: number } {
   const posteriors = computeBayesianPosteriors(accumulated, genres, config)

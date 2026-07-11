@@ -35,6 +35,16 @@ export class MovementFeature implements FeatureSystem {
     this.driftTime = 0
   }
 
+  onDisable(world: MutableWorld): void {
+    // Feature が無効化された場合は、スライド中にプレイヤーの高さが縮小されていた場合を回復
+    if (this.slide.active) {
+      world.player.h = PLAYER_PHYSICS.height
+      this.slide = { timer: 0, cooldown: 0, active: false }
+    }
+    this.dash = { cooldown: 0, timer: 0, dir: 1 }
+    this.driftTime = 0
+  }
+
   preUpdate(world: MutableWorld, input: InputSnapshot, dt: number): void {
     const r = world.rules
     const p = world.player
