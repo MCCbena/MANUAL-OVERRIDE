@@ -12,6 +12,7 @@ import type { GenreId } from '../domain/types'
 import { PixelCanvas } from '../game/render'
 import { selectPlayerFrame } from './playerBaseAnim'
 import type { PlayerAnimState } from '../engine/GenrePlugin'
+import { SportsMode } from '../game/modes/SportsMode'
 
 // ゴールラインの演出周期（ms）
 const GOAL_FLASH_PERIOD = 2000
@@ -20,6 +21,8 @@ const CROWD_BOOST_PERIOD = 1500
 
 export class SportsPlugin extends GenrePluginBase {
   readonly id: GenreId = 'sports'
+
+  readonly gameMode = new SportsMode()
 
   readonly skyColors    = ['#87ceeb', '#b0e0ff'] as const
   readonly groundColors = ['#2d5a27', '#1f4019'] as const

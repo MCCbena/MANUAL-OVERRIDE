@@ -127,6 +127,10 @@ export interface InputSnapshot {
   readonly keys: ReadonlySet<string>
   readonly justPressed: ReadonlySet<string>
   readonly justReleased: ReadonlySet<string>
+  /** マウス位置・状態（TowerDefMode 等のクリック操作に使用）。省略可。 */
+  readonly mouse?: { x: number; y: number; down: boolean }
+  /** タッチ位置・状態。省略可。 */
+  readonly touch?: { x: number; y: number; down: boolean }
 }
 
 // ──────────────────────────────────────────────────────────────────────

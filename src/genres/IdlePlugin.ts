@@ -12,6 +12,7 @@ import type { GenreId } from '../domain/types'
 import { PixelCanvas } from '../game/render'
 import { selectPlayerFrame } from './playerBaseAnim'
 import type { PlayerAnimState } from '../engine/GenrePlugin'
+import { IdleMode } from '../game/modes/IdleMode'
 
 // 資源の自動増加量（per sec）
 const RESOURCE_RATE = 2.5
@@ -26,6 +27,8 @@ const BLOCK_COLORS = ['#c8b898', '#b8a888', '#a89878', '#d0c0a0']
 
 export class IdlePlugin extends GenrePluginBase {
   readonly id: GenreId = 'idle'
+
+  readonly gameMode = new IdleMode()
 
   readonly skyColors    = ['#f5f5f0', '#e8e8e0'] as const
   readonly groundColors = ['#d8d0c0', '#c8c0b0'] as const

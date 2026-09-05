@@ -13,6 +13,7 @@ import type { GenreId } from '../domain/types'
 import { PixelCanvas } from '../game/render'
 import { selectPlayerFrame } from './playerBaseAnim'
 import type { PlayerAnimState } from '../engine/GenrePlugin'
+import { TowerDefMode } from '../game/modes/TowerDefMode'
 
 // 拠点（城門）の幅。左端に固定配置
 const CASTLE_GATE_WIDTH = 48
@@ -25,6 +26,8 @@ const TOWER_DECAY_PER_DIST = 800
 
 export class TowerDefPlugin extends GenrePluginBase {
   readonly id: GenreId = 'tower_def'
+
+  readonly gameMode = new TowerDefMode()
 
   readonly skyColors    = ['#0a0f1a', '#0d1420'] as const
   readonly groundColors = ['#1a2030', '#0f1420'] as const
