@@ -32,7 +32,7 @@ export type GenreParams = Partial<Record<GenreParam, number>>
 // ─────────────────────────────────────────────────────────────
 export type GenreId = string
 
-export type Phase = 'title' | 'tutorialIntro' | 'tutorial' | 'updating' | 'playing' | 'genreLocked' | 'throwing' | 'ending'
+export type Phase = 'title' | 'tutorialIntro' | 'tutorial' | 'updating' | 'playing' | 'genreLocked' | 'throwing' | 'won' | 'ending'
 
 // ─────────────────────────────────────────────────────────────
 // 説明書テーマ（UIの見た目クラスに対応）

@@ -12,6 +12,7 @@
 
 import type { GenreId } from '../domain/types'
 import type { MutableWorld, SpawnEntry } from './types'
+import type { GameMode } from './GameMode'
 
 /**
  * プレイヤーアニメーション状態。
@@ -27,6 +28,15 @@ export interface PlayerAnimState {
 
 export interface GenrePlugin {
   readonly id: GenreId
+
+  // ─── ゲームプレイ置換（省略可） ──────────────────────────────────
+  /**
+   * このジャンルのコアループを完全置換する GameMode。
+   * 指定された場合、エンジン側はデフォルトの「スクロール+障害物+衝突」パイプラインを
+   * 呼び出さず、代わりに Mode の update / render を毎フレーム呼ぶ。
+   * 省略時（undefined）は通常パイプラインで動作する（全ジャンルのデフォルト）。
+   */
+  readonly gameMode?: GameMode
 
   // ─── 視覚テーマ（必須） ───────────────────────────────────────────
   /** 空のグラデーション [上端色, 下端色] */

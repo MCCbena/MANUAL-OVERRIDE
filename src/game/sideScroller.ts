@@ -1,11 +1,12 @@
 import type { RuntimeRules, ActionStats, ScoreVars, ManualVersion, LearningRule, LearningEffect, FeatureId } from '../domain/types'
-import type { MutableWorld, GameStats } from '../engine/types'
+import type { MutableWorld, GameStats, InputSnapshot } from '../engine/types'
 import { Player, Hazard, Item, Bullet, rectsOverlap, type ScorePopup, type HazardShape } from './entities'
 import { HAZARD_SPAWN, PLAYER_PHYSICS, UPDATE_DISTANCES, DISTANCE_ACCEL, BASE_SCROLL_SPEED, DEFAULT_SCORE_FORMULA } from '../data/gameBalance'
 import { VFX, CAMERA, BACKGROUND, HAZARD_VFX, UI, SPAWN, SCORE, PHYSICS, DIFFICULTY, PIXELART, HUD_SAFEZONE } from '../data/tunables'
 import { classifyHudLayout, computeSafeZone, type SafeZone } from '../domain/hudLayout'
-import { getGenre, getActiveSystems } from '../engine/GameRegistry'
+import { getGenre, getActiveSystems, getMode } from '../engine/GameRegistry'
 import { resolveWeight } from '../engine/types'
+import type { GameMode } from '../engine/GameMode'
 import type { PlayerAnimState } from '../engine/GenrePlugin'
 import { soundManager } from '../plugins/SoundManager'
 import { evalScoreFormula, getLastFormulaError } from '../domain/scoreCalc'
@@ -30,6 +31,7 @@ export interface GameSnapshot {
   hp: number
   maxHp: number
   dead: boolean
+  won: boolean
   shouldUpdate: number | null
   // チュートリアルヒント用の入力統計
   statJumps: number
@@ -109,6 +111,8 @@ export class SideScroller {
   private dead = false
   private paused = false
   private firstJumpDone = false
+  /** 勝利フラグ（GameMode 由来のクリア）。dead と排他。 */
+  private won = false
   // stealth_mode: 隠密中の被弾回避フラグ（衝突判定が Feature update より前のため、
   // 前フレームの隠密状態を参照して被弾をスキップする。#254）
   private stealthHidden = false
@@ -174,6 +178,14 @@ export class SideScroller {
 
   // フレーム内で一度だけ _buildWorld() するためのキャッシュ
   private _frameWorld: MutableWorld | null = null
+  /** 毎フレーム更新される入力スナップショット（_buildWorld から参照される） */
+  private _inputSnap: InputSnapshot = { keys: new Set(), justPressed: new Set(), justReleased: new Set() }
+
+  // ─── GameMode ──────────────────────────────────────────────────
+  /** 現在のジャンルに対応する GameMode（null ならデフォルトパイプライン） */
+  private _activeMode: GameMode | null = null
+  /** setup() が既に呼ばれたか（ジャンル遷移時にリセット） */
+  private _modeSetupDone = false
 
   // ─── 統計 ────────────────────────────────────────────────────────
   private stats: ActionStats = { jumps: 0, moveRight: 0, moveLeft: 0, shots: 0, ticks: 0, collisions: 0, itemsCollected: 0, dashes: 0 }
@@ -237,6 +249,7 @@ export class SideScroller {
 
     this.rules = rules
     this.input.setGameKeys(rules.controls)
+    this._refreshMode()  // ジャンル変更時に新 Mode を取得・旧状態をリセット
     if (rules.features.has('double_jump')) {
       this.player.jumpsLeft = Math.max(this.player.jumpsLeft, 2)
     } else {
@@ -273,6 +286,32 @@ export class SideScroller {
   notifyGenreLocked(): void {
     this.genreLocked = true
     getGenre(this.rules.genre).onGenreLocked?.(this._buildWorld())
+  }
+
+  // ─── GameMode 管理 ─────────────────────────────────────────────
+  /** 現在のジャンルに対応する GameMode を取得（初回取得時にキャッシュ） */
+  private _getActiveMode(): GameMode | null {
+    if (this._activeMode) return this._activeMode
+    const mode = getMode(this.rules.genre)
+    if (mode) {
+      this._activeMode = mode
+      this._modeSetupDone = false  // 新モードでは setup を再実行
+    }
+    return this._activeMode
+  }
+
+  /** ルール変更時に Mode を再取得（ジャンル変更で前 Mode の状態が残らないよう） */
+  private _refreshMode(): void {
+    this._activeMode = null
+    this._modeSetupDone = false
+  }
+
+  /** Mode 由来の勝利（dead ではなく won 状態へ遷移） */
+  private _onWin(): void {
+    if (this.won) return
+    this.won = true
+    this._recalculatePlayScore()
+    this._pendingFormulaError = getLastFormulaError()
   }
 
   /** フレーム内で _buildWorld() を1回だけ呼ぶためのキャッシュアクセサ */
@@ -341,6 +380,7 @@ export class SideScroller {
       hp: this.player.hp,
       maxHp: this.player.maxHp,
       dead: this.dead,
+      won: this.won,
       shouldUpdate: pending >= 0 ? pending : null,
       statJumps: this.stats.jumps,
       statMoveLeft: this.stats.moveLeft,
@@ -415,13 +455,15 @@ export class SideScroller {
     const dt = rawDt * this._timescaleScale
 
     this.input.tick()
+    this._inputSnap = this.input.snapshot()
 
     if (!this.paused) {
-      if (!this.dead) {
+      if (!this.dead && !this.won) {
         this._update(dt)
-      } else {
+      } else if (this.dead) {
         this._updateDeathEffect(dt)
       }
+      // won 時は update をスキップ（スコア確定済み）だが render は継続
     }
 
     this._render()
@@ -441,6 +483,29 @@ export class SideScroller {
     if (this._transitionRemaining > 0) {
       this._updateTransition(dt)
       return
+    }
+
+    // ─── GameMode 分岐 ─────────────────────────────────────────────
+    // Mode があるジャンルはデフォルトパイプライン（スクロール+スポーン+衝突）を
+    // 完全に置換する。transition 中は Mode も待機（遷移演出を優先）。
+    if (!this._modeSetupDone && this._activeMode) {
+      const world = this._buildWorld()
+      this._activeMode.setup?.(world)
+      this._modeSetupDone = true
+    }
+    const mode = this._activeMode
+    if (mode && this._transitionRemaining <= 0) {
+      const world = this._buildWorld()
+      mode.update(world, dt)
+      if (mode.isWon?.(world)) {
+        this._onWin()
+        return
+      }
+      if (mode.isLost?.(world)) {
+        this._die(world.player)
+        return
+      }
+      return  // デフォルトパイプラインを完全にスキップ
     }
 
     // ─── LearningSystem の評価（定期チェック） ────────────────────
@@ -489,9 +554,8 @@ export class SideScroller {
     const effectiveScrollSpeed = r.scrollSpeed * distanceAccelFactor
 
     // ─── Pre-physics: 移動 Feature が vx をセット ────────────────────
-    const inputSnap = this.input.snapshot()
     for (const sys of getActiveSystems(r.features)) {
-      sys.preUpdate?.(this._getWorld(), inputSnap, dt)
+      sys.preUpdate?.(this._getWorld(), this._inputSnap, dt)
     }
 
     if (isVertical ? this._updateVertical(dt, effectiveScrollSpeed)
@@ -503,7 +567,7 @@ export class SideScroller {
 
     // ─── Feature システム（GameRegistry 経由で全システムをディスパッチ） ──
     for (const sys of getActiveSystems(r.features)) {
-      sys.update(this._getWorld(), inputSnap, dt)
+      sys.update(this._getWorld(), this._inputSnap, dt)
     }
 
     // ─── アイテムクリーンアップ ───────────────────────────────────
@@ -917,6 +981,20 @@ export class SideScroller {
     ctx.save()
     ctx.translate(this.shakeX, this.shakeY)
 
+    // ─── GameMode 描画（コアループ完全置換時） ────────────────────
+    // Mode があるジャンルはデフォルトの描画をスキップし、Mode 自前の
+    // レンダリング（ノーツ・盤面・敵等）で全画面を埋める。
+    if (this._activeMode && !this.dead && !this.won) {
+      const mWorld = this._buildWorld()
+      this._drawBackground(W, H, gY)  // 背景は共通（ジャンルテーマ）
+      this._activeMode.render(ctx, mWorld)
+      this.particles.render(ctx)
+      getGenre(r.genre).drawForeground?.(ctx, this.cameraX, W, H, gY)
+      ctx.restore()
+      this._drawSafeZoneBoundaries(W, H)
+      return
+    }
+
     // ─── 背景（パラレックス） ─────────────────────────────────────
     this._drawBackground(W, H, gY)
 
@@ -984,6 +1062,24 @@ export class SideScroller {
         this.px.text('説明書を投げてください', W / 2, H / 2 + 28, {
           font: UI.deathSubFont,
           fill: `rgba(255,255,255,${UI.deathSubTextAlpha})`,
+          align: 'center',
+          alpha,
+        })
+      }
+    }
+
+    // ─── 勝利オーバーレイ（Mode 由来のクリア） ────────────────────
+    if (this.won) {
+      const fadeIn = Math.min(1, this.deathTimer * UI.deathFadeSpeed)
+      ctx.fillStyle = `rgba(0, 80, 0, ${fadeIn * UI.deathOverlayAlpha * 0.6})`
+      ctx.fillRect(0, 0, W, H)
+
+      if (this.deathTimer > UI.deathTextDelayS) {
+        const alpha = Math.min(1, (this.deathTimer - UI.deathTextDelayS) * UI.deathTextFadeSpeed)
+        this.px.text('CLEAR', W / 2, H / 2 - 10, { font: UI.deathTitleFont, fill: '#88ff88', align: 'center', alpha })
+        this.px.text('説明書を投げてください', W / 2, H / 2 + 28, {
+          font: UI.deathSubFont,
+          fill: `rgba(180,255,180,${UI.deathSubTextAlpha})`,
           align: 'center',
           alpha,
         })
@@ -1549,6 +1645,7 @@ export class SideScroller {
       get gameStats()   { return self._gameStats },
       get scrollMode()  { return self.rules.scrollAxis as 'x' | 'y' },
       get stealthHidden() { return self.stealthHidden },
+      get input()       { return self._inputSnap },
       setStealthHidden(v) { self.stealthHidden = v },
 
       addScore(amount)              { self.playScore += amount },

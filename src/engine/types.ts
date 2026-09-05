@@ -40,6 +40,8 @@ export interface MutableWorld {
   readonly scrollMode: 'x' | 'y'
   /** stealth_mode 隠密中フラグ（衝突判定で被弾回避に使用。SpecialFeature が毎フレーム更新） */
   readonly stealthHidden: boolean
+  /** 現在の入力スナップショット（justPressed 等。GameMode がキー入力を取得するために使用） */
+  readonly input: InputSnapshot
 
   // ─ ステルス状態更新（SpecialFeature 専用） ────────────────────
   /** 隠密中フラグを更新（衝突判定で参照される） */

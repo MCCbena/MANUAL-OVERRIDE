@@ -1,10 +1,12 @@
 /**
  * genres/BasePlugin.ts
- * 'base' および 'runner' の視覚テーマを担当するジャンルプラグイン。
+ * 'base' ジャンルの視覚テーマを担当するジャンルプラグイン。
  *
  * DarkThemePlugin は継承可能な共通描画ロジックを持つ abstract クラス。
  * フィールドは全て abstract とし、各サブクラスが具体値を提供する。
  * これにより TypeScript のリテラル型の継承問題を回避する。
+ *
+ * 'runner' ジャンルは RunnerPlugin.ts を参照。
  */
 
 import { GenrePluginBase } from '../engine/GenrePluginBase'
@@ -121,26 +123,4 @@ export class BasePlugin extends DarkThemePlugin {
   ]
 }
 
-// ──────────────────────────────────────────────────────────────────────
-// RunnerPlugin — 'runner' ジャンル
-// ──────────────────────────────────────────────────────────────────────
-export class RunnerPlugin extends DarkThemePlugin {
-  readonly id: GenreId = 'runner'
-  readonly skyColors: readonly [string, string] = ['#0d0d1e', '#1e1e3e']
-  readonly groundColors: readonly [string, string] = ['#1a1a3a', '#0e0e22']
-  readonly farLayerColor = '#1a1a4a'
-  readonly midLayerColor = '#15153a'
-  readonly starColor: string | undefined = '#ffffff'
-  readonly palette = {
-    danger: '#e74c3c', dangerGlow: '#ff6b6b',
-    safe:   '#00cec9', safeGlow:   '#55efc4',
-  }
-  readonly spawnTable: readonly SpawnEntry[] = [
-    { shape: 'rect',    placement: 'ground', weightStart: 8,  weightEnd: 5,  wRange: [22, 40], hRange: [30, 55] },
-    { shape: 'rect',    placement: 'air',    weightStart: 2,  weightEnd: 4,  wRange: [28, 48], hRange: [25, 40] },
-    { shape: 'spike',   placement: 'ground', weightStart: 1,  weightEnd: 5,  wRange: [22, 40], hRange: [40, 65] },
-    { shape: 'pillar',  placement: 'ground', weightStart: 0,  weightEnd: 3,  wRange: [14, 18], hRange: [70, 130] },
-  ]
-}
-
-export default [new BasePlugin(), new RunnerPlugin()]
+export default new BasePlugin()
