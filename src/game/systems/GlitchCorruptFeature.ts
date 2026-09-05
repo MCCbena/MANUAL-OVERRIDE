@@ -36,10 +36,14 @@ export class GlitchCorruptFeature implements FeatureSystem {
   private scoreAtFlickerStart = 0
   private _isInputReversed = false
 
-  update(world: MutableWorld, _input: InputSnapshot, dt: number): void {
+  update(world: MutableWorld, input: InputSnapshot, dt: number): void {
     this._tickTimers(dt, world)
     this._maybeDoubleHazardSpeed(world, dt)
     this._maybeFlickerScore(world, dt)
+    // 入力反転が有効なら、入力スナップショットのキー集合を反転させる
+    if (this._isInputReversed) {
+      this._swapInputKeys(input)
+    }
   }
 
   onManualUpdated(): void {
@@ -105,8 +109,10 @@ export class GlitchCorruptFeature implements FeatureSystem {
     this._isInputReversed = true
   }
 
-  private _maybeDoubleHazardSpeed(world: MutableWorld, _dt: number): void {
-    if (Math.random() >= HAZARD_SPEED_DOUBLE_CHANCE) return
+  private _maybeDoubleHazardSpeed(world: MutableWorld, dt: number): void {
+    // 秒ベースの確率（Math.random() >= 0.15 は毎フレーム判定だったため、
+    // フレームレートに依存する問題があった。dt を掛けることで 1 秒あたり 15% に修正）
+    if (Math.random() >= HAZARD_SPEED_DOUBLE_CHANCE * dt) return
     if (world.hazards.length === 0) return
 
     const idx = Math.floor(Math.random() * world.hazards.length)
@@ -116,14 +122,50 @@ export class GlitchCorruptFeature implements FeatureSystem {
     this.hazardSpeedDoubles.set(_hazardId(hazard), until)
   }
 
-  private _maybeFlickerScore(world: MutableWorld, _dt: number): void {
+  private _maybeFlickerScore(world: MutableWorld, dt: number): void {
     if (this.scoreFlickerRemaining > 0) return
-    if (Math.random() >= SCORE_FLICKER_CHANCE) return
+    // 秒ベースの確率
+    if (Math.random() >= SCORE_FLICKER_CHANCE * dt) return
 
     this.scoreAtFlickerStart = 0
     this.scoreFlickerValue = Math.floor(Math.random() * 99999)
     this.scoreFlickerRemaining = SCORE_FLICKER_DURATION
     world.addScore(this.scoreFlickerValue)
+  }
+
+  /**
+   * 入力スナップショットのキー集合を左右反転させる。
+   * ArrowLeft ↔ ArrowRight、a ↔ d をスワップ。
+   */
+  private _swapInputKeys(input: InputSnapshot): void {
+    const swapPair = (a: string, b: string) => {
+      if (input.keys.has(a)) {
+        input.keys.delete(a)
+        input.keys.add(b)
+      }
+      if (input.justPressed.has(a)) {
+        input.justPressed.delete(a)
+        input.justPressed.add(b)
+      }
+      if (input.justReleased.has(a)) {
+        input.justReleased.delete(a)
+        input.justReleased.add(b)
+      }
+      if (input.keys.has(b)) {
+        input.keys.delete(b)
+        input.keys.add(a)
+      }
+      if (input.justPressed.has(b)) {
+        input.justPressed.delete(b)
+        input.justPressed.add(a)
+      }
+      if (input.justReleased.has(b)) {
+        input.justReleased.delete(b)
+        input.justReleased.add(a)
+      }
+    }
+    swapPair('ArrowLeft', 'ArrowRight')
+    swapPair('a', 'd')
   }
 
   /** 入力反転状態を設定（テスト用） */

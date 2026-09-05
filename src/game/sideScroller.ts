@@ -93,6 +93,11 @@ export function isHazardous(beatHazardInverted: boolean, hasBeatHazard: boolean,
 // ──────────────────────────────────────────────────────────────────────
 // SideScroller — Canvas ゲームエンジン本体
 // ──────────────────────────────────────────────────────────────────────
+
+/** ハザードの ID 生成（GlitchCorruptFeature とエンジン間で共有） */
+function _hazardId(h: { x: number; y: number }): number {
+  return Math.floor(h.x * 31 + h.y * 17)
+}
 export class SideScroller {
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
@@ -168,6 +173,8 @@ export class SideScroller {
   private facing: 1 | -1 = 1
   private deathTimer = 0
   private deathSlowMo = false
+  /** 勝利オーバーレイのフェードイン用タイマー（deathTimer とは独立, #fix-win-overlay） */
+  private _winFadeTimer = 0
 
   // プレイヤー演出
   private runCycle = 0           // 走りアニメ位相（0〜1）
@@ -186,6 +193,10 @@ export class SideScroller {
   private _activeMode: GameMode | null = null
   /** setup() が既に呼ばれたか（ジャンル遷移時にリセット） */
   private _modeSetupDone = false
+
+  // ─── GlitchCorruptFeature 共有状態 ─────────────────────────────
+  /** ハザード速度倍化の対象IDと期限（Feature ↔ エンジン間で共有） */
+  private _doubledHazardIds = new Map<number, number>()
 
   // ─── 統計 ────────────────────────────────────────────────────────
   private stats: ActionStats = { jumps: 0, moveRight: 0, moveLeft: 0, shots: 0, ticks: 0, collisions: 0, itemsCollected: 0, dashes: 0 }
@@ -304,12 +315,16 @@ export class SideScroller {
   private _refreshMode(): void {
     this._activeMode = null
     this._modeSetupDone = false
+    // 新 rules に基づいて即座に Mode を解決（_activeMode が null のままでは
+    // _update / _render の Mode 分岐が永遠に false になるバグの修正）
+    this._activeMode = this._getActiveMode()
   }
 
   /** Mode 由来の勝利（dead ではなく won 状態へ遷移） */
   private _onWin(): void {
     if (this.won) return
     this.won = true
+    this._winFadeTimer = 0  // 勝利オーバーレイのフェードインをリセット
     this._recalculatePlayScore()
     this._pendingFormulaError = getLastFormulaError()
   }
@@ -462,6 +477,9 @@ export class SideScroller {
         this._update(dt)
       } else if (this.dead) {
         this._updateDeathEffect(dt)
+      } else if (this.won) {
+        // 勝利時は update を停止するが、オーバーレイのフェードインを進める
+        this._winFadeTimer += dt
       }
       // won 時は update をスキップ（スコア確定済み）だが render は継続
     }
@@ -702,8 +720,10 @@ export class SideScroller {
     this.distance += speed * dt
     this.cameraX = 0
 
+    const doubledIds = this._getWorld().getDoubledHazardIds?.()
     for (const h of this.hazards) {
-      h.y += speed * dt
+      const mult = doubledIds?.has(_hazardId(h)) ? 2 : 1
+      h.y += speed * dt * mult
       h.pulse += dt * VFX.hazardPulseRate
     }
     this.hazards = this.hazards.filter(h => h.y < H + SPAWN.hazardCullBelow)
@@ -886,11 +906,13 @@ export class SideScroller {
       this.nextSpawnDist += (Math.max(sp.minInterval, interval) / MS_TO_SEC) * speed
     }
 
+    const doubledIds = this._getWorld().getDoubledHazardIds?.()
     for (const h of this.hazards) {
       h.pulse += dt * VFX.hazardPulseRate
       // 左方向ハザードは右へ移動（スクロール速度と同速）
       if (h.direction === 'left') {
-        h.x += speed * dt
+        const mult = doubledIds?.has(_hazardId(h)) ? 2 : 1
+        h.x += speed * dt * mult
       }
     }
 
@@ -1070,12 +1092,12 @@ export class SideScroller {
 
     // ─── 勝利オーバーレイ（Mode 由来のクリア） ────────────────────
     if (this.won) {
-      const fadeIn = Math.min(1, this.deathTimer * UI.deathFadeSpeed)
+      const fadeIn = Math.min(1, this._winFadeTimer * UI.deathFadeSpeed)
       ctx.fillStyle = `rgba(0, 80, 0, ${fadeIn * UI.deathOverlayAlpha * 0.6})`
       ctx.fillRect(0, 0, W, H)
 
-      if (this.deathTimer > UI.deathTextDelayS) {
-        const alpha = Math.min(1, (this.deathTimer - UI.deathTextDelayS) * UI.deathTextFadeSpeed)
+      if (this._winFadeTimer > UI.deathTextDelayS) {
+        const alpha = Math.min(1, (this._winFadeTimer - UI.deathTextDelayS) * UI.deathTextFadeSpeed)
         this.px.text('CLEAR', W / 2, H / 2 - 10, { font: UI.deathTitleFont, fill: '#88ff88', align: 'center', alpha })
         this.px.text('説明書を投げてください', W / 2, H / 2 + 28, {
           font: UI.deathSubFont,
@@ -1676,6 +1698,17 @@ export class SideScroller {
         } else {
           self._timescaleRemaining = -1  // 永続
         }
+      },
+      declareWin() { self._onWin() },
+      getDoubledHazardIds() {
+        // GlitchCorruptFeature が毎フレーム更新する hazardSpeedDoubles から
+        // 生存中の ID 集合を返す（期限切れは除外）
+        const now = performance.now()
+        const ids = new Set<number>()
+        for (const [id, until] of self._doubledHazardIds) {
+          if (now < until) ids.add(id)
+        }
+        return ids
       },
 
       getHazardScreenX(h) {

@@ -54,7 +54,7 @@ export class SanityFeature implements FeatureSystem {
     // 120 秒生存で勝利
     if (world.survivedSec >= WIN_SURVIVAL_SEC) {
       this.won = true
-      ;(world as unknown as { won: boolean }).won = true
+      world.declareWin?.()  // エンジンの勝利処理をトリガー（#fix-sanity-win）
       return
     }
 

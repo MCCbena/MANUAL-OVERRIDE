@@ -82,6 +82,18 @@ export interface MutableWorld {
    */
   setTimescale(scale: number, durationSec?: number): void
 
+  /**
+   * 勝利をエンジンに通知する（Mode 由来のクリア時など）。
+   * 省略可（undefined の場合は無視される）。
+   */
+  declareWin?(): void
+
+  /**
+   * 速度倍化対象のハザードID集合を返す（GlitchCorruptFeature が使用）。
+   * 省略可（undefined の場合は倍化なしとして扱う）。
+   */
+  getDoubledHazardIds?(): ReadonlySet<number>
+
   // ─ 座標系ヘルパー（FeatureSystem が scrollMode を意識しなくてよくする）
   /**
    * ハザードのスクリーン X 座標を取得（モード非依存）。
@@ -124,9 +136,9 @@ export interface MutableWorld {
 // InputSnapshot — 1フレーム分の入力状態
 // ──────────────────────────────────────────────────────────────────────
 export interface InputSnapshot {
-  readonly keys: ReadonlySet<string>
-  readonly justPressed: ReadonlySet<string>
-  readonly justReleased: ReadonlySet<string>
+  readonly keys: Set<string>
+  readonly justPressed: Set<string>
+  readonly justReleased: Set<string>
   /** マウス位置・状態（TowerDefMode 等のクリック操作に使用）。省略可。 */
   readonly mouse?: { x: number; y: number; down: boolean }
   /** タッチ位置・状態。省略可。 */

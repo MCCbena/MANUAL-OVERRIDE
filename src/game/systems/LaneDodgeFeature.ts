@@ -34,7 +34,11 @@ export class LaneDodgeFeature implements FeatureSystem {
   update(world: MutableWorld, input: InputSnapshot, dt: number): void {
     this._handleLaneSwitchInput(world, input)
     this._updateLaneAnimation(world, dt)
-    this._enforceLaneBounds(world)
+    // 切替中は currentLane が旧レーンのままなので、_enforceLaneBounds だと
+    // 旧レーンの帯にクランプされて空中浮遊するバグを回避するためスキップ
+    if (this.laneSwitchTimer <= 0) {
+      this._enforceLaneBounds(world)
+    }
     this._adjustScrollSpeed(world)
   }
 

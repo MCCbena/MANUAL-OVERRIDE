@@ -5,7 +5,7 @@
  * 画面左に拠点（城門）。右から敵が波状に接近。
  * タワーを配置して敵を撃破。全ウェーブを耐え切ったらクリア。
  *
- * 操作: 1-3 = タワータイプ選択, クリック = 配置
+ * 操作: 1-3 = タワータイプ選択, Space = プレイヤー位置にタワー配置
  * 勝利: 全ウェーブ（5/5）を耐え切ったらクリア
  * 敗北: 敵が拠点に到達
  */
@@ -174,7 +174,7 @@ export class TowerDefMode implements GameMode {
 
     // ─── ゲーム開始判定 ────────────────────────────────────────
     if (!this.state.gameStarted) {
-      if (input.justPressed.has('Space') || input.keys.has('Space')) {
+      if (input.justPressed.has('Space')) {
         this.state.gameStarted = true
         this._startWave(1)
       } else {
@@ -329,9 +329,11 @@ export class TowerDefMode implements GameMode {
       }
     }
 
-    // ─── キー入力: タワー配置（クリック） ──────────────────────
-    if (input.mouse && input.mouse.down) {
-      this._tryPlaceTower(world, input.mouse.x, input.mouse.y)
+    // ─── キー入力: タワー配置（Space でプレイヤー位置に配置） ─────
+    // justReleased を使用（justPressed だとゲーム開始フレームと競合するため）
+    // プレイヤーは Space を離してから再び押すことでタワーを配置する
+    if (input.justReleased.has('Space') && this.state.gameStarted) {
+      this._tryPlaceTowerAtPlayer(world)
     }
   }
 
@@ -403,7 +405,7 @@ export class TowerDefMode implements GameMode {
       px.text('Press Space to start!', W / 2, H / 2 - 60, {
         font: 'bold 18px monospace', fill: '#ffffff', align: 'center',
       })
-      px.text('1-3: Tower type | Click: Place', W / 2, H / 2 - 30, {
+      px.text('1-3: Tower type | Space: Place at player', W / 2, H / 2 - 30, {
         font: '12px monospace', fill: 'rgba(255,255,255,0.5)', align: 'center',
       })
     }
@@ -519,6 +521,49 @@ export class TowerDefMode implements GameMode {
     })
 
     world.addScorePopup(mouseX, mouseY - 20, `-${cost}G`, '#ff6644')
+  }
+
+  /**
+   * プレイヤーの現在位置にタワーを配置（キー操作対応, #fix-towerdef-input）。
+   * 配置可能範囲: 城門から一定距離以内（TOWER_RANGE 以内）。
+   */
+  private _tryPlaceTowerAtPlayer(world: MutableWorld): void {
+    const s = this.state
+    const px = world.player
+    const placeX = px.x + px.w / 2
+    const placeY = px.y + px.h / 2
+    const groundY = world.canvas.height * 0.7
+
+    // 配置可能範囲: 城門の右側、プレイヤー位置が城門から TOWER_RANGE 以内
+    const minPlaceX = CASTLE_X + CASTLE_W + 20
+    const maxPlaceX = Math.min(world.canvas.width - 40, CASTLE_X + CASTLE_W + TOWER_RANGE)
+    const minPlaceY = 40
+    const maxPlaceY = groundY - 20
+
+    if (placeX < minPlaceX || placeX > maxPlaceX ||
+        placeY < minPlaceY || placeY > maxPlaceY) {
+      return
+    }
+
+    // 既存タワーと重ならないかチェック
+    for (const tower of s.towers) {
+      const dist = Math.hypot(placeX - tower.x, placeY - tower.y)
+      if (dist < 30) return
+    }
+
+    const cost = TOWER_COST[s.selectedTowerType]
+    if (s.gold < cost) return
+
+    s.gold -= cost
+    s.towers.push({
+      x: placeX,
+      y: placeY,
+      type: s.selectedTowerType,
+      shootTimer: 0,
+      targetId: null,
+    })
+
+    world.addScorePopup(placeX, placeY - 20, `-${cost}G`, '#ff6644')
   }
 
   private _spawnHitParticles(x: number, y: number): void {
