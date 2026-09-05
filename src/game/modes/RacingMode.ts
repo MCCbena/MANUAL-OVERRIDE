@@ -182,6 +182,18 @@ export class RacingMode implements GameMode {
       }
     }
 
+    // ─── 障害物のカリング（プレイヤーを過ぎた障害物を削除） ────
+    for (let i = this.state.obstacles.length - 1; i >= 0; i--) {
+      const obs = this.state.obstacles[i]
+      // プレイヤーの左端を過ぎた障害物は削除（画面外 + マージン）
+      if (obs.x < this.state.playerX - PLAYER_W * 2) {
+        this.state.obstacles.splice(i, 1)
+      }
+    }
+
+    // ─── 障害物の動的スポーン（カリングされた分を補填） ────────
+    this._respawnObstacles(world)
+
     // ─── AI 更新 ───────────────────────────────────────────────
     for (let i = 0; i < AI_COUNT; i++) {
       const ai = this.state.aiPositions[i]
@@ -385,6 +397,24 @@ export class RacingMode implements GameMode {
       const h = HAZARD_H_RANGE[0] + rng() * (HAZARD_H_RANGE[1] - HAZARD_H_RANGE[0])
       const lane = Math.floor(rng() * LANE_COUNT)
       s.obstacles.push({ x, y: 0, w, h, lane })
+    }
+  }
+
+  private _respawnObstacles(world: MutableWorld): void {
+    const s = this.state
+
+    // 必要に応じて障害物を前方にスポーン
+    const targetCount = HAZARD_COUNT
+    if (s.obstacles.length < targetCount) {
+      const needCount = targetCount - s.obstacles.length
+      const W = world.canvas.width
+      for (let i = 0; i < needCount; i++) {
+        const w = HAZARD_W_RANGE[0] + Math.random() * (HAZARD_W_RANGE[1] - HAZARD_W_RANGE[0])
+        const h = HAZARD_H_RANGE[0] + Math.random() * (HAZARD_H_RANGE[1] - HAZARD_H_RANGE[0])
+        const lane = Math.floor(Math.random() * LANE_COUNT)
+        const spawnX = s.playerX + W * 0.5 + Math.random() * W * 0.5
+        s.obstacles.push({ x: spawnX, y: 0, w, h, lane })
+      }
     }
   }
 

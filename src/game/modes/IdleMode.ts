@@ -91,9 +91,11 @@ export class IdleMode implements GameMode {
 
   private state: IdleModeState = initialState()
 
-  setup(_world: MutableWorld): void {
+  setup(world: MutableWorld): void {
     this.state = initialState()
     this.state.initialized = true
+    // IdleMode は死亡・障害物なし。既存のハザードを全削除。
+    world.hazards.length = 0
   }
 
   update(world: MutableWorld, dt: number): void {

@@ -116,7 +116,10 @@
           "survival_hunger",
           "survival_level",
           "survival_melee",
-          "tetris_mode"
+          "tetris_mode",
+          "glitch_corrupt",
+          "lane_dodge",
+          "sanity"
         ]
       }
     },
@@ -157,7 +160,10 @@
           "survival_hunger",
           "survival_level",
           "survival_melee",
-          "tetris_mode"
+          "tetris_mode",
+          "glitch_corrupt",
+          "lane_dodge",
+          "sanity"
         ]
       }
     },

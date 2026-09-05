@@ -3,7 +3,7 @@
   "id": "horror",
   "label": "サバイバルホラー",
   "thresholds": { "survive": 5, "stealth": 4 },
-  "enableFeatures": ["hp", "stealth_mode", "slow_precise"],
+  "enableFeatures": ["hp", "stealth_mode", "slow_precise", "sanity"],
   "disableFeatures": ["auto_run", "shoot", "beat_hazard", "boss"],
   "scoreFormula": "survivedSec * 20 + stealthBonus * 0.8 + deaths * -200",
   "manualReveal": "これはサバイバルホラーになりました。正気を保ってください。",
