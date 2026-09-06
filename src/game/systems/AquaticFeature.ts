@@ -20,10 +20,6 @@ const OXYGEN_DECAY_PER_SEC = 3.0
 const OXYGEN_RECOVERY_AMOUNT = 30
 const BUIOYANCY_FACTOR = 0.5   // 重力を 0.5 倍
 
-const SWIM_UP_FORCE = 200      // 上昇力 px/s²
-const SWIM_DOWN_FORCE = 200    // 下降力 px/s²
-const SWIM_JUMP_FORCE = -300   // Space での上昇初速
-
 const CURRENT_INTERVAL = 5     // 海流発生間隔（秒）
 const CURRENT_DURATION = 2     // 海流持続（秒）
 const CURRENT_SPEED = 30       // 海流速度（px/s）
@@ -70,9 +66,9 @@ export class AquaticFeature implements FeatureSystem {
     }
   }
 
-  setup(world: MutableWorld): void {
+  onManualUpdated(world: MutableWorld): void {
     this._state = this._createState()
-    // 浮力: 重力を半減
+    // C4: 浮力: 重力を半減（onManualUpdated で適用。setup はエンジンから呼ばれない）
     if (!this._gravityModified) {
       world.rules.gravity = Math.floor(world.rules.gravity * BUIOYANCY_FACTOR)
       this._gravityModified = true
@@ -111,19 +107,8 @@ export class AquaticFeature implements FeatureSystem {
       return
     }
 
-    // ─── 泳ぎ操作 ─────────────────────────────────────────────
-    const player = world.player
-    if (input.keys.has('ArrowUp')) {
-      player.vy -= SWIM_UP_FORCE * dt
-    }
-    if (input.keys.has('ArrowDown')) {
-      player.vy += SWIM_DOWN_FORCE * dt
-    }
-    if (input.justPressed.has('Space')) {
-      player.vy = SWIM_JUMP_FORCE
-    }
-
     // ─── 海流の影響 ───────────────────────────────────────────
+    const player = world.player
     if (this._state.currentActive) {
       player.vx += CURRENT_SPEED * this._state.currentDir * dt
     }
@@ -216,11 +201,6 @@ export class AquaticFeature implements FeatureSystem {
     ctx.fillText(`${Math.floor(s.oxygen)}`, barX + OXYGEN_BAR_W + 8, barY + OXYGEN_BAR_H - 2)
 
     ctx.restore()
-  }
-
-  onManualUpdated(): void {
-    this._state = this._createState()
-    this._gravityModified = false
   }
 
   onDisable(_world: MutableWorld): void {

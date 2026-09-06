@@ -20,7 +20,7 @@ const DETECTION_OUT_RATE = -15     // 円錐外の減衰率（per sec）
 
 // 警戒円錐
 const CONE_LENGTH = 120
-const CONE_HALF_HEIGHT = 40
+const CONE_HALF_HEIGHT = 55       // C8: 40 → 55（プレイヤー高さ 52px をカバー）
 
 // alertLevel 閾値
 const ALERT_SUSPICIOUS_THRESHOLD = 30
@@ -94,12 +94,17 @@ export class StealthFeature implements FeatureSystem {
     for (const hazard of world.hazards) {
       if (hazard.shape !== 'pillar') continue
 
-      // 警戒円錐内判定: ハザードの左側（プレイヤーが来る方向）
-      // 矩形: (h.x - CONE_LENGTH, h.y - CONE_HALF_HEIGHT, CONE_LENGTH, CONE_HALF_HEIGHT * 2)
-      const coneLeft = hazard.x - CONE_LENGTH
-      const coneRight = hazard.x
-      const coneTop = hazard.y - CONE_HALF_HEIGHT
-      const coneBottom = hazard.y + CONE_HALF_HEIGHT
+      // C7: hazard.x はワールド座標、player.x はスクリーン座標なので
+      // getHazardScreenX でスクリーン座標に変換してから判定
+      const hScreenX = world.getHazardScreenX(hazard)
+      const hScreenY = hazard.y  // pillar の上辺 Y（スクリーン座標）
+
+      // C8: 円錐を pillar の下辺（地面側）にアンカー
+      const coneCenterY = hScreenY + hazard.h
+      const coneLeft = hScreenX - CONE_LENGTH
+      const coneRight = hScreenX
+      const coneTop = coneCenterY - CONE_HALF_HEIGHT
+      const coneBottom = coneCenterY + CONE_HALF_HEIGHT
 
       const playerInCone = (
         player.x + player.w > coneLeft &&
@@ -148,8 +153,14 @@ export class StealthFeature implements FeatureSystem {
     for (const hazard of world.hazards) {
       if (hazard.shape !== 'pillar') continue
 
-      const coneLeft = world.getHazardScreenX(hazard) - CONE_LENGTH
-      const coneTop = hazard.y - CONE_HALF_HEIGHT
+      // C7: スクリーン座標に変換
+      const hScreenX = world.getHazardScreenX(hazard)
+      const hScreenY = hazard.y
+
+      // C8: 円錐を pillar の下辺（地面側）にアンカー
+      const coneCenterY = hScreenY + hazard.h
+      const coneLeft = hScreenX - CONE_LENGTH
+      const coneTop = coneCenterY - CONE_HALF_HEIGHT
       const coneW = CONE_LENGTH
       const coneH = CONE_HALF_HEIGHT * 2
 

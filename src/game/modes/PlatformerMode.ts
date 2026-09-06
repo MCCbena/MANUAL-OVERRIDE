@@ -40,11 +40,10 @@ const LAVA_MAX_SPEED = 200           // 最大速度
 // プラットフォーム
 const PLATFORM_GAP_MIN = 80
 const PLATFORM_GAP_MAX = 150
-const PLATFORM_X_MIN = 30
-const PLATFORM_X_MAX = 370           // W - 90（400幅想定）
 const PLATFORM_W_MIN = 60
 const PLATFORM_W_MAX = 120
 const PLATFORM_H = 12
+const PLATFORM_X_MARGIN = 30
 
 // 溶岩波状
 const LAVA_BUMP_COUNT = 4
@@ -81,8 +80,7 @@ interface Platform {
 
 interface PlatformerModeState {
   platforms: Platform[]
-  totalClimb: number
-  highestY: number
+  totalClimb: number       // 最大到達高度（px）
   lavaY: number
   lavaSpeed: number
   lavaAccelTimer: number
@@ -97,7 +95,6 @@ function initialState(): PlatformerModeState {
   return {
     platforms: [],
     totalClimb: 0,
-    highestY: 0,
     lavaY: LAVA_INITIAL_Y,
     lavaSpeed: LAVA_INITIAL_SPEED,
     lavaAccelTimer: 0,
@@ -140,7 +137,9 @@ export class PlatformerMode implements GameMode {
   private _jumpsLeft = MAX_DOUBLE_JUMPS
   private _initialized = false
 
-  setup(_world: MutableWorld): void {
+  private _maxAltitude = 0
+
+  setup(world: MutableWorld): void {
     this.state = initialState()
     this.state.initialized = true
     this._playerX = 200
@@ -149,7 +148,22 @@ export class PlatformerMode implements GameMode {
     this._vx = 0
     this._onGround = false
     this._jumpsLeft = MAX_DOUBLE_JUMPS
+    this._maxAltitude = 0
     this._initialized = true
+
+    // C1: プレイヤーの足元に開始プラットフォームを配置
+    this.state.platforms.push({
+      x: this._playerX - 20,
+      y: this._playerY + PLAYER_H + 2,
+      w: 80,
+      type: 'normal',
+      conveyorDir: 1,
+      crumbleTimer: 0,
+      crumbleTriggered: false,
+      visible: true,
+    })
+    // カメラを地面付近に合わせる
+    this.state.cameraY = this._playerY + PLAYER_H - world.canvas.height * 0.6
   }
 
   update(world: MutableWorld, dt: number): void {
@@ -272,12 +286,13 @@ export class PlatformerMode implements GameMode {
       this.state.cameraY += delta
     }
 
-    // 最高到達地点
-    const absoluteY = this._playerY - this.state.cameraY
-    if (absoluteY < this.state.highestY) {
-      this.state.highestY = absoluteY
+    // C2: 最大到達高度をプレイヤーのスクリーンYから計算
+    // プレイヤーが上に行くほど _playerY は小さくなる
+    const currentAltitude = -this._playerY
+    if (currentAltitude > this._maxAltitude) {
+      this._maxAltitude = currentAltitude
     }
-    this.state.totalClimb = Math.max(0, -this.state.highestY)
+    this.state.totalClimb = this._maxAltitude
 
     // ─── プラットフォーム生成 ─────────────────────────────────
     const cameraTop = this.state.cameraY
@@ -290,10 +305,16 @@ export class PlatformerMode implements GameMode {
       const newY = lastY - this.state.nextGap
       this.state.nextGap = PLATFORM_GAP_MIN + _rand() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN)
 
+      // C3: canvas.width から動的に X 範囲を計算
+      const platW = _pickPlatformW()
+      const xMin = PLATFORM_X_MARGIN
+      const xMax = W - PLATFORM_X_MARGIN - platW
+      const platX = xMin + Math.random() * Math.max(0, xMax - xMin)
+
       const plat: Platform = {
-        x: PLATFORM_X_MIN + Math.floor(_rand() * (PLATFORM_X_MAX - PLATFORM_X_MIN)),
+        x: platX,
         y: newY,
-        w: _pickPlatformW(),
+        w: platW,
         type: _pickPlatformType(),
         conveyorDir: _rand() < 0.5 ? 1 : -1,
         crumbleTimer: 0,

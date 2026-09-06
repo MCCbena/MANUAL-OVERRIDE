@@ -20,9 +20,6 @@ const TORCH_RECOVERY_AMOUNT = 40
 // 部屋
 const ROOM_WIDTH = 400
 
-// 暗闇
-const DARKNESS_COLOR = 'rgba(0,0,0,0.85)'
-
 // HUD
 const TORCH_BAR_W = 120
 const TORCH_BAR_H = 10
@@ -79,9 +76,11 @@ export class DungeonFeature implements FeatureSystem {
       const key = `${hazard.x},${hazard.y}`
       if (this._state.collectedItems.has(key)) continue
 
-      // 衝突判定
+      // C6: hazard.x はワールド座標、player.x はスクリーン座標なので
+      // getHazardScreenX でスクリーン座標に変換してから衝突判定
+      const hScreenX = world.getHazardScreenX(hazard)
       const playerRect = { x: player.x, y: player.y, w: player.w, h: player.h }
-      const hazardRect = { x: hazard.x, y: hazard.y, w: hazard.w, h: hazard.h }
+      const hazardRect = { x: hScreenX, y: hazard.y, w: hazard.w, h: hazard.h }
       const overlap = (
         playerRect.x < hazardRect.x + hazardRect.w &&
         playerRect.x + playerRect.w > hazardRect.x &&
@@ -92,7 +91,7 @@ export class DungeonFeature implements FeatureSystem {
       if (overlap) {
         this._state.torch = Math.min(TORCH_MAX, this._state.torch + TORCH_RECOVERY_AMOUNT)
         this._state.collectedItems.add(key)
-        world.addScorePopup(hazard.x + hazard.w / 2, hazard.y, `+${TORCH_RECOVERY_AMOUNT} TORCH`, COLOR_TORCH_HIGH)
+        world.addScorePopup(hScreenX + hazard.w / 2, hazard.y, `+${TORCH_RECOVERY_AMOUNT} TORCH`, COLOR_TORCH_HIGH)
       }
     }
   }
@@ -106,32 +105,20 @@ export class DungeonFeature implements FeatureSystem {
     // 光半径: torch * 1.5（20〜150px の範囲）
     const radius = Math.max(20, Math.min(150, this._state.torch * 1.5))
 
-    // プレイヤーのスクリーン中心
+    // C12: destination-out だと既存描画を消去してしまうので、
+    // ラジアルグラデーションで暗闇を描く（中心透明 → 外周暗い）
     const playerScreenX = world.player.x + world.player.w / 2
     const playerScreenY = world.player.y + world.player.h / 2
 
-    // 1. 画面全体に暗い矩形を描く
-    ctx.save()
-    ctx.fillStyle = DARKNESS_COLOR
-    ctx.fillRect(0, 0, W, H)
-
-    // 2. 円形明かりを destination-out で抜く
-    ctx.globalCompositeOperation = 'destination-out'
     const gradient = ctx.createRadialGradient(
-      playerScreenX, playerScreenY, 0,
+      playerScreenX, playerScreenY, radius * 0.3,
       playerScreenX, playerScreenY, radius,
     )
-    gradient.addColorStop(0, 'rgba(255,255,255,1)')
-    gradient.addColorStop(0.6, 'rgba(255,255,255,0.8)')
-    gradient.addColorStop(1, 'rgba(255,255,255,0)')
+    gradient.addColorStop(0, 'rgba(0,0,0,0)')
+    gradient.addColorStop(0.7, 'rgba(0,0,0,0.4)')
+    gradient.addColorStop(1, 'rgba(0,0,0,0.85)')
     ctx.fillStyle = gradient
-    ctx.beginPath()
-    ctx.arc(playerScreenX, playerScreenY, radius, 0, Math.PI * 2)
-    ctx.fill()
-
-    // 3. composite mode をリセット
-    ctx.globalCompositeOperation = 'source-over'
-    ctx.restore()
+    ctx.fillRect(0, 0, W, H)
   }
 
   // ─── 内部: HUD ───────────────────────────────────────────────────

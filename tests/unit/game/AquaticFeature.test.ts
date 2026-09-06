@@ -81,7 +81,7 @@ describe('AquaticFeature', () => {
   beforeEach(() => {
     feature = new AquaticFeature()
     world = createMockWorld()
-    feature.setup(world)
+    feature.onManualUpdated(world)
   })
 
   describe('handles', () => {
@@ -168,36 +168,6 @@ describe('AquaticFeature', () => {
 
       const oxygen = (feature as { _state: { oxygen: number } })._state.oxygen
       expect(oxygen).toBeLessThanOrEqual(100)
-    })
-  })
-
-  describe('泳ぎ操作', () => {
-    it('上キーで上昇する', () => {
-      const initialVy = world.player.vy
-      world.input.keys.add('ArrowUp')
-
-      feature.update(world, world.input, 0.016)
-
-      // 上昇力がかかる（vy が減少、またはより負の値になる）
-      expect(world.player.vy).not.toBe(initialVy)
-    })
-
-    it('下キーで下降する', () => {
-      world.input.keys.add('ArrowDown')
-
-      feature.update(world, world.input, 0.016)
-
-      // 下降力がかかる
-      expect(world.player.vy).not.toBe(0)
-    })
-
-    it('Space で上昇する', () => {
-      world.input.justPressed.add('Space')
-
-      feature.update(world, world.input, 0.016)
-
-      // 初速が設定される
-      expect(world.player.vy).toBe(-300)
     })
   })
 

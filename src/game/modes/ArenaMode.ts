@@ -186,9 +186,6 @@ export class ArenaMode implements GameMode {
           this._startWave(this.state.currentWave + 1)
         }
       }
-      if (this.state.waveAnnounceTimer > 0) {
-        this.state.waveAnnounceTimer -= dt
-      }
     } else {
       const waveIdx = this.state.currentWave - 1
       const expectedCount = ENEMIES_PER_WAVE[waveIdx]
@@ -207,11 +204,17 @@ export class ArenaMode implements GameMode {
       if (aliveEnemies.length === 0 && this.state.enemiesSpawnedThisWave >= expectedCount) {
         this.state.waveInProgress = false
         this.state.waveTimer = 0
+        world.setCombo(this.state.totalKills)
         world.addScorePopup(W / 2, H / 2 - 40, `WAVE ${this.state.currentWave} CLEAR!`, '#ffcc44')
         if (this.state.currentWave >= WAVE_COUNT) {
           world.addScorePopup(W / 2, H / 2, 'ALL WAVES CLEARED!', '#ffdd44')
         }
       }
+    }
+
+    // W1: waveAnnounceTimer は waveInProgress 関係なく減算する
+    if (this.state.waveAnnounceTimer > 0) {
+      this.state.waveAnnounceTimer -= dt
     }
 
     // ─── プレイヤー物理 ───────────────────────────────────────
@@ -283,6 +286,7 @@ export class ArenaMode implements GameMode {
           if (enemy.hp <= 0) {
             enemy.alive = false
             this.state.totalKills++
+            world.setKills(this.state.totalKills)
             world.addScore(POINTS_PER_KILL)
             world.addScorePopup(enemy.x, enemy.y - 10, `+${POINTS_PER_KILL}`, '#ffcc44')
             this._spawnHitParticles(enemy.x + ENEMY_W / 2, enemy.y + ENEMY_H / 2)
@@ -376,7 +380,8 @@ export class ArenaMode implements GameMode {
     }
 
     // ─── プレイヤー描画 ───────────────────────────────────────
-    const drawY = this._playerY - PLAYER_H
+    // C9: _playerY は既にプレイヤーの上辺 Y なので - PLAYER_H しない
+    const drawY = this._playerY
 
     if (this._invincibleTimer > 0) {
       // 点滅
