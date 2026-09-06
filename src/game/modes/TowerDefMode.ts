@@ -174,7 +174,7 @@ export class TowerDefMode implements GameMode {
 
     // ─── ゲーム開始判定 ────────────────────────────────────────
     if (!this.state.gameStarted) {
-      if (input.justPressed.has('Space')) {
+      if (input.keys.has('Space')) {
         this.state.gameStarted = true
         this._startWave(1)
       } else {

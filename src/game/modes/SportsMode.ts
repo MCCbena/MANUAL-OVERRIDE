@@ -159,18 +159,16 @@ export class SportsMode implements GameMode {
       this.setup(world)
     }
 
-    this.state.elapsed += dt
-
     // ─── レース開始判定 ────────────────────────────────────────
     if (!this.state.raceStarted) {
-      if (input.justPressed.has('ArrowRight') || input.justPressed.has('Space') ||
-          input.keys.has('ArrowRight') || input.keys.has('Space')) {
+      if (input.keys.has('ArrowRight') || input.keys.has('Space')) {
         this.state.raceStarted = true
+      } else {
+        return // 未開始時は elapsed 不进み、入力チェックのみ
       }
     }
-    if (!this.state.raceStarted) {
-      return // 未開始時は更新しない
-    }
+
+    this.state.elapsed += dt
 
     // ─── タイマー判定（敗北） ─────────────────────────────────
     if (this.state.elapsed >= RACE_TIME_SEC) {

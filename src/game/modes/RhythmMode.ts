@@ -16,12 +16,13 @@
 import type { GameMode } from '../../engine/GameMode'
 import type { MutableWorld } from '../../engine/types'
 import { PixelCanvas } from '../render'
+import { soundManager } from '../../plugins/SoundManager'
 
 // ── 定数 ──────────────────────────────────────────────────────────
 const BPM = 120
 const BEAT_INTERVAL_SEC = 60 / BPM            // 0.5 秒
 const SONG_DURATION_SEC = 60                  // 曲の長さ
-const NOTE_FALL_SPEED = 300                   // px/s（ノーツが落ちる速さ）
+const NOTE_FALL_SPEED = 250                   // px/s（ノーツが落ちる速さ）
 const HIT_LINE_Y_RATIO = 0.82                 // 判定ラインの画面比率（下から 18%）
 const LANE_COUNT = 4
 const NOTE_SIZE = 36                          // ノーツの幅・高さ（px）
@@ -30,7 +31,7 @@ const HIT_LINE_THICKNESS = 4                  // 判定ラインの太さ
 // 判定ウィンドウ（秒、ヒットラインからの許容ズレ）
 const PERFECT_WINDOW = 0.045
 const GREAT_WINDOW = 0.09
-const GOOD_WINDOW = 0.15
+const GOOD_WINDOW = 0.20
 
 // スコア
 const SCORE_PERFECT = 150
@@ -246,6 +247,16 @@ export class RhythmMode implements GameMode {
 
         // hitLine を過ぎたら Miss 判定
         if (note.y > hitLineY + GOOD_WINDOW * NOTE_FALL_SPEED) {
+          note.missed = true
+          this._onMiss(world)
+        }
+      }
+    }
+
+    // 曲終了時: 未解決ノーツを強制的に Miss 処理（filter より前に実行）
+    if (this.state.elapsed >= SONG_DURATION_SEC) {
+      for (const note of this.state.notes) {
+        if (!note.hit && !note.missed) {
           note.missed = true
           this._onMiss(world)
         }
@@ -510,6 +521,9 @@ export class RhythmMode implements GameMode {
       `${result.toUpperCase()} +${score}`,
       JUDGMENT_COLORS[result],
     )
+
+    // 判定音
+    soundManager.onBeat(120)
   }
 
   private _onMiss(world: MutableWorld): void {
@@ -525,6 +539,9 @@ export class RhythmMode implements GameMode {
 
     // 画面シェイク
     world.triggerShake(0.3)
+
+    // ミス音（低いノイズ）
+    soundManager.onHit()
   }
 }
 
