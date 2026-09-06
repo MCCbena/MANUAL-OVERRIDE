@@ -4,8 +4,10 @@
  * 3レーン制で障害物を回避する「疾走感」ランナー。
  * - 3レーン制: 画面を上下3レーンに分割
  * - レーン切替: ArrowUp/ArrowDown で隣接レーンに移動（0.15秒でスムーズに移動）
+ * - レーンロック: 左右キー無効化（vx = 0 に固定）
+ * - コヨーテタイム: 切替中のキャンセル（0.1秒以内の再入力で即座に新しい切替へ）
+ * - 速度加速: 10秒ごとに scrollSpeed を +10px/s（最大 +100px/s）
  * - 衝突判定: 同じレーン + X座標が重なったら死亡
- * - 高速スクロール: scrollSpeedBonus = 100
  */
 
 import type { FeatureSystem } from '../../engine/FeatureSystem'
@@ -15,9 +17,14 @@ import type { MutableWorld, InputSnapshot } from '../../engine/types'
 const LANE_COUNT = 3
 // レーン切替のスムーズ移動時間（秒）
 const LANE_SWITCH_DURATION = 0.15
-// scrollSpeedBonus（RunnerPlugin 等の scrollSpeedBonus と統合）
-// 実際の加算は engine 側で GenrePlugin.scrollSpeedBonus を参照して処理される
-const _LANE_DODGE_SPEED_BONUS = 100
+// コヨーテタイム: 切替中のキャンセル許容窓（秒）
+const COYOTE_TIME = 0.1
+// 速度加速: 間隔（秒）
+const SPEED_ACCEL_INTERVAL = 10
+// 速度加速: 1回あたりの増加量（px/s）
+const SPEED_ACCEL_AMOUNT = 10
+// 速度加速: 最大追加量（px/s）
+const MAX_SPEED_BONUS = 100
 
 // レーンインデックス（0=上, 1=中, 2=下）
 type LaneIndex = 0 | 1 | 2
@@ -31,7 +38,12 @@ export class LaneDodgeFeature implements FeatureSystem {
   private laneSwitchStartY = 0
   private laneSwitchEndY = 0
 
+  // 速度加速
+  private _speedAccelTimer = 0
+  private _speedBonus = 0
+
   update(world: MutableWorld, input: InputSnapshot, dt: number): void {
+    this._laneLock(world)
     this._handleLaneSwitchInput(world, input)
     this._updateLaneAnimation(world, dt)
     // 切替中は currentLane が旧レーンのままなので、_enforceLaneBounds だと
@@ -39,7 +51,7 @@ export class LaneDodgeFeature implements FeatureSystem {
     if (this.laneSwitchTimer <= 0) {
       this._enforceLaneBounds(world)
     }
-    this._adjustScrollSpeed(world)
+    this._adjustScrollSpeed(world, dt)
   }
 
   render(_ctx: CanvasRenderingContext2D, _world: MutableWorld): void {
@@ -50,13 +62,32 @@ export class LaneDodgeFeature implements FeatureSystem {
     this.currentLane = 1
     this.targetLane = 1
     this.laneSwitchTimer = 0
+    this._speedAccelTimer = 0
+    this._speedBonus = 0
   }
 
   // ─── 内部 ────────────────────────────────────────────────────────
 
+  /** レーンロック: 左右移動を無効化 */
+  private _laneLock(world: MutableWorld): void {
+    world.player.vx = 0
+  }
+
   private _handleLaneSwitchInput(world: MutableWorld, input: InputSnapshot): void {
     const H = world.canvas.height
     const laneHeight = H / LANE_COUNT
+
+    // コヨーテタイム: 切替中のキャンセル
+    // laneSwitchTimer > 0 かつ残り時間が COYOTE_TIME 以内のとき、
+    // 再度キーを押すと即座にキャンセルして新しい切替を開始
+    if (this.laneSwitchTimer > 0 && this.laneSwitchTimer < COYOTE_TIME) {
+      // 既存の切替をキャンセル
+      this.laneSwitchTimer = 0
+      // currentLane を targetLane に即座に合わせる
+      this.currentLane = this.targetLane
+      // 現在の Y を新しい切替の開始位置として記録
+      this.laneSwitchStartY = world.player.y
+    }
 
     // ArrowUp: 上のレーンへ（currentLane > 0 のとき）
     if (input.justPressed.has('ArrowUp') && this.currentLane > 0) {
@@ -106,8 +137,13 @@ export class LaneDodgeFeature implements FeatureSystem {
     player.y = Math.max(laneTop, Math.min(laneBottom - player.h, player.y))
   }
 
-  private _adjustScrollSpeed(_world: MutableWorld): void {
-    // scrollSpeedBonus は GenrePlugin.scrollSpeedBonus で処理されるため、
-    // ここでは Feature としての宣言のみ（実際の加算はエンジン側で処理）
+  private _adjustScrollSpeed(world: MutableWorld, dt: number): void {
+    this._speedAccelTimer += dt
+    if (this._speedAccelTimer >= SPEED_ACCEL_INTERVAL && this._speedBonus < MAX_SPEED_BONUS) {
+      this._speedAccelTimer -= SPEED_ACCEL_INTERVAL
+      const increment = Math.min(SPEED_ACCEL_AMOUNT, MAX_SPEED_BONUS - this._speedBonus)
+      this._speedBonus += increment
+      world.rules.scrollSpeed += increment
+    }
   }
 }
