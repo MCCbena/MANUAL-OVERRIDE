@@ -25,6 +25,7 @@ import { NearMissComboFeature } from './NearMissComboFeature'
 import { GlitchCorruptFeature } from './GlitchCorruptFeature'
 import { LaneDodgeFeature } from './LaneDodgeFeature'
 import { SanityFeature } from './SanityFeature'
+import { AquaticFeature } from './AquaticFeature'
 
 registerFeature(new ShootFeature())
 registerFeature(new RhythmFeature())
@@ -39,3 +40,4 @@ registerFeature(new NearMissComboFeature())
 registerFeature(new GlitchCorruptFeature())
 registerFeature(new LaneDodgeFeature())
 registerFeature(new SanityFeature())
+registerFeature(new AquaticFeature())
