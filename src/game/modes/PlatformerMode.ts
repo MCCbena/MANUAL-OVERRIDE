@@ -153,10 +153,9 @@ export class PlatformerMode implements GameMode {
     this._maxAltitude = 0
     this._initialized = true
 
-    // C1: プレイヤーの足元に開始プラットフォームを配置（画面中央）
-    const W = world.canvas.width
+    // C1: プレイヤーの足元に開始プラットフォームを配置
     this.state.platforms.push({
-      x: W / 2 - 40,
+      x: this._playerX - 20,
       y: this._playerY + PLAYER_H + 2,
       w: 80,
       type: 'normal',
@@ -452,9 +451,12 @@ export class PlatformerMode implements GameMode {
 
   private _spawnPlatform(W: number, prevX: number, prevY: number): Platform {
     const platW = PLATFORM_W_MIN + Math.floor(_rand() * (PLATFORM_W_MAX - PLATFORM_W_MIN))
-    // X: 前プラットフォームの X 付近に制限（到達可能範囲内）
-    const minX = Math.max(PLATFORM_X_MARGIN, prevX - MAX_PLATFORM_H_GAP)
-    const maxX = Math.min(W - PLATFORM_X_MARGIN - platW, prevX + platW + MAX_PLATFORM_H_GAP)
+    // X: 前プラットフォームの X 付近に制限（到達可能範囲内 + プレイヤー到達可能帯内）
+    // プレイヤー X クランプは [100, W-100-PLAYER_W]。着地条件: playerLeft < platRight && playerRight > platLeft
+    const landMinX = 100 - platW + 1
+    const landMaxX = W - 100 - 1
+    const minX = Math.max(PLATFORM_X_MARGIN, landMinX, prevX - MAX_PLATFORM_H_GAP)
+    const maxX = Math.min(W - PLATFORM_X_MARGIN - platW, landMaxX, prevX + platW + MAX_PLATFORM_H_GAP)
     const platX = minX + Math.random() * Math.max(1, maxX - minX)
     // Y: 前より上（80〜150px 間隔）
     const platY = prevY - (PLATFORM_GAP_MIN + _rand() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN))
