@@ -4,7 +4,6 @@
  * 水中アドベンチャー Feature。
  * - 酸素ゲージ: 100 初期、-3/sec で減少。0 で敗北。
  * - 酸素回復: safe flag のハザードを回収で +30（上限100）
- * - 浮力: 重力を半減（setup で world.rules.gravity を 0.5 倍）
  * - 泳ぎ: 上キーで上昇、下キーで下降、Space も上昇
  * - 海流: 5秒ごとに一定方向に 2秒間押し流す
  * - HUD: 酸素バー（右上）、深度（左上）
@@ -18,7 +17,6 @@ import type { MutableWorld, InputSnapshot } from '../../engine/types'
 const OXYGEN_MAX = 100
 const OXYGEN_DECAY_PER_SEC = 3.0
 const OXYGEN_RECOVERY_AMOUNT = 30
-const BUIOYANCY_FACTOR = 0.5   // 重力を 0.5 倍
 
 const CURRENT_INTERVAL = 5     // 海流発生間隔（秒）
 const CURRENT_DURATION = 2     // 海流持続（秒）
@@ -42,7 +40,6 @@ interface AquaticState {
   currentDir: 1 | -1
   currentActive: boolean
   currentRemaining: number
-  bubbleItems: Set<number>  // 回収済みの safe hazard ID
   _dirty: boolean
 }
 
@@ -50,7 +47,6 @@ export class AquaticFeature implements FeatureSystem {
   readonly handles = ['aquatic'] as const
 
   private _state: AquaticState = this._createState()
-  private _gravityModified = false
 
   private _createState(): AquaticState {
     return {
@@ -61,18 +57,12 @@ export class AquaticFeature implements FeatureSystem {
       currentDir: 1,
       currentActive: false,
       currentRemaining: 0,
-      bubbleItems: new Set(),
       _dirty: true,
     }
   }
 
-  onManualUpdated(world: MutableWorld): void {
+  onManualUpdated(_world: MutableWorld): void {
     this._state = this._createState()
-    // C4: 浮力: 重力を半減（onManualUpdated で適用。setup はエンジンから呼ばれない）
-    if (!this._gravityModified) {
-      world.rules.gravity = Math.floor(world.rules.gravity * BUIOYANCY_FACTOR)
-      this._gravityModified = true
-    }
   }
 
   update(world: MutableWorld, input: InputSnapshot, dt: number): void {
@@ -116,7 +106,6 @@ export class AquaticFeature implements FeatureSystem {
     // ─── アイテム回収（safe hazard） ──────────────────────────
     for (const hazard of world.hazards) {
       if (!hazard.isSafe) continue
-      if (this._state.bubbleItems.has(hazard.x + hazard.y)) continue
 
       // 衝突判定
       const playerRect = { x: player.x, y: player.y, w: player.w, h: player.h }
@@ -130,7 +119,7 @@ export class AquaticFeature implements FeatureSystem {
 
       if (overlap) {
         this._state.oxygen = Math.min(OXYGEN_MAX, this._state.oxygen + OXYGEN_RECOVERY_AMOUNT)
-        this._state.bubbleItems.add(hazard.x + hazard.y)
+        world.removeHazardById(hazard)
         world.addScorePopup(hazard.x + hazard.w / 2, hazard.y, `+${OXYGEN_RECOVERY_AMOUNT} O2`, COLOR_OXYGEN_HIGH)
         world.addParticle(
           hazard.x + hazard.w / 2, hazard.y + hazard.h / 2,
@@ -201,10 +190,5 @@ export class AquaticFeature implements FeatureSystem {
     ctx.fillText(`${Math.floor(s.oxygen)}`, barX + OXYGEN_BAR_W + 8, barY + OXYGEN_BAR_H - 2)
 
     ctx.restore()
-  }
-
-  onDisable(_world: MutableWorld): void {
-    // 浮力効果を解除（元の重力値に戻す）
-    this._gravityModified = false
   }
 }

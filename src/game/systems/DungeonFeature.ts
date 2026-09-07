@@ -31,7 +31,6 @@ const COLOR_TORCH_LOW = '#884400'
 // 内部状態
 interface DungeonState {
   torch: number
-  collectedItems: Set<string>  // 回収済みの safe hazard ID
 }
 
 export class DungeonFeature implements FeatureSystem {
@@ -42,7 +41,6 @@ export class DungeonFeature implements FeatureSystem {
   private _createState(): DungeonState {
     return {
       torch: TORCH_MAX,
-      collectedItems: new Set(),
     }
   }
 
@@ -72,9 +70,6 @@ export class DungeonFeature implements FeatureSystem {
     const player = world.player
     for (const hazard of world.hazards) {
       if (!hazard.isSafe) continue
-      // 同一 safe hazard の重複回収を避ける（ID ではなく位置で判定）
-      const key = `${hazard.x},${hazard.y}`
-      if (this._state.collectedItems.has(key)) continue
 
       // C6: hazard.x はワールド座標、player.x はスクリーン座標なので
       // getHazardScreenX でスクリーン座標に変換してから衝突判定
@@ -90,7 +85,7 @@ export class DungeonFeature implements FeatureSystem {
 
       if (overlap) {
         this._state.torch = Math.min(TORCH_MAX, this._state.torch + TORCH_RECOVERY_AMOUNT)
-        this._state.collectedItems.add(key)
+        world.removeHazardById(hazard)
         world.addScorePopup(hScreenX + hazard.w / 2, hazard.y, `+${TORCH_RECOVERY_AMOUNT} TORCH`, COLOR_TORCH_HIGH)
       }
     }

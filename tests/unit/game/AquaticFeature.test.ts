@@ -96,9 +96,9 @@ describe('AquaticFeature', () => {
       expect(oxygen).toBe(100)
     })
 
-    it('浮力で重力が半減される', () => {
-      // 初期重力 1600 → 800
-      expect(world.rules.gravity).toBe(800)
+    it('重力は変更されない（浮力ロジックは削除済み）', () => {
+      // 浮力ロジックを削除したので、gravity は変更されない
+      expect(world.rules.gravity).toBe(1600)
     })
   })
 

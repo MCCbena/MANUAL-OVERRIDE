@@ -171,4 +171,42 @@ describe('ArenaMode', () => {
       expect(mode.id).toBe('arena')
     })
   })
+
+  describe('横向き移動（N1 修正: _playerDrawX が毎フレームリセットされない）', () => {
+    it('ArrowRight で _playerDrawX が増加する', () => {
+      world.input.keys.add('Space')
+      // ゲーム開始
+      for (let i = 0; i < 5; i++) {
+        mode.update(world, 1 / 60)
+      }
+
+      const startX = mode['_playerDrawX']
+      world.input.keys.add('ArrowRight')
+      // 60フレーム（1秒）経過
+      for (let i = 0; i < 60; i++) {
+        mode.update(world, 1 / 60)
+      }
+      const endX = mode['_playerDrawX']
+      expect(endX).toBeGreaterThan(startX)
+    })
+
+    it('ArrowLeft で _playerDrawX が減少する', () => {
+      world.input.keys.add('Space')
+      for (let i = 0; i < 5; i++) {
+        mode.update(world, 1 / 60)
+      }
+
+      const startX = mode['_playerDrawX']
+      world.input.keys.add('ArrowLeft')
+      for (let i = 0; i < 60; i++) {
+        mode.update(world, 1 / 60)
+      }
+      const endX = mode['_playerDrawX']
+      expect(endX).toBeLessThan(startX)
+    })
+
+    it('_playerVx フィールドは存在しない（死んでいたフィールドを削除）', () => {
+      expect((mode as { _playerVx?: number })._playerVx).toBeUndefined()
+    })
+  })
 })

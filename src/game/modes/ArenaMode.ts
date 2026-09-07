@@ -127,7 +127,6 @@ export class ArenaMode implements GameMode {
   private _playerHp = PLAYER_MAX_HP
   private _playerY = 300
   private _playerVy = 0
-  private _playerVx = 0
   private _playerOnGround = false
   private _shootTimer = 0
   private _invincibleTimer = 0
@@ -141,7 +140,6 @@ export class ArenaMode implements GameMode {
     this._playerHp = PLAYER_MAX_HP
     this._playerY = 300
     this._playerVy = 0
-    this._playerVx = 0
     this._playerOnGround = false
     this._shootTimer = 0
     this._invincibleTimer = 0
@@ -218,13 +216,16 @@ export class ArenaMode implements GameMode {
     }
 
     // ─── プレイヤー物理 ───────────────────────────────────────
-    // 左右移動
-    this._playerVx = 0
+    // 左右移動（直接加算）
+    const moveSpeed = PLAYER_MOVE_SPEED * dt
     if (input.keys.has('ArrowLeft')) {
-      this._playerVx = -PLAYER_MOVE_SPEED
-    } else if (input.keys.has('ArrowRight')) {
-      this._playerVx = PLAYER_MOVE_SPEED
+      this._playerDrawX -= moveSpeed
     }
+    if (input.keys.has('ArrowRight')) {
+      this._playerDrawX += moveSpeed
+    }
+    // 壁クランプ
+    this._playerDrawX = Math.max(WALL_WIDTH, Math.min(W - WALL_WIDTH - PLAYER_W, this._playerDrawX))
 
     // ジャンプ
     if (input.justPressed.has('Space') && this._playerOnGround) {
@@ -237,22 +238,12 @@ export class ArenaMode implements GameMode {
 
     // 位置更新
     this._playerY += this._playerVy * dt
-    this._playerVx *= dt  // X 移動は直接加算
 
     // 地面衝突
     if (this._playerY + PLAYER_H >= groundY) {
       this._playerY = groundY - PLAYER_H
       this._playerVy = 0
       this._playerOnGround = true
-    }
-
-    // X 位置（壁制限内）
-    this._playerDrawX = PLAYER_START_X
-    if (input.keys.has('ArrowLeft')) {
-      this._playerDrawX = Math.max(WALL_WIDTH, this._playerDrawX - PLAYER_MOVE_SPEED * dt)
-    }
-    if (input.keys.has('ArrowRight')) {
-      this._playerDrawX = Math.min(W - WALL_WIDTH - PLAYER_W, this._playerDrawX + PLAYER_MOVE_SPEED * dt)
     }
 
     // 射撃

@@ -188,4 +188,32 @@ describe('PlatformerMode', () => {
       expect(mode.id).toBe('platformer')
     })
   })
+
+  describe('プラットフォーム生成（N2 修正: 到達可能範囲内）', () => {
+    it('生成されたプラットフォームの X 位置が前プラットフォームから MAX_PLATFORM_H_GAP 以内', () => {
+      world.input.keys.add('Space')
+      // 十分に多くのプラットフォームを生成
+      for (let i = 0; i < 300; i++) {
+        mode.update(world, 1 / 60)
+      }
+
+      const platforms = mode['state'].platforms
+      expect(platforms.length).toBeGreaterThan(5)
+
+      // 各プラットフォームが前プラットフォームから到達可能範囲内か確認
+      const MAX_H_GAP = 250 * 1.31 * 0.8  // = 262.6
+      for (let i = 1; i < platforms.length; i++) {
+        const prev = platforms[i - 1]
+        const curr = platforms[i]
+        const hDist = Math.abs(curr.x - prev.x)
+        expect(hDist).toBeLessThanOrEqual(MAX_H_GAP + prev.w)
+      }
+    })
+
+    it('開始プラットフォームは画面中央付近に配置される', () => {
+      const firstPlat = mode['state'].platforms[0]
+      expect(firstPlat.x).toBeGreaterThan(0)
+      expect(firstPlat.x + firstPlat.w).toBeLessThan(world.canvas.width)
+    })
+  })
 })

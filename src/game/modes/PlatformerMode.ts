@@ -44,6 +44,8 @@ const PLATFORM_W_MIN = 60
 const PLATFORM_W_MAX = 120
 const PLATFORM_H = 12
 const PLATFORM_X_MARGIN = 30
+const JUMP_AIRTIME_SEC = 1.31
+const MAX_PLATFORM_H_GAP = MOVE_SPEED * JUMP_AIRTIME_SEC * 0.8
 
 // 溶岩波状
 const LAVA_BUMP_COUNT = 4
@@ -151,9 +153,10 @@ export class PlatformerMode implements GameMode {
     this._maxAltitude = 0
     this._initialized = true
 
-    // C1: プレイヤーの足元に開始プラットフォームを配置
+    // C1: プレイヤーの足元に開始プラットフォームを配置（画面中央）
+    const W = world.canvas.width
     this.state.platforms.push({
-      x: this._playerX - 20,
+      x: W / 2 - 40,
       y: this._playerY + PLAYER_H + 2,
       w: 80,
       type: 'normal',
@@ -299,29 +302,9 @@ export class PlatformerMode implements GameMode {
     const generateUpTo = cameraTop - H * 1.5  // 画面外の上部まで
     while (this.state.platforms.length === 0 ||
            this.state.platforms[this.state.platforms.length - 1].y > generateUpTo) {
-      const lastY = this.state.platforms.length > 0
-        ? this.state.platforms[this.state.platforms.length - 1].y
-        : cameraTop - H * 0.5
-      const newY = lastY - this.state.nextGap
-      this.state.nextGap = PLATFORM_GAP_MIN + _rand() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN)
-
-      // C3: canvas.width から動的に X 範囲を計算
-      const platW = _pickPlatformW()
-      const xMin = PLATFORM_X_MARGIN
-      const xMax = W - PLATFORM_X_MARGIN - platW
-      const platX = xMin + Math.random() * Math.max(0, xMax - xMin)
-
-      const plat: Platform = {
-        x: platX,
-        y: newY,
-        w: platW,
-        type: _pickPlatformType(),
-        conveyorDir: _rand() < 0.5 ? 1 : -1,
-        crumbleTimer: 0,
-        crumbleTriggered: false,
-        visible: true,
-      }
-      this.state.platforms.push(plat)
+      const lastPlat = this.state.platforms[this.state.platforms.length - 1]
+      const newPlat = this._spawnPlatform(W, lastPlat.x, lastPlat.y)
+      this.state.platforms.push(newPlat)
     }
 
     // 画面外のプラットフォームを削除（メモリリーク防止）
@@ -465,7 +448,31 @@ export class PlatformerMode implements GameMode {
     return this._playerY + PLAYER_H >= this.state.lavaY
   }
 
-  // ─── 内部 ───────────────────────────────────────────────────────
+  // ─── 内部: プラットフォーム生成 ────────────────────────────────
+
+  private _spawnPlatform(W: number, prevX: number, prevY: number): Platform {
+    const platW = PLATFORM_W_MIN + Math.floor(_rand() * (PLATFORM_W_MAX - PLATFORM_W_MIN))
+    // X: 前プラットフォームの X 付近に制限（到達可能範囲内）
+    const minX = Math.max(PLATFORM_X_MARGIN, prevX - MAX_PLATFORM_H_GAP)
+    const maxX = Math.min(W - PLATFORM_X_MARGIN - platW, prevX + platW + MAX_PLATFORM_H_GAP)
+    const platX = minX + Math.random() * Math.max(1, maxX - minX)
+    // Y: 前より上（80〜150px 間隔）
+    const platY = prevY - (PLATFORM_GAP_MIN + _rand() * (PLATFORM_GAP_MAX - PLATFORM_GAP_MIN))
+    // 種類
+    const type = _pickPlatformType()
+    return {
+      x: platX,
+      y: platY,
+      w: platW,
+      type,
+      conveyorDir: _rand() < 0.5 ? 1 : -1,
+      crumbleTimer: 0,
+      crumbleTriggered: false,
+      visible: true,
+    }
+  }
+
+  // ─── 内部: 溶岩バー描画 ────────────────────────────────────────
 
   private _drawLavaBar(px: PixelCanvas, W: number, H: number, s: PlatformerModeState): void {
     const barW = 160

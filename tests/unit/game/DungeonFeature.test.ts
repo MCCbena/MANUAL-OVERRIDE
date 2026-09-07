@@ -115,7 +115,7 @@ describe('DungeonFeature', () => {
       expect(torch).toBeGreaterThanOrEqual(20)
     })
 
-    it('safe hazard 回収で回復する', () => {
+    it('safe hazard 回収で removeHazardById が呼ばれる', () => {
       // 松明を中程度に設定
       ;(feature as { _state: { torch: number } })._state.torch = 50
 
@@ -126,10 +126,16 @@ describe('DungeonFeature', () => {
       )
       world.hazards.push(safeItem)
 
+      let removed = false
+      ;(world as { removeHazardById: (h: Hazard) => void }).removeHazardById = () => {
+        removed = true
+      }
+
       feature.update(world, world.input, 0.016)
 
       const torch = (feature as { _state: { torch: number } })._state.torch
       expect(torch).toBeGreaterThan(50)
+      expect(removed).toBe(true)
     })
 
     it('MAX(100) を超えない', () => {
@@ -188,12 +194,10 @@ describe('DungeonFeature', () => {
       expect((feature as { _state: { torch: number } })._state.torch).toBe(100)
     })
 
-    it('回収アイテムリストがクリアされる', () => {
-      ;(feature as { _state: { collectedItems: Set<string> } })._state.collectedItems.add('test')
-
-      feature.onManualUpdated()
-
-      expect((feature as { _state: { collectedItems: Set<string> } })._state.collectedItems.size).toBe(0)
+    it('回収アイテムリストは存在しない（removeHazardById で即消えるため追跡不要）', () => {
+      // _state に collectedItems が存在しないことを確認
+      const state = (feature as { _state: DungeonState })._state
+      expect('collectedItems' in state).toBe(false)
     })
   })
 
