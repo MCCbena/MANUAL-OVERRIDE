@@ -117,7 +117,8 @@
           "survival_level",
           "survival_melee",
           "tetris_mode",
-          "boss_stationary"
+          "boss_stationary",
+          "power_up"
         ]
       }
     },
@@ -159,7 +160,8 @@
           "survival_level",
           "survival_melee",
           "tetris_mode",
-          "boss_stationary"
+          "boss_stationary",
+          "power_up"
         ]
       }
     },

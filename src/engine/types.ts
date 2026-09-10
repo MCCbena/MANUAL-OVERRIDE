@@ -120,6 +120,10 @@ export interface MutableWorld {
   addScoreVarsHitsOnBoss(): void
   /** 最大hitCombo をセット（bullet_hell の BossFeature が使用） */
   setScoreVarsMaxHitCombo(n: number): void
+
+  // ─ power_up フィーチャー用 ──────────────────────────────────────
+  /** 射撃ブースト残り時間（秒）。power_up 有効時のみ使用。ShootFeature が参照 */
+  powerBoostTimer: number
 }
 
 // ──────────────────────────────────────────────────────────────────────
